@@ -74,34 +74,40 @@ import Testing
 
 @Suite struct FuzzTests {
     /// In-process smoke run of the fuzzer over the committed skins; `sudamp-dev skin-fuzz` runs the 2000-case gate.
-    @Test func mutatedSkinsNeverCrashTheLoader() throws {
+    @Test func mutatedSkinsNeverCrashTheLoader() async throws {
         var bases = [SudampDark.archive()]
         for name in ["AndAmp-Dark.wsz", "AndAmp-Light.wsz"] { bases.append(try Repo.data("Fixtures/skins/" + name)) }
-        var rng = SeededRandomForTests(seed: 42)
-        var loaded = 0, rejected = 0
-        var state = WindowState()
-        state.playback = .playing
-        state.title = "FUZZ"
-        for i in 0..<240 {
-            let mutation = SkinFuzzer.Mutation.allCases[i % SkinFuzzer.Mutation.allCases.count]
-            let data = SkinFuzzer.mutate(bases[i % bases.count], mutation, using: &rng)
-            if let skin = SkinLoader.load(data: data).skin {
-                loaded += 1
-                for window in WindowKind.allCases { _ = WindowComposer.render(window, state: state, skin: skin) }
-            } else {
-                rejected += 1
+        let (loaded, rejected) = try await offPool { [bases] in
+            var rng = SeededRandomForTests(seed: 42)
+            var loaded = 0, rejected = 0
+            var state = WindowState()
+            state.playback = .playing
+            state.title = "FUZZ"
+            for i in 0..<240 {
+                let mutation = SkinFuzzer.Mutation.allCases[i % SkinFuzzer.Mutation.allCases.count]
+                let data = SkinFuzzer.mutate(bases[i % bases.count], mutation, using: &rng)
+                if let skin = SkinLoader.load(data: data).skin {
+                    loaded += 1
+                    for window in WindowKind.allCases { _ = WindowComposer.render(window, state: state, skin: skin) }
+                } else {
+                    rejected += 1
+                }
             }
+            return (loaded, rejected)
         }
         #expect(loaded + rejected == 240)
         #expect(loaded > 0 && rejected > 0)
     }
 
-    @Test func mutationsAreReproducible() {
-        var a = SeededRandomForTests(seed: 7), b = SeededRandomForTests(seed: 7)
-        let base = SudampDark.archive()
-        for mutation in SkinFuzzer.Mutation.allCases {
-            #expect(SkinFuzzer.mutate(base, mutation, using: &a) == SkinFuzzer.mutate(base, mutation, using: &b), "\(mutation)")
+    @Test func mutationsAreReproducible() async throws {
+        let differing = try await offPool {
+            var a = SeededRandomForTests(seed: 7), b = SeededRandomForTests(seed: 7)
+            let base = SudampDark.archive()
+            return SkinFuzzer.Mutation.allCases.filter {
+                SkinFuzzer.mutate(base, $0, using: &a) != SkinFuzzer.mutate(base, $0, using: &b)
+            }.map { "\($0)" }
         }
+        #expect(differing.isEmpty, "\(differing)")
     }
 }
 

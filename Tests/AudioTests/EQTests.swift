@@ -178,8 +178,8 @@ import Testing
 
 @Suite struct OfflineEQTests {
     /// PLAN M3 / DESIGN §9: the eq-selftest gates on the real graph rendered offline (no device).
-    @Test func offlineGatesPass() throws {
-        let report = try EQMeasurement.offlineGates()
+    @Test func offlineGatesPass() async throws {
+        let report = try await offPool { try EQMeasurement.offlineGates() }
         #expect(report.mode == "offline")
         #expect(report.gates.count == 22)
         for check in report.gates + report.extra {

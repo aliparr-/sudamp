@@ -120,16 +120,16 @@ import Testing
 
 /// PLAN M4: a 1 MB archive holding a 1 GiB entry is rejected, and peak memory stays under 150 MB.
 @Suite(.serialized) struct ZipBomb1GiBTests {
-    @Test func zipBombIsRejectedWithoutInflating() throws {
-        let bomb = ZipBomb.make(uncompressedSize: 1 << 30)
+    @Test func zipBombIsRejectedWithoutInflating() async throws {
+        let bomb = try await offPool { ZipBomb.make(uncompressedSize: 1 << 30) }
         #expect(bomb.count < 1_200_000, "bomb is \(bomb.count) bytes")
         #expect(bomb.count > 900_000)
         let before = residentFootprint()
         let archive = try ZipArchive(data: bomb)
         #expect(archive.entries[0].uncompressedSize == 1 << 30)
         #expect(throws: ZipError.entryTooLarge(name: "Skin/MAIN.BMP", bytes: 1 << 30)) { try SkinArchive(archive) }
-        let result = SkinLoader.load(data: bomb)
-        #expect(result.rejection?.kind == "entryTooLarge")
+        let rejection = try await offPool { SkinLoader.load(data: bomb).rejection?.kind }
+        #expect(rejection == "entryTooLarge")
         let grown = residentFootprint() - before
         #expect(grown < 150 << 20, "footprint grew by \(grown) bytes")
     }

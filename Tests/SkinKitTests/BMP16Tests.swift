@@ -102,22 +102,26 @@ func rgb555(_ r: UInt16, _ g: UInt16, _ b: UInt16) -> UInt16 { r << 10 | g << 5 
     }
 
     /// Hostile input: corrupted headers, masks, offsets and lengths never trap, and whatever decodes stays bounded.
-    @Test func corruptedSixteenBitFilesNeverTrap() {
+    @Test func corruptedSixteenBitFilesNeverTrap() async throws {
         let base = bmp16(width: 5, rows: (0..<4).map { y in (0..<5).map { UInt16($0 * 997 + y * 31) } }, masks: (0xF800, 0x07E0, 0x001F))
-        var rng = SeededRandomForTests(seed: 16)
-        var decoded = 0
-        for i in 0..<3000 {
-            var data = base
-            for _ in 0..<(1 + i % 4) {
-                let at = Int.random(in: 0..<(i % 3 == 0 ? 70 : data.count), using: &rng)
-                data[at] = UInt8.random(in: 0...255, using: &rng)
+        let (decoded, oversized) = try await offPool {
+            var rng = SeededRandomForTests(seed: 16)
+            var decoded = 0, oversized = 0
+            for i in 0..<3000 {
+                var data = base
+                for _ in 0..<(1 + i % 4) {
+                    let at = Int.random(in: 0..<(i % 3 == 0 ? 70 : data.count), using: &rng)
+                    data[at] = UInt8.random(in: 0...255, using: &rng)
+                }
+                if i % 5 == 0 { data = data.prefix(Int.random(in: 0...data.count, using: &rng)) }
+                if let bitmap = try? SheetDecoder.decode(data) {
+                    decoded += 1
+                    if bitmap.width > SheetDecoder.maxDimension || bitmap.height > SheetDecoder.maxDimension { oversized += 1 }
+                }
             }
-            if i % 5 == 0 { data = data.prefix(Int.random(in: 0...data.count, using: &rng)) }
-            if let bitmap = try? SheetDecoder.decode(data) {
-                decoded += 1
-                #expect(bitmap.width <= SheetDecoder.maxDimension && bitmap.height <= SheetDecoder.maxDimension)
-            }
+            return (decoded, oversized)
         }
+        #expect(oversized == 0)
         #expect(decoded > 0)
     }
 

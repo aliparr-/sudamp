@@ -135,7 +135,11 @@ import Testing
 
 /// scripts/check-notices.sh against the committed THIRD_PARTY_NOTICES.md.
 @Suite(.serialized) struct ThirdPartyNoticesTests {
-    static func run(_ arguments: [String]) throws -> (status: Int32, output: String) {
+    static func run(_ arguments: [String]) async throws -> (status: Int32, output: String) {
+        try await offPool { try runBlocking(arguments) }
+    }
+
+    private static func runBlocking(_ arguments: [String]) throws -> (status: Int32, output: String) {
         let process = Process()
         process.executableURL = URL(fileURLWithPath: "/bin/bash")
         process.arguments = [ShellRepo.url("scripts/check-notices.sh").path] + arguments
@@ -149,8 +153,8 @@ import Testing
         return (process.terminationStatus, String(decoding: data, as: UTF8.self))
     }
 
-    @Test func committedNoticesCoverTheLinkSet() throws {
-        let (status, output) = try Self.run([])
+    @Test func committedNoticesCoverTheLinkSet() async throws {
+        let (status, output) = try await Self.run([])
         #expect(status == 0, "\(output)")
         #expect(output.contains("29 MPVKit binary targets"), "\(output)")
     }
@@ -166,26 +170,26 @@ import Testing
         ("| `AndAmp-Dark.wsz` |", "AndAmp-Dark.wsz"),
         ("### MIT © 2015 Jordan Eldredge", "Jordan Eldredge"),
     ])
-    func removingAnEntryFails(line: String, name: String) throws {
+    func removingAnEntryFails(line: String, name: String) async throws {
         let notices = try String(contentsOf: ShellRepo.url("THIRD_PARTY_NOTICES.md"), encoding: .utf8)
         let kept = notices.components(separatedBy: "\n").filter { !$0.hasPrefix(line) }
         #expect(kept.count < notices.components(separatedBy: "\n").count, "fixture line \(line) not found")
         let dir = try ShellTempDir()
         let copy = dir.url.appending(path: "THIRD_PARTY_NOTICES.md")
         try kept.joined(separator: "\n").write(to: copy, atomically: true, encoding: .utf8)
-        let (status, output) = try Self.run(["--notices", copy.path, "--link-map", "none"])
+        let (status, output) = try await Self.run(["--notices", copy.path, "--link-map", "none"])
         #expect(status == 1, "\(output)")
         #expect(output.contains(name), "\(output)")
     }
 
-    @Test func versionDriftFromMPVKitFails() throws {
+    @Test func versionDriftFromMPVKitFails() async throws {
         let notices = try String(contentsOf: ShellRepo.url("THIRD_PARTY_NOTICES.md"), encoding: .utf8)
         let drifted = notices.replacingOccurrences(of: "| openssl-build 3.3.5 |", with: "| openssl-build 3.3.4 |")
         #expect(drifted != notices)
         let dir = try ShellTempDir()
         let copy = dir.url.appending(path: "notices.md")
         try drifted.write(to: copy, atomically: true, encoding: .utf8)
-        let (status, output) = try Self.run(["--notices", copy.path, "--link-map", "none"])
+        let (status, output) = try await Self.run(["--notices", copy.path, "--link-map", "none"])
         #expect(status == 1 && output.contains("Libcrypto") && output.contains("openssl-build 3.3.5"), "\(output)")
     }
 }
