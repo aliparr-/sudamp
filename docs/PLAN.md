@@ -1,6 +1,6 @@
 # sudamp: milestone plan (v1)
 
-*Companion to `docs/DESIGN.md` · 2026-10-22 · Status: Proposed — awaiting owner review of DESIGN §13 decisions*
+*Companion to `docs/DESIGN.md` · 2026-10-22 · Status: Approved by the owner; M0–M6 built (progress: README and `docs/spikes/`); DESIGN §13 decisions still open*
 
 ## Conventions
 
@@ -231,7 +231,7 @@ M2, M3 and M6 need only M1 and run in parallel; M4 needs only M0, so a second ag
 
 **Acceptance criteria**
 - `make test`: a crafted m3u8 pointing at `file:///etc/hosts` fails to load; radio hosts resolving to 127.0.0.1, 10.0.0.0/8 or 169.254.0.0/16 are rejected; breaker schedules hold under a fake Clock (bot-check 6 → 12 → 24 h, transient 15 min → 2 h, engine 15 min → 1 h).
-- **(live)** `SUDAMP_FAULT=youtube:403 sudamp-dev play --genre deep-house --next-every 15 --seconds 120 --json` (≥ 2 YouTube picks attempted): each failure advances within 1 s; 2 consecutive engine-class failures produce exactly one update check in `metrics.jsonl`; YouTube's breaker opens and playback continues on SoundCloud, Mixcloud or radio.
+- **(live)** `SUDAMP_FAULT=youtube:403 sudamp-dev play --genre deep-house --next-every 15 --seconds 120 --prefetch=false --json` (with prefetch on, prefetches trip the breaker before any user pick reaches YouTube) (≥ 2 YouTube picks attempted): each failure advances within 1 s; 2 consecutive engine-class failures produce exactly one update check in `metrics.jsonl`; YouTube's breaker opens and playback continues on SoundCloud, Mixcloud or radio.
 - **(live)** `SUDAMP_FAULT=youtube:botcheck sudamp-dev play --genre deep-house --source youtube --seconds 30 --json` sets the breaker's `reopenAt` 6 h ahead; a rerun with `SUDAMP_CLOCK_OFFSET=21700` (past the reopen) trips it again and sets it 12 h ahead.
 - **(live)** `SUDAMP_FAULT=mixcloud:repeat_play`: the item is skipped within 1 s and classed unavailable, with `nextEligibleAt` 24 h ahead.
 - **(live)** `SUDAMP_FAULT=engine:corrupt`: the launch re-hash catches a byte flipped in `_internal/`, the engine is reinstalled or rolled back, and the next pick plays.

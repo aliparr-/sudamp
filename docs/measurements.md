@@ -180,3 +180,28 @@ Museum golden metric (`scripts/golden-fetch.sh` + `scripts/golden-compare.sh`; d
 - `scripts/check-notices.sh`: 29 MPVKit binary targets in the link set (28 contribute objects to `sudamp`: Libavcodec 581, gnutls 302, Libshaderc_combined 241, Libmpv 217, gmp 216, Libavformat 197 …; Libssl 0); 7 system libraries; check 1–3 s; `THIRD_PARTY_NOTICES.md` 1,616 lines
 - `scripts/mirror-sources.sh --verify`: 36 corresponding-source archives, 36 HTTP 200
 - YouTube requests used by this agent: 0
+
+## M6 resilience (resilience agent, 2026-10-22)
+
+Debug `sudamp-dev` from `.build-resil`, muted, throwaway profiles with the pinned yt-dlp 2026.10.21 copied in; fault
+runs had `updates.json` primed so only the update check under test ran. Details: `docs/spikes/M6.md`.
+
+- `youtube:403` (`play --next-every 15 --seconds 180 --prefetch=false`): failure → next pick 0.3 / 1 ms; after 2 engine failures exactly one `engine.update.check` (`engineFailures`); canary of the current build 46.0 s and of nightly 2026.10.21.233146 55.8 s (both mostly waiting for YouTube tokens), whole check 106.0 s, `canaryFailed`, `current.json` unchanged; 12 starts on SoundCloud/Mixcloud/radio
+- `youtube:botcheck`: `reopenAt` = trip + 21,600 s; rerun at `SUDAMP_CLOCK_OFFSET=21700`: re-trip, `reopenAt` = trip + 43,200 s
+- `mixcloud:repeat_play`: failure → next pick 0.1–0.2 ms; `nextEligibleAt` = failure + 24 h
+- `engine:corrupt`: re-hash caught the flipped byte 84 ms after it; reinstall 3.56 s; radio TTFA 2454 ms during the download; next SoundCloud pick 1082 ms
+- `engine:bad-update`: nightly staged (download, verify, unpack, tree, smoke) in 4.0 s; `current.json` SHA-256 unchanged
+- `net:offline=30@20` (SoundCloud VOD): offline 2.0 s after the path loss (2 s debounce) or 10.0 s (final, while playing); audio back 857 / 1241 / 1108 ms after the restore, at the saved position
+- `stream:expire`: SoundCloud refresh 514 / 655 ms, audio back 870 / 937 ms at ±0 s; YouTube refresh 1573 ms (incl. the 64 KB range GET, 31 ms), audio back 102 ms at ±0 s
+- `resolve:delay=5` (YouTube, cold user pick): `TUNING…` 0.05–5.1 s, audio 5152 ms; max 1 concurrent yt-dlp child (226 samples at 50 ms)
+- Launch warm-up (fresh engine copy): `--version` 1887–1929 ms cold, `-v` identifier 233–237 ms; launch update check (up to date) 0.5 s
+- Radio TTFA (`ttfa --source radio`, n = 8 per run): FFmpeg following redirects p50 708 ms / mean 893 ms (n = 24); walking every hop incl. the final one p50 1172 / mean 1317 (n = 16); built (remembered hop counts) runs 1–3 p50 1205 / 1432 / 652 ms, mean 1251 / 1245 / 916 ms
+- HLS open (SoundCloud, TTFA − resolve, n = 6): 963 ms p50 baseline, 1003 ms with `demuxer-lavf-probe-info=no`; mpv's refresh seek after track selection re-fetches init.mp4 + 2 segments (~210 ms) in every variant tried
+- Demuxer cache, pinned one-stream feeds, footprint: radio (1.FM) +1.1 MB / 20 s with mpv defaults (pre-M6 binary +0.95 MB / 20 s), +1.1 MB / 20 s with `demuxer-max-back-bytes=1MiB` alone, flat with `demuxer-donate-buffer=no` + 512 KiB / 1 MiB (24.1 → 24.2, 28.3 → 28.5 MB); Mixcloud VOD 285 MB at 15 s with unbounded readahead vs 174 MB with `cache-secs=30`, plateau 231.6 MB RSS once the 8 MiB back buffer filled (~160 s)
+- 30 loads of one radio station (`soak --minutes 10 --skip-every 20s`): RSS 198.8 → 198.8 MB (pre-M6 binary) and 199.1 → 201.1 MB (M6), footprint 36.5 MB both
+- Soak `--minutes 35 --skip-every 1m` (SoundCloud, Mixcloud, radio): 0 crashes, 35/35 starts (16 MC, 10 radio, 9 SC; 34 prefetched), RSS 219.6 → 238.3 MB (+18.7), footprint −10.4 MB, TTFA p50 1308 / p90 1935 ms
+- Soak `--hours 2 --skip-every 10m` (same sources): 7199.6 s, 0 crashes, 12/12 starts (5 MC, 4 SC, 3 radio; 11 prefetched), RSS 220.2 → 243.1 MB (**+22.9, misses < 20**; peak 257.9), footprint 60.4 → 27.0 MB (−33.4), TTFA p50 1514 / p90 3563 ms (cold first pick 8882 ms)
+- 8 loads of one Mixcloud mix (`--skip-every 1m`): RSS 212–222 MB sawtooth, no trend, with or without `malloc_zone_pressure_relief` after each start (not adopted)
+- An earlier 2 h attempt before the cache bounds: RSS 457 MB / footprint 262 MB after 24 min (stopped)
+- Tests: 825 in the package (71 new); `count-escapes.sh` 3 / 0 unjustified
+- YouTube requests used by this agent: 4 resolves + 1 range GET; no bot check

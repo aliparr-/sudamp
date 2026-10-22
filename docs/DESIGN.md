@@ -129,7 +129,7 @@ cache=yes  demuxer-max-bytes=64MiB  demuxer-readahead-secs=30  network-timeout=1
 idle=yes  load-unsafe-playlists=no  input-media-keys=no  media-controls=no  msg-level=all=warn
 ```
 
-**Per file:** `loadfile <url> replace -1 <node map>` with yt-dlp's `http-header-fields` and `user-agent`, `force-media-title`, `start=<s>` on resume, `http-proxy` when a system proxy is set (§6.2), and `stream-lavf-o`: progressive formats get `request_size` from `downloader_options.http_chunk_size`, like mpv's ytdl_hook [source] (10 MiB for YouTube, whose unbounded ranges are throttled to 32 KiB/s [measured]; ~5 MB for Mixcloud's `http` fallback [source]), an equal `short_seek_size` (E1 checks pass-through) and `reconnect=1,reconnect_streamed=1,reconnect_delay_max=10`; radio gets `reconnect_streamed=1`.
+**Per file:** `loadfile <url> replace -1 <node map>` with yt-dlp's `http-header-fields` and `user-agent`, `force-media-title`, `start=<s>` on resume, `http-proxy` when a system proxy is set (§6.2), and `stream-lavf-o`: progressive formats get `request_size` from `downloader_options.http_chunk_size`, like mpv's ytdl_hook [source] (10 MiB for YouTube, whose unbounded ranges are throttled to 32 KiB/s [measured]; ~5 MB for Mixcloud's `http` fallback [source]), an equal `short_seek_size` (E1 checks pass-through) and `reconnect=1,reconnect_streamed=1,reconnect_delay_max=10`; radio gets `reconnect_streamed=1`. Every load also bounds the demuxer cache: `cache-secs=30` (with `cache=yes`, mpv's `cache-secs` would otherwise override `demuxer-readahead-secs`), `demuxer-donate-buffer=no`, `demuxer-max-back-bytes=8MiB` for VOD and `1MiB` for radio and live (PLAN M6 soak: without them RSS reached 457 MB in 24 min [measured]).
 
 **Observed:** `pause`, `time-pos`, `duration`, `seekable`, `media-title`, `metadata` (`icy-title`), `audio-params` (display), `audio-out-params` (guard), `audio-bitrate`, `paused-for-cache`, `idle-active`. Live means `seekable=no` or the feed's `kind` (live ICY reports a growing `duration` [measured]).
 
@@ -220,7 +220,7 @@ env: HOME=<AS>/sudamp/engine-home  XDG_CONFIG_HOME=<AS>/sudamp/engine-home/.conf
 | engine | 403 on a fresh URL, format unavailable, n-challenge failure | Step up the JS ladder; after 2 in a row, an update check and a 15 min → 1 h breaker |
 | botCheck / 429 | "Sign in to confirm you're not a bot", LOGIN_REQUIRED, 429 | YouTube degraded 6 h → 12 h → 24 h (blocks have lasted 2–3 weeks [source]) |
 
-Breakers half-open with one probe; a success resets that stream's health. Without cookies or PO tokens, a blocked user hears the other sources.
+Breakers half-open with one probe; a success resets that stream's health. Without cookies or PO tokens, a blocked user hears the other sources. Radio has no source breaker (each station is its own host). "Retry once" applies to quick transient failures (< 3 s); a timeout moves on at once.
 
 ### 6.5 Terms of service and legal
 **Decision.** sudamp is an unofficial client that reduces exposure without claiming to remove it.
@@ -255,7 +255,7 @@ Sources are `youtube`, `youtube-live` (`@handle` or `UC…` ID), `soundcloud`, `
 | `soundcloud` | `^[a-z0-9_-]+/[a-z0-9_-]+$` | `https://soundcloud.com/<user>/<slug>` |
 | `mixcloud` | `^[A-Za-z0-9_-]+/[A-Za-z0-9_-]+$` | `https://www.mixcloud.com/<user>/<slug>/` |
 
-**Radio URLs** must be http(s) on a real hostname (no IP literal, localhost, `.local`, `.internal` or single label), without userinfo, on port 80, 443 or 1024–65535, and a direct stream; before playback the host is resolved and loopback, private and link-local addresses are rejected. mpv gets `config=no`, `load-scripts=no`, `load-unsafe-playlists=no` and array commands only; a test proves a crafted `file://` m3u8 fails.
+**Radio URLs** must be http(s) on a real hostname (no IP literal, localhost, `.local`, `.internal` or single label), without userinfo, on port 80, 443 or 1024–65535, and a direct stream; before playback the host is resolved and loopback, private and link-local addresses are rejected. mpv gets `config=no`, `load-scripts=no`, `load-unsafe-playlists=no` and array commands only; a test proves a crafted `file://` m3u8 fails. FFmpeg follows no redirect (`max_redirects=0`); sudamp follows them itself, re-checking every hop (M6).
 
 ### 7.2 Feeds: bundled first, remote in M7
 **Decision.** The app uses only its bundled snapshot until M7, which publishes and fetches the same document, signed.

@@ -15,7 +15,7 @@ usage: sudamp-dev <command> [options]
   ttfa              measure end-to-end time to first audio per source (M1)
   wait              wait until the app's <profile>/debug/state.json matches (M2)
   eq-selftest       measure the 10-band EQ, preamp and balance offline (M3)
-  soak              long-running playback with skips; crashes, RSS drift, short reads (M3)
+  soak              long-running playback with skips: crashes, RSS drift, start success (M6)
   render            render a skin window state to PNG + RGBA hash (M4)
   skin-load         load a .wsz and report sheets/fallbacks (M4)
   skin-fuzz         mutate skins and check the loader never crashes (M4)
