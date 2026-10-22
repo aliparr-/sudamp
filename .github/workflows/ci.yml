@@ -21,7 +21,20 @@ jobs:
             ~/Library/Caches/org.swift.swiftpm
             ~/Library/Caches/sudamp-dev
           key: spm-${{ runner.os }}-xcode26.3-${{ hashFiles('Package.resolved') }}
-      - name: Build and test
-        run: make build test
+      - name: Build
+        run: make build
+      - name: Test
+        run: set -o pipefail; make test 2>&1 | tee .build/test.log
       - name: Third-party notices
         run: scripts/check-notices.sh
+      # Job logs need a GitHub login; annotations are public. Surface errors, warnings and failing tests there.
+      - name: Report failures
+        if: failure()
+        run: |
+          for log in .build/build-debug.log .build/test.log; do
+            [ -f "$log" ] || continue
+            lines=$(grep -E 'error:|warning:|✘|fatal|Fatal|crashed|signal' "$log" | grep -v -E '^ *[|:`]' | grep -v 'search path' | head -60)
+            [ -n "$lines" ] || continue
+            msg=$(printf '%s' "$lines" | sed -e 's/%/%25/g' | awk '{printf "%s%%0A", $0}')
+            echo "::error title=$(basename "$log")::$msg"
+          done
