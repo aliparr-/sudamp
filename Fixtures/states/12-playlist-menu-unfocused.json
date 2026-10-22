@@ -1,0 +1,20 @@
+{
+  "window": "playlist",
+  "focused": false,
+  "playback": "paused",
+  "blinkVisible": false,
+  "elapsed": 61,
+  "duration": 200,
+  "pressed": "close",
+  "playlist": {
+    "rows": [
+      {"title": "One", "duration": "3:20", "tag": "SC"},
+      {"title": "東京 Night Radio", "tag": "FM"}
+    ],
+    "current": 0,
+    "scroll": 0.5,
+    "runningTime": "3:20/3:20",
+    "openMenu": "add",
+    "menuHover": 1
+  }
+}

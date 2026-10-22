@@ -1,0 +1,1486 @@
+{
+"DIGIT_0": {
+"h": 13,
+"sheet": "NUMBERS",
+"w": 9,
+"x": 0,
+"y": 0
+},
+"DIGIT_0_EX": {
+"h": 13,
+"sheet": "NUMS_EX",
+"w": 9,
+"x": 0,
+"y": 0
+},
+"DIGIT_1": {
+"h": 13,
+"sheet": "NUMBERS",
+"w": 9,
+"x": 9,
+"y": 0
+},
+"DIGIT_1_EX": {
+"h": 13,
+"sheet": "NUMS_EX",
+"w": 9,
+"x": 9,
+"y": 0
+},
+"DIGIT_2": {
+"h": 13,
+"sheet": "NUMBERS",
+"w": 9,
+"x": 18,
+"y": 0
+},
+"DIGIT_2_EX": {
+"h": 13,
+"sheet": "NUMS_EX",
+"w": 9,
+"x": 18,
+"y": 0
+},
+"DIGIT_3": {
+"h": 13,
+"sheet": "NUMBERS",
+"w": 9,
+"x": 27,
+"y": 0
+},
+"DIGIT_3_EX": {
+"h": 13,
+"sheet": "NUMS_EX",
+"w": 9,
+"x": 27,
+"y": 0
+},
+"DIGIT_4": {
+"h": 13,
+"sheet": "NUMBERS",
+"w": 9,
+"x": 36,
+"y": 0
+},
+"DIGIT_4_EX": {
+"h": 13,
+"sheet": "NUMS_EX",
+"w": 9,
+"x": 36,
+"y": 0
+},
+"DIGIT_5": {
+"h": 13,
+"sheet": "NUMBERS",
+"w": 9,
+"x": 45,
+"y": 0
+},
+"DIGIT_5_EX": {
+"h": 13,
+"sheet": "NUMS_EX",
+"w": 9,
+"x": 45,
+"y": 0
+},
+"DIGIT_6": {
+"h": 13,
+"sheet": "NUMBERS",
+"w": 9,
+"x": 54,
+"y": 0
+},
+"DIGIT_6_EX": {
+"h": 13,
+"sheet": "NUMS_EX",
+"w": 9,
+"x": 54,
+"y": 0
+},
+"DIGIT_7": {
+"h": 13,
+"sheet": "NUMBERS",
+"w": 9,
+"x": 63,
+"y": 0
+},
+"DIGIT_7_EX": {
+"h": 13,
+"sheet": "NUMS_EX",
+"w": 9,
+"x": 63,
+"y": 0
+},
+"DIGIT_8": {
+"h": 13,
+"sheet": "NUMBERS",
+"w": 9,
+"x": 72,
+"y": 0
+},
+"DIGIT_8_EX": {
+"h": 13,
+"sheet": "NUMS_EX",
+"w": 9,
+"x": 72,
+"y": 0
+},
+"DIGIT_9": {
+"h": 13,
+"sheet": "NUMBERS",
+"w": 9,
+"x": 81,
+"y": 0
+},
+"DIGIT_9_EX": {
+"h": 13,
+"sheet": "NUMS_EX",
+"w": 9,
+"x": 81,
+"y": 0
+},
+"EQ_AUTO_BUTTON": {
+"h": 12,
+"sheet": "EQMAIN",
+"w": 32,
+"x": 36,
+"y": 119
+},
+"EQ_AUTO_BUTTON_DEPRESSED": {
+"h": 12,
+"sheet": "EQMAIN",
+"w": 32,
+"x": 154,
+"y": 119
+},
+"EQ_AUTO_BUTTON_SELECTED": {
+"h": 12,
+"sheet": "EQMAIN",
+"w": 32,
+"x": 95,
+"y": 119
+},
+"EQ_AUTO_BUTTON_SELECTED_DEPRESSED": {
+"h": 12,
+"sheet": "EQMAIN",
+"w": 32,
+"x": 213,
+"y": 119
+},
+"EQ_CLOSE_BUTTON": {
+"h": 9,
+"sheet": "EQMAIN",
+"w": 9,
+"x": 0,
+"y": 116
+},
+"EQ_CLOSE_BUTTON_ACTIVE": {
+"h": 9,
+"sheet": "EQMAIN",
+"w": 9,
+"x": 0,
+"y": 125
+},
+"EQ_GRAPH_BACKGROUND": {
+"h": 19,
+"sheet": "EQMAIN",
+"w": 113,
+"x": 0,
+"y": 294
+},
+"EQ_GRAPH_LINE_COLORS": {
+"h": 19,
+"sheet": "EQMAIN",
+"w": 1,
+"x": 115,
+"y": 294
+},
+"EQ_MAXIMIZE_BUTTON_ACTIVE": {
+"h": 9,
+"sheet": "EQ_EX",
+"w": 9,
+"x": 1,
+"y": 38
+},
+"EQ_MAXIMIZE_BUTTON_ACTIVE_FALLBACK": {
+"h": 9,
+"sheet": "EQMAIN",
+"w": 9,
+"x": 254,
+"y": 152
+},
+"EQ_MINIMIZE_BUTTON_ACTIVE": {
+"h": 9,
+"sheet": "EQ_EX",
+"w": 9,
+"x": 1,
+"y": 47
+},
+"EQ_ON_BUTTON": {
+"h": 12,
+"sheet": "EQMAIN",
+"w": 26,
+"x": 10,
+"y": 119
+},
+"EQ_ON_BUTTON_DEPRESSED": {
+"h": 12,
+"sheet": "EQMAIN",
+"w": 26,
+"x": 128,
+"y": 119
+},
+"EQ_ON_BUTTON_SELECTED": {
+"h": 12,
+"sheet": "EQMAIN",
+"w": 26,
+"x": 69,
+"y": 119
+},
+"EQ_ON_BUTTON_SELECTED_DEPRESSED": {
+"h": 12,
+"sheet": "EQMAIN",
+"w": 26,
+"x": 187,
+"y": 119
+},
+"EQ_PREAMP_LINE": {
+"h": 1,
+"sheet": "EQMAIN",
+"w": 113,
+"x": 0,
+"y": 314
+},
+"EQ_PRESETS_BUTTON": {
+"h": 12,
+"sheet": "EQMAIN",
+"w": 44,
+"x": 224,
+"y": 164
+},
+"EQ_PRESETS_BUTTON_SELECTED": {
+"h": 12,
+"sheet": "EQMAIN",
+"w": 44,
+"x": 224,
+"y": 176
+},
+"EQ_SHADE_BACKGROUND": {
+"h": 14,
+"sheet": "EQ_EX",
+"w": 275,
+"x": 0,
+"y": 15
+},
+"EQ_SHADE_BACKGROUND_SELECTED": {
+"h": 14,
+"sheet": "EQ_EX",
+"w": 275,
+"x": 0,
+"y": 0
+},
+"EQ_SHADE_BALANCE_SLIDER_CENTER": {
+"h": 7,
+"sheet": "EQ_EX",
+"w": 3,
+"x": 14,
+"y": 30
+},
+"EQ_SHADE_BALANCE_SLIDER_LEFT": {
+"h": 7,
+"sheet": "EQ_EX",
+"w": 3,
+"x": 11,
+"y": 30
+},
+"EQ_SHADE_BALANCE_SLIDER_RIGHT": {
+"h": 7,
+"sheet": "EQ_EX",
+"w": 3,
+"x": 17,
+"y": 30
+},
+"EQ_SHADE_CLOSE_BUTTON": {
+"h": 9,
+"sheet": "EQ_EX",
+"w": 9,
+"x": 11,
+"y": 38
+},
+"EQ_SHADE_CLOSE_BUTTON_ACTIVE": {
+"h": 9,
+"sheet": "EQ_EX",
+"w": 9,
+"x": 11,
+"y": 47
+},
+"EQ_SHADE_VOLUME_SLIDER_CENTER": {
+"h": 7,
+"sheet": "EQ_EX",
+"w": 3,
+"x": 4,
+"y": 30
+},
+"EQ_SHADE_VOLUME_SLIDER_LEFT": {
+"h": 7,
+"sheet": "EQ_EX",
+"w": 3,
+"x": 1,
+"y": 30
+},
+"EQ_SHADE_VOLUME_SLIDER_RIGHT": {
+"h": 7,
+"sheet": "EQ_EX",
+"w": 3,
+"x": 7,
+"y": 30
+},
+"EQ_SLIDER_BACKGROUND": {
+"h": 129,
+"sheet": "EQMAIN",
+"w": 209,
+"x": 13,
+"y": 164
+},
+"EQ_SLIDER_THUMB": {
+"h": 11,
+"sheet": "EQMAIN",
+"w": 11,
+"x": 0,
+"y": 164
+},
+"EQ_SLIDER_THUMB_SELECTED": {
+"h": 11,
+"sheet": "EQMAIN",
+"w": 11,
+"x": 0,
+"y": 176
+},
+"EQ_TITLE_BAR": {
+"h": 14,
+"sheet": "EQMAIN",
+"w": 275,
+"x": 0,
+"y": 149
+},
+"EQ_TITLE_BAR_SELECTED": {
+"h": 14,
+"sheet": "EQMAIN",
+"w": 275,
+"x": 0,
+"y": 134
+},
+"EQ_WINDOW_BACKGROUND": {
+"h": 116,
+"sheet": "EQMAIN",
+"w": 275,
+"x": 0,
+"y": 0
+},
+"GEN_BOTTOM_FILL": {
+"h": 14,
+"sheet": "GEN",
+"w": 25,
+"x": 127,
+"y": 72
+},
+"GEN_BOTTOM_LEFT": {
+"h": 14,
+"sheet": "GEN",
+"w": 125,
+"x": 0,
+"y": 42
+},
+"GEN_BOTTOM_RIGHT": {
+"h": 14,
+"sheet": "GEN",
+"w": 125,
+"x": 0,
+"y": 57
+},
+"GEN_CLOSE_SELECTED": {
+"h": 9,
+"sheet": "GEN",
+"w": 9,
+"x": 148,
+"y": 42
+},
+"GEN_MIDDLE_LEFT": {
+"h": 29,
+"sheet": "GEN",
+"w": 11,
+"x": 127,
+"y": 42
+},
+"GEN_MIDDLE_LEFT_BOTTOM": {
+"h": 24,
+"sheet": "GEN",
+"w": 11,
+"x": 158,
+"y": 42
+},
+"GEN_MIDDLE_RIGHT": {
+"h": 29,
+"sheet": "GEN",
+"w": 8,
+"x": 139,
+"y": 42
+},
+"GEN_MIDDLE_RIGHT_BOTTOM": {
+"h": 24,
+"sheet": "GEN",
+"w": 8,
+"x": 170,
+"y": 42
+},
+"GEN_TOP_CENTER_FILL": {
+"h": 20,
+"sheet": "GEN",
+"w": 25,
+"x": 52,
+"y": 21
+},
+"GEN_TOP_CENTER_FILL_SELECTED": {
+"h": 20,
+"sheet": "GEN",
+"w": 25,
+"x": 52,
+"y": 0
+},
+"GEN_TOP_LEFT": {
+"h": 20,
+"sheet": "GEN",
+"w": 25,
+"x": 0,
+"y": 21
+},
+"GEN_TOP_LEFT_END": {
+"h": 20,
+"sheet": "GEN",
+"w": 25,
+"x": 26,
+"y": 21
+},
+"GEN_TOP_LEFT_END_SELECTED": {
+"h": 20,
+"sheet": "GEN",
+"w": 25,
+"x": 26,
+"y": 0
+},
+"GEN_TOP_LEFT_RIGHT_FILL": {
+"h": 20,
+"sheet": "GEN",
+"w": 25,
+"x": 104,
+"y": 21
+},
+"GEN_TOP_LEFT_RIGHT_FILL_SELECTED": {
+"h": 20,
+"sheet": "GEN",
+"w": 25,
+"x": 104,
+"y": 0
+},
+"GEN_TOP_LEFT_SELECTED": {
+"h": 20,
+"sheet": "GEN",
+"w": 25,
+"x": 0,
+"y": 0
+},
+"GEN_TOP_RIGHT": {
+"h": 20,
+"sheet": "GEN",
+"w": 25,
+"x": 130,
+"y": 21
+},
+"GEN_TOP_RIGHT_END": {
+"h": 20,
+"sheet": "GEN",
+"w": 25,
+"x": 78,
+"y": 21
+},
+"GEN_TOP_RIGHT_END_SELECTED": {
+"h": 20,
+"sheet": "GEN",
+"w": 25,
+"x": 78,
+"y": 0
+},
+"GEN_TOP_RIGHT_SELECTED": {
+"h": 20,
+"sheet": "GEN",
+"w": 25,
+"x": 130,
+"y": 0
+},
+"MAIN_BALANCE_BACKGROUND": {
+"h": 420,
+"sheet": "BALANCE",
+"w": 38,
+"x": 9,
+"y": 0
+},
+"MAIN_BALANCE_THUMB": {
+"h": 11,
+"sheet": "BALANCE",
+"w": 14,
+"x": 15,
+"y": 422
+},
+"MAIN_BALANCE_THUMB_ACTIVE": {
+"h": 11,
+"sheet": "BALANCE",
+"w": 14,
+"x": 0,
+"y": 422
+},
+"MAIN_CLOSE_BUTTON": {
+"h": 9,
+"sheet": "TITLEBAR",
+"w": 9,
+"x": 18,
+"y": 0
+},
+"MAIN_CLOSE_BUTTON_DEPRESSED": {
+"h": 9,
+"sheet": "TITLEBAR",
+"w": 9,
+"x": 18,
+"y": 9
+},
+"MAIN_CLUTTER_BAR_BACKGROUND": {
+"h": 43,
+"sheet": "TITLEBAR",
+"w": 8,
+"x": 304,
+"y": 0
+},
+"MAIN_CLUTTER_BAR_BACKGROUND_DISABLED": {
+"h": 43,
+"sheet": "TITLEBAR",
+"w": 8,
+"x": 312,
+"y": 0
+},
+"MAIN_CLUTTER_BAR_BUTTON_A_SELECTED": {
+"h": 7,
+"sheet": "TITLEBAR",
+"w": 8,
+"x": 312,
+"y": 55
+},
+"MAIN_CLUTTER_BAR_BUTTON_D_SELECTED": {
+"h": 8,
+"sheet": "TITLEBAR",
+"w": 8,
+"x": 328,
+"y": 69
+},
+"MAIN_CLUTTER_BAR_BUTTON_I_SELECTED": {
+"h": 7,
+"sheet": "TITLEBAR",
+"w": 8,
+"x": 320,
+"y": 62
+},
+"MAIN_CLUTTER_BAR_BUTTON_O_SELECTED": {
+"h": 8,
+"sheet": "TITLEBAR",
+"w": 8,
+"x": 304,
+"y": 47
+},
+"MAIN_CLUTTER_BAR_BUTTON_V_SELECTED": {
+"h": 7,
+"sheet": "TITLEBAR",
+"w": 8,
+"x": 336,
+"y": 77
+},
+"MAIN_EASTER_EGG_TITLE_BAR": {
+"h": 14,
+"sheet": "TITLEBAR",
+"w": 275,
+"x": 27,
+"y": 72
+},
+"MAIN_EASTER_EGG_TITLE_BAR_SELECTED": {
+"h": 14,
+"sheet": "TITLEBAR",
+"w": 275,
+"x": 27,
+"y": 57
+},
+"MAIN_EJECT_BUTTON": {
+"h": 16,
+"sheet": "CBUTTONS",
+"w": 22,
+"x": 114,
+"y": 0
+},
+"MAIN_EJECT_BUTTON_ACTIVE": {
+"h": 16,
+"sheet": "CBUTTONS",
+"w": 22,
+"x": 114,
+"y": 16
+},
+"MAIN_EQ_BUTTON": {
+"h": 12,
+"sheet": "SHUFREP",
+"w": 23,
+"x": 0,
+"y": 61
+},
+"MAIN_EQ_BUTTON_DEPRESSED": {
+"h": 12,
+"sheet": "SHUFREP",
+"w": 23,
+"x": 46,
+"y": 61
+},
+"MAIN_EQ_BUTTON_DEPRESSED_SELECTED": {
+"h": 12,
+"sheet": "SHUFREP",
+"w": 23,
+"x": 46,
+"y": 73
+},
+"MAIN_EQ_BUTTON_SELECTED": {
+"h": 12,
+"sheet": "SHUFREP",
+"w": 23,
+"x": 0,
+"y": 73
+},
+"MAIN_MINIMIZE_BUTTON": {
+"h": 9,
+"sheet": "TITLEBAR",
+"w": 9,
+"x": 9,
+"y": 0
+},
+"MAIN_MINIMIZE_BUTTON_DEPRESSED": {
+"h": 9,
+"sheet": "TITLEBAR",
+"w": 9,
+"x": 9,
+"y": 9
+},
+"MAIN_MONO": {
+"h": 12,
+"sheet": "MONOSTER",
+"w": 27,
+"x": 29,
+"y": 12
+},
+"MAIN_MONO_SELECTED": {
+"h": 12,
+"sheet": "MONOSTER",
+"w": 27,
+"x": 29,
+"y": 0
+},
+"MAIN_NEXT_BUTTON": {
+"h": 18,
+"sheet": "CBUTTONS",
+"w": 23,
+"x": 92,
+"y": 0
+},
+"MAIN_NEXT_BUTTON_ACTIVE": {
+"h": 18,
+"sheet": "CBUTTONS",
+"w": 22,
+"x": 92,
+"y": 18
+},
+"MAIN_NOT_WORKING_INDICATOR": {
+"h": 9,
+"sheet": "PLAYPAUS",
+"w": 9,
+"x": 36,
+"y": 0
+},
+"MAIN_OPTIONS_BUTTON": {
+"h": 9,
+"sheet": "TITLEBAR",
+"w": 9,
+"x": 0,
+"y": 0
+},
+"MAIN_OPTIONS_BUTTON_DEPRESSED": {
+"h": 9,
+"sheet": "TITLEBAR",
+"w": 9,
+"x": 0,
+"y": 9
+},
+"MAIN_PAUSED_INDICATOR": {
+"h": 9,
+"sheet": "PLAYPAUS",
+"w": 9,
+"x": 9,
+"y": 0
+},
+"MAIN_PAUSE_BUTTON": {
+"h": 18,
+"sheet": "CBUTTONS",
+"w": 23,
+"x": 46,
+"y": 0
+},
+"MAIN_PAUSE_BUTTON_ACTIVE": {
+"h": 18,
+"sheet": "CBUTTONS",
+"w": 23,
+"x": 46,
+"y": 18
+},
+"MAIN_PLAYING_INDICATOR": {
+"h": 9,
+"sheet": "PLAYPAUS",
+"w": 9,
+"x": 0,
+"y": 0
+},
+"MAIN_PLAYLIST_BUTTON": {
+"h": 12,
+"sheet": "SHUFREP",
+"w": 23,
+"x": 23,
+"y": 61
+},
+"MAIN_PLAYLIST_BUTTON_DEPRESSED": {
+"h": 12,
+"sheet": "SHUFREP",
+"w": 23,
+"x": 69,
+"y": 61
+},
+"MAIN_PLAYLIST_BUTTON_DEPRESSED_SELECTED": {
+"h": 12,
+"sheet": "SHUFREP",
+"w": 23,
+"x": 69,
+"y": 73
+},
+"MAIN_PLAYLIST_BUTTON_SELECTED": {
+"h": 12,
+"sheet": "SHUFREP",
+"w": 23,
+"x": 23,
+"y": 73
+},
+"MAIN_PLAY_BUTTON": {
+"h": 18,
+"sheet": "CBUTTONS",
+"w": 23,
+"x": 23,
+"y": 0
+},
+"MAIN_PLAY_BUTTON_ACTIVE": {
+"h": 18,
+"sheet": "CBUTTONS",
+"w": 23,
+"x": 23,
+"y": 18
+},
+"MAIN_POSITION_SLIDER_BACKGROUND": {
+"h": 10,
+"sheet": "POSBAR",
+"w": 248,
+"x": 0,
+"y": 0
+},
+"MAIN_POSITION_SLIDER_THUMB": {
+"h": 10,
+"sheet": "POSBAR",
+"w": 29,
+"x": 248,
+"y": 0
+},
+"MAIN_POSITION_SLIDER_THUMB_SELECTED": {
+"h": 10,
+"sheet": "POSBAR",
+"w": 29,
+"x": 278,
+"y": 0
+},
+"MAIN_PREVIOUS_BUTTON": {
+"h": 18,
+"sheet": "CBUTTONS",
+"w": 23,
+"x": 0,
+"y": 0
+},
+"MAIN_PREVIOUS_BUTTON_ACTIVE": {
+"h": 18,
+"sheet": "CBUTTONS",
+"w": 23,
+"x": 0,
+"y": 18
+},
+"MAIN_REPEAT_BUTTON": {
+"h": 15,
+"sheet": "SHUFREP",
+"w": 28,
+"x": 0,
+"y": 0
+},
+"MAIN_REPEAT_BUTTON_DEPRESSED": {
+"h": 15,
+"sheet": "SHUFREP",
+"w": 28,
+"x": 0,
+"y": 15
+},
+"MAIN_REPEAT_BUTTON_SELECTED": {
+"h": 15,
+"sheet": "SHUFREP",
+"w": 28,
+"x": 0,
+"y": 30
+},
+"MAIN_REPEAT_BUTTON_SELECTED_DEPRESSED": {
+"h": 15,
+"sheet": "SHUFREP",
+"w": 28,
+"x": 0,
+"y": 45
+},
+"MAIN_SHADE_BACKGROUND": {
+"h": 14,
+"sheet": "TITLEBAR",
+"w": 275,
+"x": 27,
+"y": 42
+},
+"MAIN_SHADE_BACKGROUND_SELECTED": {
+"h": 14,
+"sheet": "TITLEBAR",
+"w": 275,
+"x": 27,
+"y": 29
+},
+"MAIN_SHADE_BUTTON": {
+"h": 9,
+"sheet": "TITLEBAR",
+"w": 9,
+"x": 0,
+"y": 18
+},
+"MAIN_SHADE_BUTTON_DEPRESSED": {
+"h": 9,
+"sheet": "TITLEBAR",
+"w": 9,
+"x": 9,
+"y": 18
+},
+"MAIN_SHADE_BUTTON_SELECTED": {
+"h": 9,
+"sheet": "TITLEBAR",
+"w": 9,
+"x": 0,
+"y": 27
+},
+"MAIN_SHADE_BUTTON_SELECTED_DEPRESSED": {
+"h": 9,
+"sheet": "TITLEBAR",
+"w": 9,
+"x": 9,
+"y": 27
+},
+"MAIN_SHADE_POSITION_BACKGROUND": {
+"h": 7,
+"sheet": "TITLEBAR",
+"w": 17,
+"x": 0,
+"y": 36
+},
+"MAIN_SHADE_POSITION_THUMB": {
+"h": 7,
+"sheet": "TITLEBAR",
+"w": 3,
+"x": 20,
+"y": 36
+},
+"MAIN_SHADE_POSITION_THUMB_LEFT": {
+"h": 7,
+"sheet": "TITLEBAR",
+"w": 3,
+"x": 17,
+"y": 36
+},
+"MAIN_SHADE_POSITION_THUMB_RIGHT": {
+"h": 7,
+"sheet": "TITLEBAR",
+"w": 3,
+"x": 23,
+"y": 36
+},
+"MAIN_SHUFFLE_BUTTON": {
+"h": 15,
+"sheet": "SHUFREP",
+"w": 47,
+"x": 28,
+"y": 0
+},
+"MAIN_SHUFFLE_BUTTON_DEPRESSED": {
+"h": 15,
+"sheet": "SHUFREP",
+"w": 47,
+"x": 28,
+"y": 15
+},
+"MAIN_SHUFFLE_BUTTON_SELECTED": {
+"h": 15,
+"sheet": "SHUFREP",
+"w": 47,
+"x": 28,
+"y": 30
+},
+"MAIN_SHUFFLE_BUTTON_SELECTED_DEPRESSED": {
+"h": 15,
+"sheet": "SHUFREP",
+"w": 47,
+"x": 28,
+"y": 45
+},
+"MAIN_STEREO": {
+"h": 12,
+"sheet": "MONOSTER",
+"w": 29,
+"x": 0,
+"y": 12
+},
+"MAIN_STEREO_SELECTED": {
+"h": 12,
+"sheet": "MONOSTER",
+"w": 29,
+"x": 0,
+"y": 0
+},
+"MAIN_STOPPED_INDICATOR": {
+"h": 9,
+"sheet": "PLAYPAUS",
+"w": 9,
+"x": 18,
+"y": 0
+},
+"MAIN_STOP_BUTTON": {
+"h": 18,
+"sheet": "CBUTTONS",
+"w": 23,
+"x": 69,
+"y": 0
+},
+"MAIN_STOP_BUTTON_ACTIVE": {
+"h": 18,
+"sheet": "CBUTTONS",
+"w": 23,
+"x": 69,
+"y": 18
+},
+"MAIN_TITLE_BAR": {
+"h": 14,
+"sheet": "TITLEBAR",
+"w": 275,
+"x": 27,
+"y": 15
+},
+"MAIN_TITLE_BAR_SELECTED": {
+"h": 14,
+"sheet": "TITLEBAR",
+"w": 275,
+"x": 27,
+"y": 0
+},
+"MAIN_VOLUME_BACKGROUND": {
+"h": 420,
+"sheet": "VOLUME",
+"w": 68,
+"x": 0,
+"y": 0
+},
+"MAIN_VOLUME_THUMB": {
+"h": 11,
+"sheet": "VOLUME",
+"w": 14,
+"x": 15,
+"y": 422
+},
+"MAIN_VOLUME_THUMB_SELECTED": {
+"h": 11,
+"sheet": "VOLUME",
+"w": 14,
+"x": 0,
+"y": 422
+},
+"MAIN_WINDOW_BACKGROUND": {
+"h": 116,
+"sheet": "MAIN",
+"w": 275,
+"x": 0,
+"y": 0
+},
+"MAIN_WORKING_INDICATOR": {
+"h": 9,
+"sheet": "PLAYPAUS",
+"w": 9,
+"x": 39,
+"y": 0
+},
+"MINUS_SIGN": {
+"h": 1,
+"sheet": "NUMBERS",
+"w": 5,
+"x": 20,
+"y": 6
+},
+"MINUS_SIGN_EX": {
+"h": 13,
+"sheet": "NUMS_EX",
+"w": 9,
+"x": 99,
+"y": 0
+},
+"NO_MINUS_SIGN": {
+"h": 1,
+"sheet": "NUMBERS",
+"w": 5,
+"x": 9,
+"y": 6
+},
+"NO_MINUS_SIGN_EX": {
+"h": 13,
+"sheet": "NUMS_EX",
+"w": 9,
+"x": 90,
+"y": 0
+},
+"PLAYLIST_ADD_DIR": {
+"h": 18,
+"sheet": "PLEDIT",
+"w": 22,
+"x": 0,
+"y": 130
+},
+"PLAYLIST_ADD_DIR_SELECTED": {
+"h": 18,
+"sheet": "PLEDIT",
+"w": 22,
+"x": 23,
+"y": 130
+},
+"PLAYLIST_ADD_FILE": {
+"h": 18,
+"sheet": "PLEDIT",
+"w": 22,
+"x": 0,
+"y": 149
+},
+"PLAYLIST_ADD_FILE_SELECTED": {
+"h": 18,
+"sheet": "PLEDIT",
+"w": 22,
+"x": 23,
+"y": 149
+},
+"PLAYLIST_ADD_MENU_BAR": {
+"h": 54,
+"sheet": "PLEDIT",
+"w": 3,
+"x": 48,
+"y": 111
+},
+"PLAYLIST_ADD_URL": {
+"h": 18,
+"sheet": "PLEDIT",
+"w": 22,
+"x": 0,
+"y": 111
+},
+"PLAYLIST_ADD_URL_SELECTED": {
+"h": 18,
+"sheet": "PLEDIT",
+"w": 22,
+"x": 23,
+"y": 111
+},
+"PLAYLIST_BOTTOM_LEFT_CORNER": {
+"h": 38,
+"sheet": "PLEDIT",
+"w": 125,
+"x": 0,
+"y": 72
+},
+"PLAYLIST_BOTTOM_RIGHT_CORNER": {
+"h": 38,
+"sheet": "PLEDIT",
+"w": 150,
+"x": 126,
+"y": 72
+},
+"PLAYLIST_BOTTOM_TILE": {
+"h": 38,
+"sheet": "PLEDIT",
+"w": 25,
+"x": 179,
+"y": 0
+},
+"PLAYLIST_CLOSE_SELECTED": {
+"h": 9,
+"sheet": "PLEDIT",
+"w": 9,
+"x": 52,
+"y": 42
+},
+"PLAYLIST_COLLAPSE_SELECTED": {
+"h": 9,
+"sheet": "PLEDIT",
+"w": 9,
+"x": 62,
+"y": 42
+},
+"PLAYLIST_CROP": {
+"h": 18,
+"sheet": "PLEDIT",
+"w": 22,
+"x": 54,
+"y": 130
+},
+"PLAYLIST_CROP_SELECTED": {
+"h": 18,
+"sheet": "PLEDIT",
+"w": 22,
+"x": 77,
+"y": 130
+},
+"PLAYLIST_EXPAND_SELECTED": {
+"h": 9,
+"sheet": "PLEDIT",
+"w": 9,
+"x": 150,
+"y": 42
+},
+"PLAYLIST_FILE_INFO": {
+"h": 18,
+"sheet": "PLEDIT",
+"w": 22,
+"x": 154,
+"y": 130
+},
+"PLAYLIST_FILE_INFO_SELECTED": {
+"h": 18,
+"sheet": "PLEDIT",
+"w": 22,
+"x": 177,
+"y": 130
+},
+"PLAYLIST_INVERT_SELECTION": {
+"h": 18,
+"sheet": "PLEDIT",
+"w": 22,
+"x": 104,
+"y": 111
+},
+"PLAYLIST_INVERT_SELECTION_SELECTED": {
+"h": 18,
+"sheet": "PLEDIT",
+"w": 22,
+"x": 127,
+"y": 111
+},
+"PLAYLIST_LEFT_TILE": {
+"h": 29,
+"sheet": "PLEDIT",
+"w": 12,
+"x": 0,
+"y": 42
+},
+"PLAYLIST_LIST_BAR": {
+"h": 54,
+"sheet": "PLEDIT",
+"w": 3,
+"x": 250,
+"y": 111
+},
+"PLAYLIST_LOAD_LIST": {
+"h": 18,
+"sheet": "PLEDIT",
+"w": 22,
+"x": 204,
+"y": 149
+},
+"PLAYLIST_LOAD_LIST_SELECTED": {
+"h": 18,
+"sheet": "PLEDIT",
+"w": 22,
+"x": 227,
+"y": 149
+},
+"PLAYLIST_MISC_MENU_BAR": {
+"h": 54,
+"sheet": "PLEDIT",
+"w": 3,
+"x": 200,
+"y": 111
+},
+"PLAYLIST_MISC_OPTIONS": {
+"h": 18,
+"sheet": "PLEDIT",
+"w": 22,
+"x": 154,
+"y": 149
+},
+"PLAYLIST_MISC_OPTIONS_SELECTED": {
+"h": 18,
+"sheet": "PLEDIT",
+"w": 22,
+"x": 177,
+"y": 149
+},
+"PLAYLIST_NEW_LIST": {
+"h": 18,
+"sheet": "PLEDIT",
+"w": 22,
+"x": 204,
+"y": 111
+},
+"PLAYLIST_NEW_LIST_SELECTED": {
+"h": 18,
+"sheet": "PLEDIT",
+"w": 22,
+"x": 227,
+"y": 111
+},
+"PLAYLIST_REMOVE_ALL": {
+"h": 18,
+"sheet": "PLEDIT",
+"w": 22,
+"x": 54,
+"y": 111
+},
+"PLAYLIST_REMOVE_ALL_SELECTED": {
+"h": 18,
+"sheet": "PLEDIT",
+"w": 22,
+"x": 77,
+"y": 111
+},
+"PLAYLIST_REMOVE_MENU_BAR": {
+"h": 72,
+"sheet": "PLEDIT",
+"w": 3,
+"x": 100,
+"y": 111
+},
+"PLAYLIST_REMOVE_MISC": {
+"h": 18,
+"sheet": "PLEDIT",
+"w": 22,
+"x": 54,
+"y": 168
+},
+"PLAYLIST_REMOVE_MISC_SELECTED": {
+"h": 18,
+"sheet": "PLEDIT",
+"w": 22,
+"x": 77,
+"y": 168
+},
+"PLAYLIST_REMOVE_SELECTED": {
+"h": 18,
+"sheet": "PLEDIT",
+"w": 22,
+"x": 54,
+"y": 149
+},
+"PLAYLIST_REMOVE_SELECTED_SELECTED": {
+"h": 18,
+"sheet": "PLEDIT",
+"w": 22,
+"x": 77,
+"y": 149
+},
+"PLAYLIST_RIGHT_TILE": {
+"h": 29,
+"sheet": "PLEDIT",
+"w": 20,
+"x": 31,
+"y": 42
+},
+"PLAYLIST_SAVE_LIST": {
+"h": 18,
+"sheet": "PLEDIT",
+"w": 22,
+"x": 204,
+"y": 130
+},
+"PLAYLIST_SAVE_LIST_SELECTED": {
+"h": 18,
+"sheet": "PLEDIT",
+"w": 22,
+"x": 227,
+"y": 130
+},
+"PLAYLIST_SCROLL_HANDLE": {
+"h": 18,
+"sheet": "PLEDIT",
+"w": 8,
+"x": 52,
+"y": 53
+},
+"PLAYLIST_SCROLL_HANDLE_SELECTED": {
+"h": 18,
+"sheet": "PLEDIT",
+"w": 8,
+"x": 61,
+"y": 53
+},
+"PLAYLIST_SELECT_ALL": {
+"h": 18,
+"sheet": "PLEDIT",
+"w": 22,
+"x": 104,
+"y": 149
+},
+"PLAYLIST_SELECT_ALL_SELECTED": {
+"h": 18,
+"sheet": "PLEDIT",
+"w": 22,
+"x": 127,
+"y": 149
+},
+"PLAYLIST_SELECT_MENU_BAR": {
+"h": 54,
+"sheet": "PLEDIT",
+"w": 3,
+"x": 150,
+"y": 111
+},
+"PLAYLIST_SELECT_ZERO": {
+"h": 18,
+"sheet": "PLEDIT",
+"w": 22,
+"x": 104,
+"y": 130
+},
+"PLAYLIST_SELECT_ZERO_SELECTED": {
+"h": 18,
+"sheet": "PLEDIT",
+"w": 22,
+"x": 127,
+"y": 130
+},
+"PLAYLIST_SHADE_BACKGROUND": {
+"h": 14,
+"sheet": "PLEDIT",
+"w": 25,
+"x": 72,
+"y": 57
+},
+"PLAYLIST_SHADE_BACKGROUND_LEFT": {
+"h": 14,
+"sheet": "PLEDIT",
+"w": 25,
+"x": 72,
+"y": 42
+},
+"PLAYLIST_SHADE_BACKGROUND_RIGHT": {
+"h": 14,
+"sheet": "PLEDIT",
+"w": 50,
+"x": 99,
+"y": 57
+},
+"PLAYLIST_SHADE_BACKGROUND_RIGHT_SELECTED": {
+"h": 14,
+"sheet": "PLEDIT",
+"w": 50,
+"x": 99,
+"y": 42
+},
+"PLAYLIST_SORT_LIST": {
+"h": 18,
+"sheet": "PLEDIT",
+"w": 22,
+"x": 154,
+"y": 111
+},
+"PLAYLIST_SORT_LIST_SELECTED": {
+"h": 18,
+"sheet": "PLEDIT",
+"w": 22,
+"x": 177,
+"y": 111
+},
+"PLAYLIST_TITLE_BAR": {
+"h": 20,
+"sheet": "PLEDIT",
+"w": 100,
+"x": 26,
+"y": 21
+},
+"PLAYLIST_TITLE_BAR_SELECTED": {
+"h": 20,
+"sheet": "PLEDIT",
+"w": 100,
+"x": 26,
+"y": 0
+},
+"PLAYLIST_TOP_LEFT_CORNER": {
+"h": 20,
+"sheet": "PLEDIT",
+"w": 25,
+"x": 0,
+"y": 21
+},
+"PLAYLIST_TOP_LEFT_SELECTED": {
+"h": 20,
+"sheet": "PLEDIT",
+"w": 25,
+"x": 0,
+"y": 0
+},
+"PLAYLIST_TOP_RIGHT_CORNER": {
+"h": 20,
+"sheet": "PLEDIT",
+"w": 25,
+"x": 153,
+"y": 21
+},
+"PLAYLIST_TOP_RIGHT_CORNER_SELECTED": {
+"h": 20,
+"sheet": "PLEDIT",
+"w": 25,
+"x": 153,
+"y": 0
+},
+"PLAYLIST_TOP_TILE": {
+"h": 20,
+"sheet": "PLEDIT",
+"w": 25,
+"x": 127,
+"y": 21
+},
+"PLAYLIST_TOP_TILE_SELECTED": {
+"h": 20,
+"sheet": "PLEDIT",
+"w": 25,
+"x": 127,
+"y": 0
+},
+"PLAYLIST_VISUALIZER_BACKGROUND": {
+"h": 38,
+"sheet": "PLEDIT",
+"w": 75,
+"x": 205,
+"y": 0
+}
+}

@@ -1,0 +1,200 @@
+[
+ {
+  "file": "yt-botcheck.txt",
+  "class": "botCheck",
+  "reason": "notABot",
+  "origin": "upstream-source 2026.10.21"
+ },
+ {
+  "file": "yt-ratelimited.txt",
+  "class": "botCheck",
+  "reason": "rateLimited",
+  "origin": "upstream-source 2026.10.21"
+ },
+ {
+  "file": "yt-http429.txt",
+  "class": "botCheck",
+  "reason": "http429",
+  "origin": "upstream-source 2026.10.21"
+ },
+ {
+  "file": "yt-captcha.txt",
+  "class": "botCheck",
+  "reason": "captcha",
+  "origin": "upstream-source 2026.10.21"
+ },
+ {
+  "file": "yt-private.txt",
+  "class": "unavailable",
+  "reason": "private",
+  "origin": "upstream-source 2026.10.21"
+ },
+ {
+  "file": "yt-removed.txt",
+  "class": "unavailable",
+  "reason": "removed",
+  "origin": "upstream-source 2026.10.21"
+ },
+ {
+  "file": "yt-terminated.txt",
+  "class": "unavailable",
+  "reason": "removed",
+  "origin": "upstream-source 2026.10.21"
+ },
+ {
+  "file": "yt-geo.txt",
+  "class": "unavailable",
+  "reason": "geoBlocked",
+  "origin": "upstream-source 2026.10.21"
+ },
+ {
+  "file": "yt-age.txt",
+  "class": "unavailable",
+  "reason": "ageRestricted",
+  "origin": "upstream-source 2026.10.21"
+ },
+ {
+  "file": "yt-members.txt",
+  "class": "unavailable",
+  "reason": "membersOnly",
+  "origin": "upstream-source 2026.10.21"
+ },
+ {
+  "file": "yt-upcoming.txt",
+  "class": "unavailable",
+  "reason": "upcoming",
+  "origin": "upstream-source 2026.10.21"
+ },
+ {
+  "file": "yt-not-live.txt",
+  "class": "unavailable",
+  "reason": "notLive",
+  "origin": "upstream-source 2026.10.21"
+ },
+ {
+  "file": "yt-live-recording-gone.txt",
+  "class": "unavailable",
+  "reason": "removed",
+  "origin": "upstream-source 2026.10.21"
+ },
+ {
+  "file": "yt-drm.txt",
+  "class": "unavailable",
+  "reason": "drm",
+  "origin": "upstream-source 2026.10.21"
+ },
+ {
+  "file": "yt-format.txt",
+  "class": "engine",
+  "reason": "formatUnavailable",
+  "origin": "upstream-source 2026.10.21"
+ },
+ {
+  "file": "yt-nchallenge.txt",
+  "class": "engine",
+  "reason": "challenge",
+  "origin": "upstream-source 2026.10.21"
+ },
+ {
+  "file": "yt-http403.txt",
+  "class": "engine",
+  "reason": "http403",
+  "origin": "upstream-source 2026.10.21"
+ },
+ {
+  "file": "yt-unsupported.txt",
+  "class": "engine",
+  "reason": "unsupportedURL",
+  "origin": "upstream-source 2026.10.21"
+ },
+ {
+  "file": "net-dns.txt",
+  "class": "transient",
+  "reason": "dns",
+  "origin": "upstream-source 2026.10.21"
+ },
+ {
+  "file": "net-read-timeout.txt",
+  "class": "transient",
+  "reason": "network",
+  "origin": "upstream-source 2026.10.21"
+ },
+ {
+  "file": "net-http503.txt",
+  "class": "transient",
+  "reason": "http5xx",
+  "origin": "upstream-source 2026.10.21"
+ },
+ {
+  "file": "mc-tracklist.txt",
+  "class": "unavailable",
+  "reason": "mixcloudTracklist",
+  "origin": "upstream-source 2026.10.21"
+ },
+ {
+  "file": "mc-repeat-play.txt",
+  "class": "unavailable",
+  "reason": "mixcloudRepeatPlay",
+  "origin": "upstream-source 2026.10.21"
+ },
+ {
+  "file": "mc-restricted.txt",
+  "class": "unavailable",
+  "reason": "mixcloudRestricted",
+  "origin": "upstream-source 2026.10.21"
+ },
+ {
+  "file": "mc-exclusive.txt",
+  "class": "unavailable",
+  "reason": "loginRequired",
+  "origin": "upstream-source 2026.10.21"
+ },
+ {
+  "file": "mc-not-found.txt",
+  "class": "unavailable",
+  "reason": "removed",
+  "origin": "upstream-source 2026.10.21"
+ },
+ {
+  "file": "unknown-error.txt",
+  "class": "engine",
+  "reason": "unknown",
+  "origin": "upstream-source 2026.10.21"
+ },
+ {
+  "file": "empty.txt",
+  "class": "engine",
+  "reason": "unknown",
+  "origin": "upstream-source 2026.10.21"
+ },
+ {
+  "file": "captured-sc-not-found.txt",
+  "class": "unavailable",
+  "reason": "notFound",
+  "origin": "captured live 2026-10-22, yt-dlp 2026.10.21"
+ },
+ {
+  "file": "captured-mc-not-found-live.txt",
+  "class": "unavailable",
+  "reason": "removed",
+  "origin": "captured live 2026-10-22, yt-dlp 2026.10.21"
+ },
+ {
+  "file": "captured-proxy-refused.txt",
+  "class": "transient",
+  "reason": "network",
+  "origin": "captured live 2026-10-22, yt-dlp 2026.10.21"
+ },
+ {
+  "file": "captured-yt-missing-live.txt",
+  "class": "unavailable",
+  "reason": "removed",
+  "origin": "captured live 2026-10-22, yt-dlp 2026.10.21"
+ },
+ {
+  "file": "captured-yt-not-live-live.txt",
+  "class": "unavailable",
+  "reason": "notLive",
+  "origin": "captured live 2026-10-22, yt-dlp 2026.10.21"
+ }
+]

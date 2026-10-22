@@ -1,0 +1,20 @@
+{
+  "window": "main",
+  "playback": "playing",
+  "elapsed": 3599,
+  "duration": 3720,
+  "timeMode": "remaining",
+  "title": "SomaFM <Groove Salad> {live} ~ ambient",
+  "kbps": 256,
+  "khz": 48,
+  "volume": 100,
+  "balance": 100,
+  "shuffle": true,
+  "repeat": true,
+  "doubleSize": true,
+  "pressed": "play",
+  "visualizer": {
+    "mode": "oscilloscope",
+    "scope": [8,8,9,10,11,12,12,11,10,9,8,7,6,5,4,4,5,6,7,8,9,10,11,12,13,13,12,11,10,9,8,7,6,5,4,3,3,4,5,6,7,8,9,10,11,12,13,14,14,13,12,11,10,9,8,7,6,5,4,3,2,2,3,4,5,6,7,8,9,10,11,12,12,11,10,9]
+  }
+}

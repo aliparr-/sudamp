@@ -1,0 +1,16 @@
+{
+  "window": "main",
+  "playback": "paused",
+  "elapsed": 1325,
+  "duration": 3720,
+  "timeMode": "remaining",
+  "blinkVisible": true,
+  "title": "Ünïcödé Çafé – Ærø Ståle “Remix”",
+  "kbps": 96,
+  "khz": 44,
+  "channels": 1,
+  "volume": 30,
+  "balance": -60,
+  "eqOpen": false,
+  "visualizer": {"mode": "spectrum", "bars": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 8, 0]}
+}

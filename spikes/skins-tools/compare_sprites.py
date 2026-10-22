@@ -1,0 +1,112 @@
+import json
+W = json.load(open('/tmp/sudamp-priorart/experiments/webamp_sprites.json'))
+def r(x,y,w,h): return (x,y,w,h)
+# --- wamp (Wamp/Skinning/SpriteCatalog.swift), expanded by hand from the switch ---
+wamp = {}
+for i,n in enumerate(["PREVIOUS","PLAY","PAUSE","STOP","NEXT"]):
+    x=[0,23,46,69,92][i]
+    wamp[f"MAIN_{n}_BUTTON"]=r(x,0,22,18); wamp[f"MAIN_{n}_BUTTON_ACTIVE"]=r(x,18,22,18)
+wamp["MAIN_EJECT_BUTTON"]=r(114,0,22,16); wamp["MAIN_EJECT_BUTTON_ACTIVE"]=r(114,16,22,16)
+for d in range(10): wamp[f"DIGIT_{d}"]=r(d*9,0,9,13)
+wamp["MAIN_MONO_SELECTED"]=r(29,0,27,12); wamp["MAIN_MONO"]=r(29,12,27,12)
+wamp["MAIN_STEREO_SELECTED"]=r(0,0,29,12); wamp["MAIN_STEREO"]=r(0,12,29,12)
+wamp["MAIN_TITLE_BAR_SELECTED"]=r(27,0,275,14); wamp["MAIN_TITLE_BAR"]=r(27,15,275,14)
+wamp["MAIN_CLOSE_BUTTON"]=r(18,0,9,9); wamp["MAIN_CLOSE_BUTTON_DEPRESSED"]=r(18,9,9,9)
+wamp["MAIN_SHADE_BUTTON"]=r(0,18,9,9); wamp["MAIN_SHADE_BUTTON_DEPRESSED"]=r(0,27,9,9)
+wamp["EQ_TITLE_BAR_SELECTED"]=r(0,134,275,14); wamp["EQ_TITLE_BAR"]=r(0,149,275,14)
+wamp["MAIN_POSITION_SLIDER_BACKGROUND"]=r(0,0,248,10)
+wamp["MAIN_POSITION_SLIDER_THUMB"]=r(248,0,29,10); wamp["MAIN_POSITION_SLIDER_THUMB_SELECTED"]=r(278,0,29,10)
+wamp["MAIN_VOLUME_THUMB"]=r(15,422,14,11); wamp["MAIN_VOLUME_THUMB_SELECTED"]=r(0,422,14,11)
+wamp["MAIN_BALANCE_THUMB"]=r(15,422,14,11); wamp["MAIN_BALANCE_THUMB_ACTIVE"]=r(0,422,14,11)
+for a,sa in [(False,""),(True,"_SELECTED")]:
+    for p,sp in [(False,""),(True,"_DEPRESSED")]:
+        y=(30 if a else 0)+(15 if p else 0)
+        wamp[f"MAIN_REPEAT_BUTTON{sa}{sp}"]=r(0,y,28,15); wamp[f"MAIN_SHUFFLE_BUTTON{sa}{sp}"]=r(28,y,47,15)
+        x=46 if p else 0; yy=73 if a else 61
+        nm = {(False,False):"",(True,False):"_SELECTED",(False,True):"_DEPRESSED",(True,True):"_DEPRESSED_SELECTED"}[(a,p)]
+        wamp[f"MAIN_EQ_BUTTON{nm}"]=r(x,yy,23,12); wamp[f"MAIN_PLAYLIST_BUTTON{nm}"]=r(x+23,yy,23,12)
+wamp["EQ_WINDOW_BACKGROUND"]=r(0,0,275,116)
+wamp["EQ_SLIDER_THUMB"]=r(0,164,11,11); wamp["EQ_SLIDER_THUMB_SELECTED"]=r(0,176,11,11)
+for nm,x in [("EQ_ON_BUTTON_SELECTED_DEPRESSED",187),("EQ_ON_BUTTON_SELECTED",69),("EQ_ON_BUTTON_DEPRESSED",128),("EQ_ON_BUTTON",10)]: wamp[nm]=r(x,119,26,12)
+for nm,x in [("EQ_AUTO_BUTTON_SELECTED_DEPRESSED",213),("EQ_AUTO_BUTTON_SELECTED",95),("EQ_AUTO_BUTTON_DEPRESSED",154),("EQ_AUTO_BUTTON",36)]: wamp[nm]=r(x,119,32,12)
+wamp["EQ_PRESETS_BUTTON"]=r(224,164,44,12); wamp["EQ_PRESETS_BUTTON_SELECTED"]=r(224,176,44,12)
+wamp["EQ_GRAPH_BACKGROUND"]=r(0,294,113,19)
+wamp["PLAYLIST_TOP_LEFT_SELECTED"]=r(0,0,25,20); wamp["PLAYLIST_TOP_LEFT_CORNER"]=r(0,21,25,20)
+wamp["PLAYLIST_TITLE_BAR_SELECTED"]=r(26,0,100,20); wamp["PLAYLIST_TITLE_BAR"]=r(26,21,100,20)
+wamp["PLAYLIST_TOP_RIGHT_CORNER_SELECTED"]=r(153,0,25,20); wamp["PLAYLIST_TOP_RIGHT_CORNER"]=r(153,21,25,20)
+wamp["PLAYLIST_TOP_TILE_SELECTED"]=r(127,0,25,20); wamp["PLAYLIST_TOP_TILE"]=r(127,21,25,20)
+wamp["PLAYLIST_LEFT_TILE"]=r(0,42,12,29); wamp["PLAYLIST_RIGHT_TILE"]=r(31,42,20,29)
+wamp["PLAYLIST_BOTTOM_LEFT_CORNER"]=r(0,72,125,38); wamp["PLAYLIST_BOTTOM_TILE"]=r(179,0,25,38); wamp["PLAYLIST_BOTTOM_RIGHT_CORNER"]=r(126,72,150,38)
+wamp["PLAYLIST_SCROLL_HANDLE"]=r(52,53,8,18); wamp["PLAYLIST_SCROLL_HANDLE_SELECTED"]=r(61,53,8,18)
+wamp["PLAYLIST_ADD_FILE"]=r(0,149,22,18); wamp["PLAYLIST_ADD_FILE_SELECTED"]=r(23,149,22,18)
+wamp["PLAYLIST_REMOVE_SELECTED"]=r(54,149,22,18); wamp["PLAYLIST_REMOVE_SELECTED_SELECTED"]=r(77,149,22,18)
+wamp["PLAYLIST_REMOVE_ALL"]=r(54,111,22,18); wamp["PLAYLIST_REMOVE_ALL_SELECTED"]=r(77,111,22,18)
+wamp["PLAYLIST_SELECT_ALL"]=r(0,111,22,18); wamp["PLAYLIST_SELECT_ALL_SELECTED"]=r(23,111,22,18)
+wamp["PLAYLIST_MISC_OPTIONS"]=r(0,130,22,18); wamp["PLAYLIST_MISC_OPTIONS_SELECTED"]=r(23,130,22,18)
+wamp["MAIN_WINDOW_BACKGROUND"]=r(0,0,275,116)
+
+# --- Bitamp (Sources/BitampKit/Skin/WszSkin.swift source(for:)), expanded ---
+b = {}
+b["MAIN_WINDOW_BACKGROUND"]=r(0,0,275,116)
+b["MAIN_TITLE_BAR_SELECTED"]=r(27,0,275,14); b["MAIN_TITLE_BAR"]=r(27,15,275,14)
+for nm,x in [("OPTIONS",0),("MINIMIZE",9),("CLOSE",18)]:
+    b[f"MAIN_{nm}_BUTTON"]=r(x,0,9,9); b[f"MAIN_{nm}_BUTTON_DEPRESSED"]=r(x,9,9,9)
+b["MAIN_SHADE_BUTTON"]=r(0,18,9,9); b["MAIN_SHADE_BUTTON_DEPRESSED"]=r(9,18,9,9)
+for i,n in enumerate(["PREVIOUS","PLAY","PAUSE","STOP"]):
+    x=[0,23,46,69][i]; b[f"MAIN_{n}_BUTTON"]=r(x,0,23,18); b[f"MAIN_{n}_BUTTON_ACTIVE"]=r(x,18,23,18)
+b["MAIN_NEXT_BUTTON"]=r(92,0,22,18); b["MAIN_NEXT_BUTTON_ACTIVE"]=r(92,18,22,18)
+b["MAIN_EJECT_BUTTON"]=r(114,0,22,16); b["MAIN_EJECT_BUTTON_ACTIVE"]=r(114,16,22,16)
+b["MAIN_PLAYING_INDICATOR"]=r(0,0,9,9); b["MAIN_PAUSED_INDICATOR"]=r(9,0,9,9); b["MAIN_STOPPED_INDICATOR"]=r(18,0,9,9)
+b["MAIN_MONO_SELECTED"]=r(29,0,27,12); b["MAIN_MONO"]=r(29,12,27,12)
+b["MAIN_STEREO_SELECTED"]=r(0,0,29,12); b["MAIN_STEREO"]=r(0,12,29,12)
+b["MAIN_VOLUME_THUMB"]=r(15,422,14,11); b["MAIN_VOLUME_THUMB_SELECTED"]=r(0,422,14,11)
+b["MAIN_BALANCE_THUMB"]=r(15,422,14,11); b["MAIN_BALANCE_THUMB_ACTIVE"]=r(0,422,14,11)
+b["MAIN_POSITION_SLIDER_BACKGROUND"]=r(0,0,248,10); b["MAIN_POSITION_SLIDER_THUMB"]=r(248,0,29,10); b["MAIN_POSITION_SLIDER_THUMB_SELECTED"]=r(278,0,29,10)
+for on,sa in [(False,""),(True,"_SELECTED")]:
+    for p,sp in [(False,""),(True,"_DEPRESSED")]:
+        y=(30 if on else 0)+(15 if p else 0)
+        b[f"MAIN_REPEAT_BUTTON{sa}{sp}"]=r(0,y,28,15); b[f"MAIN_SHUFFLE_BUTTON{sa}{sp}"]=r(28,y,46,15)
+        nm={(False,False):"",(True,False):"_SELECTED",(False,True):"_DEPRESSED",(True,True):"_DEPRESSED_SELECTED"}[(on,p)]
+        b[f"MAIN_EQ_BUTTON{nm}"]=r(46 if p else 0, 73 if on else 61, 23,12)
+        b[f"MAIN_PLAYLIST_BUTTON{nm}"]=r(69 if p else 23, 73 if on else 61, 23,12)
+b["EQ_WINDOW_BACKGROUND"]=r(0,0,275,116); b["EQ_TITLE_BAR_SELECTED"]=r(0,134,275,14); b["EQ_TITLE_BAR"]=r(0,149,275,14)
+b["EQ_CLOSE_BUTTON_ACTIVE"]=r(0,116,9,9)
+for nm,x in [("EQ_ON_BUTTON",10),("EQ_ON_BUTTON_DEPRESSED",128),("EQ_ON_BUTTON_SELECTED",69),("EQ_ON_BUTTON_SELECTED_DEPRESSED",187)]: b[nm]=r(x,119,26,12)
+for nm,x in [("EQ_AUTO_BUTTON",36),("EQ_AUTO_BUTTON_DEPRESSED",154),("EQ_AUTO_BUTTON_SELECTED",95),("EQ_AUTO_BUTTON_SELECTED_DEPRESSED",213)]: b[nm]=r(x,119,32,12)
+b["EQ_PRESETS_BUTTON"]=r(224,164,44,12); b["EQ_PRESETS_BUTTON_SELECTED"]=r(224,176,44,12)
+b["EQ_SLIDER_THUMB"]=r(0,164,11,11); b["EQ_SLIDER_THUMB_SELECTED"]=r(0,176,11,11)
+b["EQ_GRAPH_BACKGROUND"]=r(0,294,113,19); b["EQ_PREAMP_LINE"]=r(0,314,113,1)
+b["PLAYLIST_TOP_LEFT_SELECTED"]=r(0,0,25,20); b["PLAYLIST_TOP_LEFT_CORNER"]=r(0,21,25,20)
+b["PLAYLIST_TITLE_BAR_SELECTED"]=r(26,0,100,20); b["PLAYLIST_TITLE_BAR"]=r(26,21,100,20)
+b["PLAYLIST_TOP_TILE_SELECTED"]=r(127,0,25,20); b["PLAYLIST_TOP_TILE"]=r(127,21,25,20)
+b["PLAYLIST_TOP_RIGHT_CORNER_SELECTED"]=r(153,0,25,20); b["PLAYLIST_TOP_RIGHT_CORNER"]=r(153,21,25,20)
+b["PLAYLIST_LEFT_TILE"]=r(0,42,12,29); b["PLAYLIST_RIGHT_TILE"]=r(31,42,20,29)
+b["PLAYLIST_BOTTOM_LEFT_CORNER"]=r(0,72,125,38); b["PLAYLIST_BOTTOM_RIGHT_CORNER"]=r(126,72,150,38); b["PLAYLIST_BOTTOM_TILE"]=r(179,0,25,38)
+b["PLAYLIST_SCROLL_HANDLE"]=r(52,53,8,18); b["PLAYLIST_SCROLL_HANDLE_SELECTED"]=r(61,53,8,18)
+b["PLAYLIST_CLOSE_SELECTED"]=r(52,42,9,9)
+b["MAIN_SHADE_BACKGROUND_SELECTED"]=r(27,29,275,14); b["MAIN_SHADE_BACKGROUND"]=r(27,42,275,14)
+b["MAIN_SHADE_BUTTON_SELECTED"]=r(0,27,9,9); b["MAIN_SHADE_BUTTON_SELECTED_DEPRESSED"]=r(9,27,9,9)
+b["MAIN_SHADE_POSITION_BACKGROUND"]=r(0,36,17,7)
+b["MAIN_SHADE_POSITION_THUMB_LEFT"]=r(17,36,3,7); b["MAIN_SHADE_POSITION_THUMB"]=r(20,36,3,7); b["MAIN_SHADE_POSITION_THUMB_RIGHT"]=r(23,36,3,7)
+b["EQ_MAXIMIZE_BUTTON_ACTIVE"]=r(1,38,9,9); b["EQ_SHADE_BACKGROUND_SELECTED"]=r(0,0,275,14); b["EQ_SHADE_BACKGROUND"]=r(0,15,275,14)
+b["EQ_MINIMIZE_BUTTON_ACTIVE"]=r(1,47,9,9); b["EQ_SHADE_CLOSE_BUTTON_ACTIVE"]=r(11,47,9,9)
+for nm,x in [("LEFT",1),("CENTER",4),("RIGHT",7)]: b[f"EQ_SHADE_VOLUME_SLIDER_{nm}"]=r(x,30,3,7)
+for nm,x in [("LEFT",11),("CENTER",14),("RIGHT",17)]: b[f"EQ_SHADE_BALANCE_SLIDER_{nm}"]=r(x,30,3,7)
+b["PLAYLIST_COLLAPSE_SELECTED"]=r(62,42,9,9)
+b["PLAYLIST_SHADE_BACKGROUND_LEFT"]=r(72,42,25,14); b["PLAYLIST_SHADE_BACKGROUND"]=r(72,57,25,14)
+b["PLAYLIST_SHADE_BACKGROUND_RIGHT_SELECTED"]=r(99,42,50,14); b["PLAYLIST_SHADE_BACKGROUND_RIGHT"]=r(99,57,50,14)
+b["PLAYLIST_EXPAND_SELECTED"]=r(150,42,9,9)
+b["MINUS_SIGN"]=r(20,6,5,1); b["MINUS_SIGN_EX"]=r(99,0,9,13)
+for d in range(10): b[f"DIGIT_{d}"]=r(d*9,0,9,13)
+
+def cmp(name, t):
+    bad=[]; ok=0; missing=[]
+    for k,v in t.items():
+        if k not in W: missing.append(k); continue
+        wv=W[k]; ww=(wv['x'],wv['y'],wv['w'],wv['h'])
+        if ww==v: ok+=1
+        else: bad.append((k, 'port', v, 'webamp', ww))
+    print(f"== {name}: {len(t)} mapped, {ok} identical, {len(bad)} differ, unmapped-name {missing}")
+    for x in bad: print("  ", *x)
+cmp("wamp", wamp); cmp("Bitamp", b)
+print("Webamp active sprites (excl. GEN/TEXT):", sum(1 for v in W.values() if v['sheet']!='GEN'))

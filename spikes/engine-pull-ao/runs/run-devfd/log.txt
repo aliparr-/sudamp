@@ -1,0 +1,25 @@
+[   0.039] CMD loadfile /tmp/sudamp-spike/engine/media/a.wav -> 0 (success) took 0.2 ms
+[   0.040] EVENT start-file
+[   0.040]   mpv[warn cplayer] client removed during hook handling
+[   0.041] EVENT audio-reconfig
+[   0.041] EVENT audio-reconfig
+[   0.041] EVENT file-loaded
+[   0.041]   mpv[v af] User filter list:
+[   0.041]   mpv[v af]   (empty)
+[   0.042]   mpv[v af] [in] 44100Hz stereo 2ch float
+[   0.042]   mpv[v af] [userspeed] 44100Hz stereo 2ch float
+[   0.042]   mpv[v af] [userspeed] (disabled)
+[   0.042]   mpv[v af] [convert] 44100Hz stereo 2ch float
+[   0.042]   mpv[v ao] Trying audio driver 'pcm'
+[   0.042]   mpv[v ao/pcm] requested format: 48000 Hz, stereo channels, float
+[   0.042] EVENT audio-reconfig
+[   0.042]   mpv[v ao/pcm] Channel layouts:
+[   0.042]   mpv[v ao/pcm]  - waveext
+[   0.042]   mpv[v ao/pcm] result: stereo
+[   0.042]   mpv[info ao/pcm] File: /dev/fd/6 (RAW PCM)
+[   0.042]   mpv[info ao/pcm] PCM: Samplerate: 48000 Hz Channels: 2 Format: float
+[   0.042]   mpv[v ao/pcm] device buffer: 65536 samples.
+[   0.042]   mpv[v ao/pcm] using soft-buffer of 65536 samples.
+[   0.042]   mpv[v af] [out] 48000Hz stereo 2ch float
+[   0.042] EVENT playback-restart
+[   1.242]   mpv[v ao/pcm] starting AO

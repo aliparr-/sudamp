@@ -1,0 +1,42 @@
+{
+ "_fixture": "Trimmed and scrubbed yt-dlp 2026.10.21 -J output captured 2026-10-22 (IP replaced with TEST-NET-3, signatures REDACTED).",
+ "abr": 160,
+ "acodec": "mp4a.40.2",
+ "duration": 2940.862,
+ "ext": "m4a",
+ "extractor_key": "Soundcloud",
+ "format_id": "hls_aac_160k",
+ "formats": [
+  {
+   "abr": 96,
+   "acodec": "mp4a.40.2",
+   "ext": "m4a",
+   "format_id": "hls_aac_96k",
+   "protocol": "m3u8_native",
+   "vcodec": "none"
+  },
+  {
+   "abr": 160,
+   "acodec": "mp4a.40.2",
+   "ext": "m4a",
+   "format_id": "hls_aac_160k",
+   "protocol": "m3u8_native",
+   "vcodec": "none"
+  }
+ ],
+ "http_headers": {
+  "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+  "Accept-Language": "en-us,en;q=0.5",
+  "Sec-Fetch-Mode": "navigate",
+  "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36"
+ },
+ "id": "495489384",
+ "protocol": "m3u8_native",
+ "thumbnail": "https://i1.sndcdn.com/artworks-000400223055-y6jbpp-original.jpg",
+ "title": "DJ Flight Mix | Boiler Room x SYSTEM: Sounds Series at Somerset House Studios",
+ "uploader": "Boiler Room",
+ "uploader_id": "752705",
+ "url": "https://playback.media-streaming.soundcloud.cloud/JOXnzvvRmp8T/aac_160k/5bacfb8e-ca92-4b6b-8635-380d87c751c3/playlist.m3u8?expires=1792681791&Policy=REDACTED&Signature=REDACTED&Key-Pair-Id=REDACTED",
+ "vcodec": "none",
+ "webpage_url": "https://soundcloud.com/platform/dj-flight-mix-boiler-room-x-system-sounds-series-at-somerset-house-studios"
+}

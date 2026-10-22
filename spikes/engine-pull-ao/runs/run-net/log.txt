@@ -1,0 +1,14 @@
+[   0.148] CMD loadfile https://ice1.somafm.com/groovesalad-128-mp3 -> 0 (success) took 0.1 ms
+[   0.148] EVENT start-file
+[   0.148]   mpv[warn cplayer] client removed during hook handling
+[   1.006] EVENT audio-reconfig
+[   1.007] EVENT audio-reconfig
+[   1.007] EVENT file-loaded
+[   1.007] EVENT audio-reconfig
+[   1.007] EVENT playback-restart
+[  12.148] media-title: the william caslon experience - more close than opran (fila brazillia remix)
+[  12.148] metadata/by-key/icy-title: the william caslon experience - more close than opran (fila brazillia remix)
+[  12.148] audio-params: {"samplerate":44100,"channel-count":2,"channels":"stereo","hr-channels":"stereo","format":"floatp"}
+[  12.148] file-format: mp3, audio-codec: mp3, duration: 27.611429
+[  12.148] demuxer-cache-duration: 16.457143, seekable: no
+[  12.149] first audible render 901 ms after loadfile; short reads after start: 0 of 1128 callbacks

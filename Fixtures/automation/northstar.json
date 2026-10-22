@@ -1,0 +1,10 @@
+{
+  "name": "north star, skinned (PLAN M5)",
+  "description": "First launch: the genre menu opens by itself under the marquee; Deep House is chosen in it; music plays.",
+  "steps": [
+    {"waitForMenu": "auto", "timeout": 10},
+    {"selectMenuItem": "Deep House"},
+    {"waitFor": "playing", "timeout": 25},
+    {"dumpState": "playing"}
+  ]
+}

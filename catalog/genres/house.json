@@ -1,0 +1,23 @@
+{
+  "id": "house",
+  "name": "House",
+  "order": 20,
+  "streams": [
+    {"id": "yt:c0-hvjV2A5Y", "source": "youtube", "ref": "c0-hvjV2A5Y", "kind": "mix", "title": "Boiler Room: London", "creator": "Fred again..", "durationSec": 4305, "weight": 1.0},
+    {"id": "yt:VflpW-6ezIQ", "source": "youtube", "ref": "VflpW-6ezIQ", "kind": "mix", "title": "Boiler Room: Miami", "creator": "Armand Van Helden", "durationSec": 3535, "weight": 1.0},
+    {"id": "yt:IC5EOU0vZjw", "source": "youtube", "ref": "IC5EOU0vZjw", "kind": "mix", "title": "Boiler Room x Sugar Mountain 2024", "creator": "Folamour", "durationSec": 3585, "weight": 1.0},
+    {"id": "yt:BVW0OgxeH6I", "source": "youtube", "ref": "BVW0OgxeH6I", "kind": "mix", "title": "Boiler Room Shanghai DJ Set", "creator": "Disclosure", "durationSec": 5349, "weight": 1.0},
+    {"id": "ytl:@DefectedMusic", "source": "youtube-live", "ref": "@DefectedMusic", "kind": "live", "title": "House Music All Life Long 24/7", "creator": "Defected Records", "weight": 0.75},
+    {"id": "sc:platform/derrick-carter-soulful-house-mix-boiler-room-x-ballantines-true-music-hybrid-sounds-sao-paulo", "source": "soundcloud", "ref": "platform/derrick-carter-soulful-house-mix-boiler-room-x-ballantines-true-music-hybrid-sounds-sao-paulo", "kind": "mix", "title": "Soulful House Mix | Boiler Room x Ballantine's True Music, Sao Paulo", "creator": "Derrick Carter", "durationSec": 5367, "weight": 1.0},
+    {"id": "sc:platform/peach", "source": "soundcloud", "ref": "platform/peach", "kind": "mix", "title": "House Pumpers Mix | Boiler Room Fleshback Manchester", "creator": "Peach", "durationSec": 3599, "weight": 1.0},
+    {"id": "sc:defectedrecords/defected-worldwide-chicago-house-music-dj-mix-deep-acid-vocal-classic-house", "source": "soundcloud", "ref": "defectedrecords/defected-worldwide-chicago-house-music-dj-mix-deep-acid-vocal-classic-house", "kind": "mix", "title": "Defected Worldwide - Chicago House Music DJ Mix", "creator": "Defected Records", "durationSec": 6263, "weight": 1.0},
+    {"id": "sc:glitterboxibiza/glitterbox-french-house-disco-classic-french-sound-dj-mix-2023-french-touch-funky", "source": "soundcloud", "ref": "glitterboxibiza/glitterbox-french-house-disco-classic-french-sound-dj-mix-2023-french-touch-funky", "kind": "mix", "title": "French House & Disco - Classic French Sound DJ Mix 2023", "creator": "Glitterbox", "durationSec": 5158, "weight": 1.0},
+    {"id": "mc:Defectedrecords/defected-radio-show-hosted-by-monki-021026", "source": "mixcloud", "ref": "Defectedrecords/defected-radio-show-hosted-by-monki-021026", "kind": "mix", "title": "Defected Radio Show 02.10.26", "creator": "Monki", "durationSec": 7200, "weight": 1.0},
+    {"id": "mc:glitterboxibiza/glitterbox-radio-show-483-the-shapeshifters-takeover", "source": "mixcloud", "ref": "glitterboxibiza/glitterbox-radio-show-483-the-shapeshifters-takeover", "kind": "mix", "title": "Glitterbox Radio Show 483", "creator": "The Shapeshifters", "durationSec": 3600, "weight": 1.0},
+    {"id": "mc:toolroom/toolroom-radio-ep863-essel", "source": "mixcloud", "ref": "toolroom/toolroom-radio-ep863-essel", "kind": "mix", "title": "Toolroom Radio EP863", "creator": "ESSEL", "durationSec": 7199, "weight": 1.0},
+    {"id": "radio:sunshine-live-house", "source": "radio", "ref": "https://stream.sunshine-live.de/house/mp3-192/stream.sunshine-live.de/", "kind": "station", "title": "House", "creator": "Sunshine Live", "homepage": "https://www.sunshine-live.de/", "weight": 0.5},
+    {"id": "radio:rautemusik-house", "source": "radio", "ref": "https://streams.rautemusik.fm/house/mp3-192/", "kind": "station", "title": "House", "creator": "RauteMusik.FM", "homepage": "https://www.rautemusik.fm/", "weight": 0.5},
+    {"id": "radio:house-nation-uk", "source": "radio", "ref": "https://streaming.radio.co/s06bd9d805/listen", "kind": "station", "title": "House Nation UK", "creator": "House Nation UK", "homepage": "https://housenationuk.com/", "weight": 0.5},
+    {"id": "radio:nts-4-to-the-floor", "source": "radio", "ref": "https://stream-mixtape-geo.ntslive.net/mixtape5", "kind": "station", "title": "4 To The Floor", "creator": "NTS", "homepage": "https://www.nts.live/infinite-mixtapes/4-to-the-floor", "weight": 0.5}
+  ]
+}

@@ -1,0 +1,99 @@
+[   0.050] default output: device 'Mac mini Speakers' rate=48000.0 bufferFrames=512 deviceLatency=60 safetyOffset=48 frames
+[   0.112] engine started: outputNode.presentationLatency=1.25 ms, output format <AVAudioFormat 0x78f4c98a50:  2 ch,  48000 Hz, Float32, deinterleaved>
+[   0.149] EVENT idle
+[   0.501] == loadfile a
+[   0.502] EVENT start-file
+[   0.502] CMD loadfile /tmp/sudamp-spike/engine/media/a.wav -> 0 (success) took 0.1 ms
+[   0.509] EVENT audio-reconfig
+[   0.509] EVENT audio-reconfig
+[   0.509] EVENT file-loaded
+[   0.509]   mpv[v af] User filter list:
+[   0.509]   mpv[v af]   (empty)
+[   0.509]   mpv[v af] [in] 44100Hz stereo 2ch float
+[   0.509]   mpv[v af] [userspeed] 44100Hz stereo 2ch float
+[   0.509] EVENT audio-reconfig
+[   0.509]   mpv[v af] [userspeed] (disabled)
+[   0.509]   mpv[v af] [convert] 44100Hz stereo 2ch float
+[   0.509]   mpv[v ao] Trying audio driver 'pcm'
+[   0.509]   mpv[v ao/pcm] requested format: 48000 Hz, stereo channels, float
+[   0.509]   mpv[v ao/pcm] device buffer: 1024 samples.
+[   0.509]   mpv[v ao/pcm] using soft-buffer of 9600 samples.
+[   0.510]   mpv[v af] [out] 48000Hz stereo 2ch floatp
+[   0.510] EVENT playback-restart
+[   6.010] == eq b4 +12
+[   8.010] == eq b4 0, preamp +6
+[  10.006] == mpv pause
+[  10.006] SET pause=yes -> 0 (success) took 0.1 ms
+[  12.001] == mpv unpause
+[  12.001] SET pause=no -> 0 (success) took 0.1 ms
+[  14.010] == host pause (render flag) + mpv pause
+[  14.010] SET pause=yes -> 0 (success) took 0.1 ms
+[  16.003] == host unpause + mpv unpause
+[  16.004] SET pause=no -> 0 (success) took 0.1 ms
+[  18.009] == seek 40
+[  18.009] CMD seek 40 absolute -> 0 (success) took 0.0 ms
+[  18.009] EVENT seek
+[  18.009] EVENT playback-restart
+[  22.009] == loadfile b replace
+[  22.009] CMD loadfile /tmp/sudamp-spike/engine/media/b.wav replace -> 0 (success) took 0.0 ms
+[  22.009] EVENT audio-reconfig
+[  22.009] EVENT end-file reason=2 error=0
+[  22.009] EVENT start-file
+[  22.021] EVENT audio-reconfig
+[  22.021] EVENT audio-reconfig
+[  22.021] EVENT file-loaded
+[  22.021]   mpv[v af] User filter list:
+[  22.021]   mpv[v af]   (empty)
+[  22.021]   mpv[v af] [in] 48000Hz stereo 2ch s16
+[  22.022]   mpv[v af] [userspeed] 48000Hz stereo 2ch s16
+[  22.022]   mpv[v af] [userspeed] (disabled)
+[  22.022]   mpv[v af] [convert] 48000Hz stereo 2ch s16
+[  22.022] EVENT playback-restart
+[  22.022]   mpv[v af] [out] 48000Hz stereo 2ch floatp
+[  26.008] == stop
+[  26.009] CMD stop -> 0 (success) took 0.0 ms
+[  26.009] EVENT audio-reconfig
+[  26.009] EVENT end-file reason=2 error=0
+[  26.009] EVENT audio-reconfig
+[  26.009] EVENT idle
+[  27.504] == loadfile a again (after idle)
+[  27.504] CMD loadfile /tmp/sudamp-spike/engine/media/a.wav -> 0 (success) took 0.0 ms
+[  27.504] EVENT start-file
+[  27.508] EVENT audio-reconfig
+[  27.508] EVENT audio-reconfig
+[  27.508] EVENT file-loaded
+[  27.508]   mpv[v af] User filter list:
+[  27.508]   mpv[v af]   (empty)
+[  27.508]   mpv[v af] [in] 44100Hz stereo 2ch float
+[  27.508]   mpv[v af] [userspeed] 44100Hz stereo 2ch float
+[  27.508] EVENT audio-reconfig
+[  27.508]   mpv[v af] [userspeed] (disabled)
+[  27.508]   mpv[v af] [convert] 44100Hz stereo 2ch float
+[  27.508]   mpv[v ao] Trying audio driver 'pcm'
+[  27.509]   mpv[v ao/pcm] requested format: 48000 Hz, stereo channels, float
+[  27.509]   mpv[v ao/pcm] device buffer: 1024 samples.
+[  27.509]   mpv[v ao/pcm] using soft-buffer of 9600 samples.
+[  27.509]   mpv[v af] [out] 48000Hz stereo 2ch floatp
+[  27.509] EVENT playback-restart
+[  30.113] render callbacks: 2812, ao inits: 2, cfgChanges: 0
+[  30.114] render quantum sizes: [512: 2812]
+[  30.115] process CPU 2..9 s (decode+resample+engine+EQ+tap): 0.238 s over 7 s = 3.4% of one core
+[  30.133] steady 2..6 s: 375 callbacks, short reads: 0
+[  30.133] callback interval mean 10.67 ms, max 10.79 ms
+[  30.142] time-pos minus last-rendered source pos (2..6 s): mean -23.4 ms, min -43.3, max -10.9 (negative = time-pos lags render by output latency)
+[  30.143] get_property(time-pos) latency over run: p50 0.011 ms, p99 0.021 ms, max 0.148 ms
+[  30.143] loadfile a: first audio at render 14.3 ms after command (pos 0.0000 s)
+[  30.144] mpv pause: first silent render callback 3.0 ms after command (+ 1.2 ms output latency)
+[  30.144]    frames rendered after command before silence: 0 (0.0 ms)
+[  30.144] mpv unpause: audio resumes 2.7 ms after command; source pos before pause 9.4931 s, after resume 9.4933 s (gap 0.2 ms of source)
+[  30.144] host pause (render flag) + mpv pause: first silent render callback 9.3 ms after command (+ 1.2 ms output latency)
+[  30.144]    frames rendered after command before silence: 0 (0.0 ms)
+[  30.145] host unpause + mpv unpause: audio resumes 10.8 ms after command; source pos before pause 11.5087 s, after resume 11.5087 s (gap -0.0 ms of source)
+[  30.145] seek 40: new audio at render 10.8 ms after command (first pos 40.0003 s); stale frames rendered meanwhile: 512 (10.7 ms)
+[  30.145] loadfile b: B audio at render 21.5 ms after command (B pos 0.0006 s); stale A frames rendered: 512 (10.7 ms)
+[  30.145] stop: first silent render callback 10.8 ms after command (+ 1.2 ms output latency)
+[  30.145]    frames rendered after command before silence: 512 (10.666666666666666 ms)
+[  30.145] loadfile a again (after idle): first audio at render 8.7 ms after command (pos 0.0000 s)
+[  30.146] tap: 300 buffers, frameLength [4800], mean interval 100.0 ms
+[  30.146] tap 1 kHz level: flat(4-6 s) +0.00 dB, b4+12 (6.3-8 s) +12.00 dB, preamp+6 (8.3-9 s) +6.00 dB
+[  30.148] done

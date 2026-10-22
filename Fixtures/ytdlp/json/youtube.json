@@ -1,0 +1,398 @@
+{
+ "_fixture": "Trimmed and scrubbed yt-dlp 2026.10.21 -J output captured 2026-10-22 (IP replaced with TEST-NET-3, signatures REDACTED).",
+ "abr": 106.853,
+ "acodec": "opus",
+ "asr": 48000,
+ "available_at": 1792671644,
+ "channel": "Boiler Room",
+ "downloader_options": {
+  "http_chunk_size": 10485760
+ },
+ "duration": 7231,
+ "ext": "webm",
+ "extractor_key": "Youtube",
+ "format_id": "251",
+ "formats": [
+  {
+   "abr": 0,
+   "acodec": "none",
+   "ext": "mhtml",
+   "format_id": "sb2",
+   "protocol": "mhtml",
+   "vcodec": "none"
+  },
+  {
+   "abr": 0,
+   "acodec": "none",
+   "ext": "mhtml",
+   "format_id": "sb1",
+   "protocol": "mhtml",
+   "vcodec": "none"
+  },
+  {
+   "abr": 0,
+   "acodec": "none",
+   "ext": "mhtml",
+   "format_id": "sb0",
+   "protocol": "mhtml",
+   "vcodec": "none"
+  },
+  {
+   "abr": null,
+   "available_at": 1792671644,
+   "ext": "mp4",
+   "format_id": "233",
+   "protocol": "m3u8_native",
+   "vcodec": "none"
+  },
+  {
+   "abr": null,
+   "available_at": 1792671644,
+   "ext": "mp4",
+   "format_id": "234",
+   "protocol": "m3u8_native",
+   "vcodec": "none"
+  },
+  {
+   "abr": 48.782,
+   "acodec": "mp4a.40.5",
+   "available_at": 1792671644,
+   "ext": "m4a",
+   "format_id": "139",
+   "protocol": "https",
+   "vcodec": "none"
+  },
+  {
+   "abr": 46.89,
+   "acodec": "opus",
+   "available_at": 1792671644,
+   "ext": "webm",
+   "format_id": "249",
+   "protocol": "https",
+   "vcodec": "none"
+  },
+  {
+   "abr": 58.745,
+   "acodec": "opus",
+   "available_at": 1792671644,
+   "ext": "webm",
+   "format_id": "250",
+   "protocol": "https",
+   "vcodec": "none"
+  },
+  {
+   "abr": 129.471,
+   "acodec": "mp4a.40.2",
+   "available_at": 1792671644,
+   "ext": "m4a",
+   "format_id": "140",
+   "protocol": "https",
+   "vcodec": "none"
+  },
+  {
+   "abr": 106.853,
+   "acodec": "opus",
+   "available_at": 1792671644,
+   "ext": "webm",
+   "format_id": "251",
+   "protocol": "https",
+   "vcodec": "none"
+  },
+  {
+   "abr": 0,
+   "acodec": "none",
+   "available_at": 1792671644,
+   "ext": "mp4",
+   "format_id": "602",
+   "protocol": "m3u8_native",
+   "vcodec": "vp09.00.10.08"
+  },
+  {
+   "abr": 0,
+   "acodec": "none",
+   "available_at": 1792671644,
+   "ext": "mp4",
+   "format_id": "269",
+   "protocol": "m3u8_native",
+   "vcodec": "avc1.4D400C"
+  },
+  {
+   "abr": 0,
+   "acodec": "none",
+   "available_at": 1792671644,
+   "ext": "mp4",
+   "format_id": "160",
+   "protocol": "https",
+   "vcodec": "avc1.4D400C"
+  },
+  {
+   "abr": 0,
+   "acodec": "none",
+   "available_at": 1792671644,
+   "ext": "mp4",
+   "format_id": "603",
+   "protocol": "m3u8_native",
+   "vcodec": "vp09.00.11.08"
+  },
+  {
+   "abr": 0,
+   "acodec": "none",
+   "available_at": 1792671644,
+   "ext": "webm",
+   "format_id": "278",
+   "protocol": "https",
+   "vcodec": "vp9"
+  },
+  {
+   "abr": 0,
+   "acodec": "none",
+   "available_at": 1792671644,
+   "ext": "mp4",
+   "format_id": "394",
+   "protocol": "https",
+   "vcodec": "av01.0.00M.08"
+  },
+  {
+   "abr": 0,
+   "acodec": "none",
+   "available_at": 1792671644,
+   "ext": "mp4",
+   "format_id": "229",
+   "protocol": "m3u8_native",
+   "vcodec": "avc1.4D4015"
+  },
+  {
+   "abr": 0,
+   "acodec": "none",
+   "available_at": 1792671644,
+   "ext": "mp4",
+   "format_id": "133",
+   "protocol": "https",
+   "vcodec": "avc1.4D4015"
+  },
+  {
+   "abr": 0,
+   "acodec": "none",
+   "available_at": 1792671644,
+   "ext": "mp4",
+   "format_id": "604",
+   "protocol": "m3u8_native",
+   "vcodec": "vp09.00.20.08"
+  },
+  {
+   "abr": 0,
+   "acodec": "none",
+   "available_at": 1792671644,
+   "ext": "webm",
+   "format_id": "242",
+   "protocol": "https",
+   "vcodec": "vp9"
+  },
+  {
+   "abr": 0,
+   "acodec": "none",
+   "available_at": 1792671644,
+   "ext": "mp4",
+   "format_id": "395",
+   "protocol": "https",
+   "vcodec": "av01.0.00M.08"
+  },
+  {
+   "abr": 0,
+   "acodec": "none",
+   "available_at": 1792671644,
+   "ext": "mp4",
+   "format_id": "230",
+   "protocol": "m3u8_native",
+   "vcodec": "avc1.4D401E"
+  },
+  {
+   "abr": 0,
+   "acodec": "none",
+   "available_at": 1792671644,
+   "ext": "mp4",
+   "format_id": "134",
+   "protocol": "https",
+   "vcodec": "avc1.4D401E"
+  },
+  {
+   "abr": 0,
+   "acodec": "none",
+   "available_at": 1792671644,
+   "ext": "mp4",
+   "format_id": "605",
+   "protocol": "m3u8_native",
+   "vcodec": "vp09.00.21.08"
+  },
+  {
+   "abr": 0,
+   "acodec": "none",
+   "available_at": 1792671644,
+   "ext": "webm",
+   "format_id": "243",
+   "protocol": "https",
+   "vcodec": "vp9"
+  },
+  {
+   "abr": 0,
+   "acodec": "none",
+   "available_at": 1792671644,
+   "ext": "mp4",
+   "format_id": "396",
+   "protocol": "https",
+   "vcodec": "av01.0.01M.08"
+  },
+  {
+   "abr": 0,
+   "acodec": "none",
+   "available_at": 1792671644,
+   "ext": "mp4",
+   "format_id": "231",
+   "protocol": "m3u8_native",
+   "vcodec": "avc1.4D401E"
+  },
+  {
+   "abr": 0,
+   "acodec": "none",
+   "available_at": 1792671644,
+   "ext": "mp4",
+   "format_id": "135",
+   "protocol": "https",
+   "vcodec": "avc1.4D401E"
+  },
+  {
+   "abr": 0,
+   "acodec": "none",
+   "available_at": 1792671644,
+   "ext": "mp4",
+   "format_id": "606",
+   "protocol": "m3u8_native",
+   "vcodec": "vp09.00.30.08"
+  },
+  {
+   "abr": 0,
+   "acodec": "none",
+   "available_at": 1792671644,
+   "ext": "webm",
+   "format_id": "244",
+   "protocol": "https",
+   "vcodec": "vp9"
+  },
+  {
+   "abr": 0,
+   "acodec": "none",
+   "available_at": 1792671644,
+   "ext": "mp4",
+   "format_id": "397",
+   "protocol": "https",
+   "vcodec": "av01.0.04M.08"
+  },
+  {
+   "abr": 0,
+   "acodec": "none",
+   "available_at": 1792671644,
+   "ext": "mp4",
+   "format_id": "232",
+   "protocol": "m3u8_native",
+   "vcodec": "avc1.4D401F"
+  },
+  {
+   "abr": 0,
+   "acodec": "none",
+   "available_at": 1792671644,
+   "ext": "mp4",
+   "format_id": "136",
+   "protocol": "https",
+   "vcodec": "avc1.4D401F"
+  },
+  {
+   "abr": 0,
+   "acodec": "none",
+   "available_at": 1792671644,
+   "ext": "mp4",
+   "format_id": "609",
+   "protocol": "m3u8_native",
+   "vcodec": "vp09.00.31.08"
+  },
+  {
+   "abr": 0,
+   "acodec": "none",
+   "available_at": 1792671644,
+   "ext": "webm",
+   "format_id": "247",
+   "protocol": "https",
+   "vcodec": "vp9"
+  },
+  {
+   "abr": 0,
+   "acodec": "none",
+   "available_at": 1792671644,
+   "ext": "mp4",
+   "format_id": "398",
+   "protocol": "https",
+   "vcodec": "av01.0.05M.08"
+  },
+  {
+   "abr": 0,
+   "acodec": "none",
+   "available_at": 1792671644,
+   "ext": "mp4",
+   "format_id": "270",
+   "protocol": "m3u8_native",
+   "vcodec": "avc1.640028"
+  },
+  {
+   "abr": 0,
+   "acodec": "none",
+   "available_at": 1792671644,
+   "ext": "mp4",
+   "format_id": "137",
+   "protocol": "https",
+   "vcodec": "avc1.640028"
+  },
+  {
+   "abr": 0,
+   "acodec": "none",
+   "available_at": 1792671644,
+   "ext": "mp4",
+   "format_id": "614",
+   "protocol": "m3u8_native",
+   "vcodec": "vp09.00.40.08"
+  },
+  {
+   "abr": 0,
+   "acodec": "none",
+   "available_at": 1792671644,
+   "ext": "webm",
+   "format_id": "248",
+   "protocol": "https",
+   "vcodec": "vp9"
+  },
+  {
+   "abr": 0,
+   "acodec": "none",
+   "available_at": 1792671644,
+   "ext": "mp4",
+   "format_id": "399",
+   "protocol": "https",
+   "vcodec": "av01.0.08M.08"
+  }
+ ],
+ "http_headers": {
+  "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+  "Accept-Language": "en-us,en;q=0.5",
+  "Sec-Fetch-Mode": "navigate",
+  "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36"
+ },
+ "id": "bk6Xst6euQk",
+ "is_live": false,
+ "live_status": "not_live",
+ "protocol": "https",
+ "thumbnail": "https://i.ytimg.com/vi_webp/bk6Xst6euQk/maxresdefault.webp",
+ "title": "Solomun | Boiler Room: Tulum",
+ "uploader": "Boiler Room",
+ "uploader_id": "@boilerroom",
+ "url": "https://rr1---sn-test0000.googlevideo.com/videoplayback?expire=1792693244&ei=REDACTED&ip=203.0.113.7&id=REDACTED&itag=251&source=youtube&requiressl=REDACTED&xpc=REDACTED&cps=REDACTED&met=REDACTED&mh=REDACTED&mm=REDACTED&mn=REDACTED&ms=REDACTED&mv=REDACTED&mvi=REDACTED&pl=REDACTED&rms=REDACTED&gcr=REDACTED&initcwndbps=REDACTED&bui=REDACTED&spc=REDACTED&vprv=REDACTED&svpuc=REDACTED&mime=audio%2Fwebm&rqh=REDACTED&gir=REDACTED&clen=96578114&dur=7230.721&lmt=REDACTED&mt=REDACTED&fvip=REDACTED&epbp=REDACTED&keepalive=REDACTED&fexp=REDACTED&c=VISIONOS&txp=REDACTED&sparams=REDACTED&sig=REDACTED&lsparams=REDACTED&lsig=REDACTED",
+ "vcodec": "none",
+ "webpage_url": "https://www.youtube.com/watch?v=bk6Xst6euQk"
+}

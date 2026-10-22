@@ -1,0 +1,10 @@
+{
+  "name": "northstar-plain",
+  "description": "PLAN M2 north star in the plain window: pick Deep House from the dropdown and hear music. Run with --mute.",
+  "timeout": 15,
+  "steps": [
+    {"selectGenre": "deep-house"},
+    {"waitFor": "playing", "timeout": 15},
+    {"dumpState": "playing"}
+  ]
+}

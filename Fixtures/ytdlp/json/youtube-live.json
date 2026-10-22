@@ -1,0 +1,89 @@
+{
+ "_fixture": "Trimmed and scrubbed yt-dlp 2026.10.21 -J output captured 2026-10-22 (IP replaced with TEST-NET-3, signatures REDACTED).",
+ "abr": null,
+ "channel": "Lofi Girl",
+ "ext": "mp4",
+ "extractor_key": "Youtube",
+ "format_id": "234",
+ "formats": [
+  {
+   "abr": null,
+   "ext": "mp4",
+   "format_id": "233",
+   "protocol": "m3u8_native",
+   "vcodec": "none"
+  },
+  {
+   "abr": null,
+   "ext": "mp4",
+   "format_id": "234",
+   "protocol": "m3u8_native",
+   "vcodec": "none"
+  },
+  {
+   "abr": 0,
+   "acodec": "none",
+   "ext": "mp4",
+   "format_id": "269",
+   "protocol": "m3u8_native",
+   "vcodec": "avc1.42C00B"
+  },
+  {
+   "abr": 0,
+   "acodec": "none",
+   "ext": "mp4",
+   "format_id": "229",
+   "protocol": "m3u8_native",
+   "vcodec": "avc1.4D4015"
+  },
+  {
+   "abr": 0,
+   "acodec": "none",
+   "ext": "mp4",
+   "format_id": "230",
+   "protocol": "m3u8_native",
+   "vcodec": "avc1.4D401E"
+  },
+  {
+   "abr": 0,
+   "acodec": "none",
+   "ext": "mp4",
+   "format_id": "231",
+   "protocol": "m3u8_native",
+   "vcodec": "avc1.4D401F"
+  },
+  {
+   "abr": 0,
+   "acodec": "none",
+   "ext": "mp4",
+   "format_id": "232",
+   "protocol": "m3u8_native",
+   "vcodec": "avc1.4D401F"
+  },
+  {
+   "abr": 0,
+   "acodec": "none",
+   "ext": "mp4",
+   "format_id": "270",
+   "protocol": "m3u8_native",
+   "vcodec": "avc1.640028"
+  }
+ ],
+ "http_headers": {
+  "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+  "Accept-Language": "en-us,en;q=0.5",
+  "Sec-Fetch-Mode": "navigate",
+  "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36"
+ },
+ "id": "0sfDth4lMLc",
+ "is_live": true,
+ "live_status": "is_live",
+ "protocol": "m3u8_native",
+ "thumbnail": "https://i.ytimg.com/vi/0sfDth4lMLc/maxresdefault.jpg",
+ "title": "24/7 halloween ambience 🎃 spooky lofi to get chills to 2026-10-22 13:20",
+ "uploader": "Lofi Girl",
+ "uploader_id": "@LofiGirl",
+ "url": "https://manifest.googlevideo.com/api/manifest/hls_playlist/expire/1792693250/ei/REDACTED/ip/203.0.113.7/id/REDACTED/itag/234/source/yt_live_broadcast/requiressl/REDACTED/ratebypass/REDACTED/live/REDACTED/goi/REDACTED/sgoap/REDACTED/rqh/REDACTED/hls_chunk_host/REDACTED/xpc/REDACTED/playlist_duration/REDACTED/manifest_duration/REDACTED/bui/REDACTED/spc/REDACTED/vprv/REDACTED/reg/REDACTED/playlist_type/REDACTED/initcwndbps/REDACTED/met/REDACTED/mh/REDACTED/mm/REDACTED/mn/REDACTED/ms/REDACTED/mv/REDACTED/mvi/REDACTED/pl/REDACTED/rms/REDACTED/dover/REDACTED/pacing/REDACTED/short_key/REDACTED/keepalive/REDACTED/fexp/REDACTED/mt/REDACTED/sparams/REDACTED/sig/REDACTED/lsparams/REDACTED/lsig/REDACTED/playlist/REDACTED",
+ "vcodec": "none",
+ "webpage_url": "https://www.youtube.com/watch?v=0sfDth4lMLc"
+}

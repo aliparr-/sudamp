@@ -1,0 +1,51 @@
+{
+ "_fixture": "Trimmed and scrubbed yt-dlp 2026.10.21 -J output captured 2026-10-22 (IP replaced with TEST-NET-3, signatures REDACTED).",
+ "abr": null,
+ "downloader_options": {
+  "http_chunk_size": 5242880
+ },
+ "duration": 2858,
+ "ext": "m4a",
+ "extractor_key": "Mixcloud",
+ "format_id": "http",
+ "formats": [
+  {
+   "abr": null,
+   "ext": "m4a",
+   "format_id": "http",
+   "protocol": "https",
+   "vcodec": "none"
+  },
+  {
+   "abr": 70.857,
+   "acodec": "mp4a.40.2",
+   "ext": "mp4",
+   "format_id": "hls-70",
+   "protocol": "m3u8_native",
+   "vcodec": "none"
+  },
+  {
+   "abr": 70.857,
+   "acodec": "mp4a.40.2",
+   "ext": "m4a",
+   "format_id": "dash-a1-x3",
+   "protocol": "http_dash_segments",
+   "vcodec": "none"
+  }
+ ],
+ "http_headers": {
+  "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+  "Accept-Language": "en-us,en;q=0.5",
+  "Sec-Fetch-Mode": "navigate",
+  "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36"
+ },
+ "id": "gelka_gelka-colored-thoughts-mixtape",
+ "protocol": "https",
+ "thumbnail": "https://thumbnailer.mixcloud.com/unsafe/1024x1024/extaudio/e/2/9/a/9c4c-e3d8-44ef-92f8-3b414729d5a2.jpg",
+ "title": "Gelka - Colored Thoughts Mixtape",
+ "uploader": "gelka",
+ "uploader_id": "gelka",
+ "url": "https://dl.mixcloud.stream/secure/c/m4a/64/5/1/2/a/302f-5941-42de-9a30-0b2d7b12c8c5.m4a?sig=REDACTED",
+ "vcodec": "none",
+ "webpage_url": "https://www.mixcloud.com/gelka/gelka-colored-thoughts-mixtape/"
+}

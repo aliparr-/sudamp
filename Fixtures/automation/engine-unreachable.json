@@ -1,0 +1,10 @@
+{
+  "name": "engine-unreachable",
+  "description": "PLAN M2 download robustness: with SUDAMP_FAULT=engine:unreachable, radio still plays and the engine reports unreachable (then retries with backoff). Run with --mute on a fresh profile.",
+  "steps": [
+    {"selectGenre": "deep-house"},
+    {"waitFor": "playing", "timeout": 15},
+    {"waitForEngine": "unreachable", "timeout": 20},
+    {"dumpState": "unreachable"}
+  ]
+}

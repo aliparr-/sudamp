@@ -1,0 +1,1 @@
+ERROR: [youtube] AAAAAAAAAAA: Video unavailable. YouTube is requiring a captcha challenge before playback

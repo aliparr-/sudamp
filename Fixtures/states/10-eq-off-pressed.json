@@ -1,0 +1,6 @@
+{
+  "window": "eq",
+  "focused": false,
+  "pressed": "band3",
+  "eq": {"on": false, "auto": true, "preamp": 0, "bands": [0, 100, 0, 100, 50, 50, 25, 75, 10, 90]}
+}

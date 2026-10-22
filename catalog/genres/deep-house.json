@@ -1,0 +1,23 @@
+{
+  "id": "deep-house",
+  "name": "Deep House",
+  "order": 10,
+  "streams": [
+    {"id": "yt:bk6Xst6euQk", "source": "youtube", "ref": "bk6Xst6euQk", "kind": "mix", "title": "Boiler Room: Tulum", "creator": "Solomun", "durationSec": 7231, "weight": 1.0},
+    {"id": "yt:K6XiDub2Wc4", "source": "youtube", "ref": "K6XiDub2Wc4", "kind": "mix", "title": "Boiler Room: New York", "creator": "Kerri Chandler", "durationSec": 8165, "weight": 1.0},
+    {"id": "yt:42XFNGZrpaQ", "source": "youtube", "ref": "42XFNGZrpaQ", "kind": "mix", "title": "Boiler Room: Edinburgh", "creator": "Chris Stussy", "durationSec": 4477, "weight": 1.0},
+    {"id": "yt:SGqg_ZzThDU", "source": "youtube", "ref": "SGqg_ZzThDU", "kind": "mix", "title": "Salle Wagram, Paris, for Cercle", "creator": "Black Coffee", "durationSec": 4264, "weight": 1.0},
+    {"id": "ytl:@monstercatsilk", "source": "youtube-live", "ref": "@monstercatsilk", "kind": "live", "title": "Deep & Melodic House 24/7", "creator": "Monstercat Silk", "weight": 0.75},
+    {"id": "sc:platform/tala-house-mix-boiler-room-beirut", "source": "soundcloud", "ref": "platform/tala-house-mix-boiler-room-beirut", "kind": "mix", "title": "House Mix | Boiler Room Beirut", "creator": "Tala", "durationSec": 4872, "weight": 1.0},
+    {"id": "sc:vibeydeephouseradio/vibey-deep-house-mix-2025-mix-by-fleiv-selected-mix-2025-deep-house-mix-2025-ibiza-house-mix-2025-10-17", "source": "soundcloud", "ref": "vibeydeephouseradio/vibey-deep-house-mix-2025-mix-by-fleiv-selected-mix-2025-deep-house-mix-2025-ibiza-house-mix-2025-10-17", "kind": "mix", "title": "Vibey Deep House Mix 2025", "creator": "FLEIV", "durationSec": 10755, "weight": 1.0},
+    {"id": "sc:defectedrecords/defected-deep-house-chilled-ibiza-summer-2021-mix", "source": "soundcloud", "ref": "defectedrecords/defected-deep-house-chilled-ibiza-summer-2021-mix", "kind": "mix", "title": "Deep House Chilled - Ibiza Summer 2021 Mix", "creator": "Defected Records", "durationSec": 5702, "weight": 1.0},
+    {"id": "mc:Defectedrecords/defected-radio-show-hosted-by-sam-divine-280826", "source": "mixcloud", "ref": "Defectedrecords/defected-radio-show-hosted-by-sam-divine-280826", "kind": "mix", "title": "Defected Radio Show 28.08.26", "creator": "Sam Divine", "durationSec": 7200, "weight": 1.0},
+    {"id": "mc:anjunadeep/the-anjunadeep-edition-600-with-james-grant-jody-wisternoff", "source": "mixcloud", "ref": "anjunadeep/the-anjunadeep-edition-600-with-james-grant-jody-wisternoff", "kind": "mix", "title": "The Anjunadeep Edition 600", "creator": "James Grant & Jody Wisternoff", "durationSec": 3564, "weight": 1.0},
+    {"id": "mc:Alexcruz/alex-cruz-deep-sexy-podcast-23", "source": "mixcloud", "ref": "Alexcruz/alex-cruz-deep-sexy-podcast-23", "kind": "mix", "title": "Deep & Sexy Podcast #23", "creator": "Alex Cruz", "durationSec": 4150, "weight": 1.0},
+    {"id": "mc:anjunadeep/the-anjunadeep-edition-615-with-dusky-live-at-explorations", "source": "mixcloud", "ref": "anjunadeep/the-anjunadeep-edition-615-with-dusky-live-at-explorations", "kind": "mix", "title": "The Anjunadeep Edition 615 (Live at Explorations)", "creator": "Dusky", "durationSec": 3702, "weight": 1.0},
+    {"id": "mc:anjunadeep/the-anjunadeep-edition-611-with-cri-live-at-explorations", "source": "mixcloud", "ref": "anjunadeep/the-anjunadeep-edition-611-with-cri-live-at-explorations", "kind": "mix", "title": "The Anjunadeep Edition 611 (Live at Explorations)", "creator": "CRi", "durationSec": 6986, "weight": 1.0},
+    {"id": "radio:1fm-deep-house", "source": "radio", "ref": "https://strm112.1.fm/deephouse_mobile_mp3", "kind": "station", "title": "Deep House Radio", "creator": "1.FM", "homepage": "https://www.1.fm/", "weight": 0.5},
+    {"id": "radio:deep-radio", "source": "radio", "ref": "https://stream.deep.radio/hd", "kind": "station", "title": "Deep Radio", "creator": "Deep Radio", "homepage": "https://deep.radio/", "weight": 0.5},
+    {"id": "radio:technolovers-deep-house", "source": "radio", "ref": "https://stream.technolovers.fm/deep-house", "kind": "station", "title": "Deep House", "creator": "Technolovers.FM", "homepage": "https://technolovers.fm/", "weight": 0.5}
+  ]
+}

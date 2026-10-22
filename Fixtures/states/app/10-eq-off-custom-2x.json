@@ -1,0 +1,23 @@
+{
+  "window": "equalizer",
+  "scale": 2,
+  "phase": "idle",
+  "volume": 80,
+  "eqAuto": true,
+  "equalizer": {
+    "enabled": false,
+    "preamp": 3,
+    "bands": [
+      6,
+      4.5,
+      2,
+      0,
+      -1.5,
+      -3,
+      -1.5,
+      1,
+      3.5,
+      6
+    ]
+  }
+}

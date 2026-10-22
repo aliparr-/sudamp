@@ -1,0 +1,10 @@
+{
+  "name": "engine-nospace",
+  "description": "PLAN M2 download robustness: with SUDAMP_FAULT=disk:full no download starts and the engine reports noSpace, while radio plays. Run with --mute on a fresh profile.",
+  "steps": [
+    {"selectGenre": "deep-house"},
+    {"waitFor": "playing", "timeout": 15},
+    {"waitForEngine": "noSpace", "timeout": 20},
+    {"dumpState": "noSpace"}
+  ]
+}

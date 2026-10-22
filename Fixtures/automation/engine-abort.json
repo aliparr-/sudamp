@@ -1,0 +1,10 @@
+{
+  "name": "engine-abort",
+  "description": "PLAN M2 download robustness, part 1: with SUDAMP_FAULT=engine:abort-at=50 the zip download is cut at 50% and the .partial file stays. Play radio meanwhile. Run with --mute on a fresh profile; then run engine-ready.json on the same profile without the fault.",
+  "steps": [
+    {"selectGenre": "deep-house"},
+    {"waitFor": "playing", "timeout": 15},
+    {"waitForEngine": "failed", "timeout": 120},
+    {"dumpState": "aborted"}
+  ]
+}

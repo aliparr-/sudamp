@@ -1,0 +1,43 @@
+{
+  "minAppVersion": "0.1.0",
+  "pin": {
+    "version": "2026.10.21"
+  },
+  "block": [],
+  "sources": {
+    "youtube": true,
+    "soundcloud": true,
+    "mixcloud": true
+  },
+  "nightlyEscalation": true,
+  "fastStartRank": [
+    "radio",
+    "soundcloud",
+    "mixcloud",
+    "youtube"
+  ],
+  "clients": [
+    "visionos",
+    "visionos,tv_samsung"
+  ],
+  "formats": {
+    "youtube": "bestaudio[ext=webm][format_id!*=drc]/bestaudio[format_id!*=drc]/bestaudio",
+    "youtube-live": "bestaudio[protocol^=m3u8]/worst[protocol^=m3u8]",
+    "soundcloud": "hls_aac_160k/hls_aac_96k/bestaudio",
+    "mixcloud": "hls-192/http/bestaudio"
+  },
+  "extractorArgs": {
+    "soundcloud": [
+      "soundcloud:formats=hls_aac"
+    ]
+  },
+  "mediaHosts": [
+    "googlevideo.com",
+    "media-streaming.soundcloud.cloud",
+    "mixcloud.stream"
+  ],
+  "canary": [
+    "yt:bk6Xst6euQk",
+    "sc:platform/misskittin"
+  ]
+}

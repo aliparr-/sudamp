@@ -1,0 +1,65 @@
+{
+ "_fixture": "Trimmed and scrubbed yt-dlp 2026.10.21 -J output captured 2026-10-22 (IP replaced with TEST-NET-3, signatures REDACTED).",
+ "abr": 192.002,
+ "acodec": "mp4a.40.2",
+ "duration": 3619,
+ "ext": "mp4",
+ "extractor_key": "Mixcloud",
+ "format_id": "hls-192",
+ "formats": [
+  {
+   "abr": null,
+   "ext": "m4a",
+   "format_id": "http",
+   "protocol": "https",
+   "vcodec": "none"
+  },
+  {
+   "abr": 64.003,
+   "acodec": "mp4a.40.2",
+   "ext": "mp4",
+   "format_id": "hls-64",
+   "protocol": "m3u8_native",
+   "vcodec": "none"
+  },
+  {
+   "abr": 192.002,
+   "acodec": "mp4a.40.2",
+   "ext": "mp4",
+   "format_id": "hls-192",
+   "protocol": "m3u8_native",
+   "vcodec": "none"
+  },
+  {
+   "abr": 66.921,
+   "acodec": "opus",
+   "ext": "webm",
+   "format_id": "dash-f1-a1-x3",
+   "protocol": "http_dash_segments",
+   "vcodec": "none"
+  },
+  {
+   "abr": 200.246,
+   "acodec": "opus",
+   "ext": "webm",
+   "format_id": "dash-f2-a1-x3",
+   "protocol": "http_dash_segments",
+   "vcodec": "none"
+  }
+ ],
+ "http_headers": {
+  "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+  "Accept-Language": "en-us,en;q=0.5",
+  "Sec-Fetch-Mode": "navigate",
+  "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36"
+ },
+ "id": "NTSRadio_fifth-world-w-harmony-index-21st-october-2026",
+ "protocol": "m3u8_native",
+ "thumbnail": "https://thumbnailer.mixcloud.com/unsafe/1024x1024/extaudio/8/4/8/7/ce55-a120-412a-9920-eca6d6fabab5",
+ "title": "Fifth World w/ Harmony Index - 21st October 2026",
+ "uploader": "Mixcloud NTS Radio",
+ "uploader_id": "NTSRadio",
+ "url": "https://aod.mixcloud.stream/secure/hls/c/7/0/e/324d-c236-43dc-8cab-7bbc39ad86da-192K.m4a/streamindex-a1.m3u8",
+ "vcodec": "none",
+ "webpage_url": "https://www.mixcloud.com/NTSRadio/fifth-world-w-harmony-index-21st-october-2026/"
+}

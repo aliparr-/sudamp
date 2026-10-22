@@ -1,0 +1,19 @@
+{
+  "window": "playlist",
+  "playback": "playing",
+  "elapsed": 83,
+  "duration": 3720,
+  "playlist": {
+    "rows": [
+      {"title": "Deep House Radio", "tag": "FM"},
+      {"title": "Solar Crew - Sunset Mix", "duration": "62:00", "tag": "YT"},
+      {"title": "Nightdrive (Extended)", "duration": "7:41", "tag": "SC"},
+      {"title": "Warehouse Session 004", "duration": "58:12", "tag": "MC"},
+      {"title": "Café del Mår – Ambient Hour", "duration": "1:00:00", "tag": "YT"},
+      {"title": "Lo-fi Beats 24/7", "tag": "YT"}
+    ],
+    "current": 1,
+    "selected": [3],
+    "runningTime": "2:07:53/3:08:53"
+  }
+}

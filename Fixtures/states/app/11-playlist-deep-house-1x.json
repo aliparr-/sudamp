@@ -1,0 +1,126 @@
+{
+  "genre": "deep-house",
+  "genreName": "Deep House",
+  "streams": [
+    {
+      "source": "youtube",
+      "ref": "sUdAmP00001",
+      "title": "Sunset Sessions",
+      "creator": "Solar Crew",
+      "durationSec": 3720
+    },
+    {
+      "source": "radio",
+      "id": "radio:deep-radio",
+      "ref": "https://stream.deepradio.fm/live",
+      "title": "Deep Radio",
+      "creator": "Deep Radio"
+    },
+    {
+      "source": "soundcloud",
+      "ref": "nightdrive/extended-mix",
+      "title": "Nightdrive (Extended Mix)",
+      "creator": "Nightdrive",
+      "durationSec": 461
+    },
+    {
+      "source": "mixcloud",
+      "ref": "WarehouseSessions/session-004",
+      "title": "Warehouse Session 004",
+      "creator": "Warehouse Sessions",
+      "durationSec": 3492
+    },
+    {
+      "source": "youtube-live",
+      "ref": "@deephouse247",
+      "title": "Deep House 24/7",
+      "creator": "Deep House Radio"
+    },
+    {
+      "source": "youtube",
+      "ref": "sUdAmP00002",
+      "title": "Boiler Room: Lisbon",
+      "creator": "Ana Lua",
+      "durationSec": 5400
+    },
+    {
+      "source": "soundcloud",
+      "ref": "afterhours/tape-07",
+      "title": "Afterhours Tape 07",
+      "creator": "Afterhours",
+      "durationSec": 2711
+    },
+    {
+      "source": "radio",
+      "id": "radio:house-fm",
+      "ref": "https://live.housefm.net/aac",
+      "title": "House FM",
+      "creator": "House FM"
+    },
+    {
+      "source": "mixcloud",
+      "ref": "BerlinBasement/basement-12",
+      "title": "Berlin Basement 12",
+      "creator": "Berlin Basement",
+      "durationSec": 4210
+    },
+    {
+      "source": "youtube",
+      "ref": "sUdAmP00003",
+      "title": "Rooftop Sunrise Set",
+      "creator": "Mira Kade",
+      "durationSec": 3305
+    },
+    {
+      "source": "soundcloud",
+      "ref": "midnightgarage/side-a",
+      "title": "Midnight Garage",
+      "creator": "MG Collective",
+      "durationSec": 389
+    },
+    {
+      "source": "youtube",
+      "ref": "sUdAmP00004",
+      "title": "Coastal Drive",
+      "creator": "Low Tide",
+      "durationSec": 2980
+    },
+    {
+      "source": "mixcloud",
+      "ref": "SundaySelections/morning-01",
+      "title": "Sunday Morning Selections",
+      "creator": "Sunday Selections",
+      "durationSec": 3600
+    },
+    {
+      "source": "radio",
+      "id": "radio:minimal-waves",
+      "ref": "https://radio.minimalwaves.org/stream",
+      "title": "Minimal Waves",
+      "creator": "Minimal Waves"
+    },
+    {
+      "source": "youtube",
+      "ref": "sUdAmP00005",
+      "title": "Warm Up Mix",
+      "creator": "Kofi Lane",
+      "durationSec": 4012
+    },
+    {
+      "source": "soundcloud",
+      "ref": "lagoon/sessions-3",
+      "title": "Lagoon Sessions 3",
+      "creator": "Lagoon",
+      "durationSec": 3133
+    }
+  ],
+  "volume": 80,
+  "balance": 0,
+  "window": "playlist",
+  "scale": 1,
+  "phase": "playing",
+  "current": 2,
+  "statusText": "[DEEP HOUSE] NIGHTDRIVE - NIGHTDRIVE (EXTENDED MIX)",
+  "position": 127,
+  "duration": 461
+}

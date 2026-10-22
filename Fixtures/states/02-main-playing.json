@@ -1,0 +1,17 @@
+{
+  "window": "main",
+  "playback": "playing",
+  "elapsed": 83,
+  "duration": 3720,
+  "title": "[DEEP HOUSE] SOLAR CREW - SUNSET",
+  "kbps": 128,
+  "khz": 48,
+  "channels": 2,
+  "volume": 75,
+  "balance": 0,
+  "visualizer": {
+    "mode": "spectrum",
+    "bars": [3, 8, 12, 15, 16, 14, 11, 9, 10, 12, 8, 6, 5, 7, 9, 4, 3, 2, 1],
+    "peaks": [5, 10, 14, 16, 16, 16, 13, 11, 12, 13, 10, 8, 7, 9, 10, 6, 5, 3, 2]
+  }
+}

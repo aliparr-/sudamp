@@ -1,0 +1,5 @@
+# One extended regex per line. A build warning matching any line is allowed; every other warning fails
+# `make build` (scripts/check-warnings.sh). Keep each entry justified.
+#
+# Command Line Tools-only toolchain: SwiftPM passes these search paths, which exist only inside Xcode.app.
+ld: warning: search path '/Library/Developer/CommandLineTools/Developer/(usr/lib|Library/Frameworks)' not found

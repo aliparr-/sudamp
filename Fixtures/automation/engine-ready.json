@@ -1,0 +1,8 @@
+{
+  "name": "engine-ready",
+  "description": "Waits until the stream engine is installed and verified (a relaunch after engine-abort.json resumes the .partial with an HTTP Range request). Run with --mute.",
+  "steps": [
+    {"waitForEngine": "ready", "timeout": 180},
+    {"dumpState": "ready"}
+  ]
+}

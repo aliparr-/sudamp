@@ -1,0 +1,16 @@
+{
+  "name": "menus: every DESIGN §3 entry point opens the same genre menu (PLAN M5)",
+  "steps": [
+    {"dumpMenus": "entry points"},
+    {"pressControl": "marquee"},
+    {"waitForMenu": "genre", "timeout": 3},
+    "cancelMenu",
+    {"pressControl": "options"},
+    {"waitForMenu": "genre", "timeout": 3},
+    "cancelMenu",
+    {"openGenreMenu": "contextMenu"},
+    {"waitForMenu": "context", "timeout": 3},
+    "cancelMenu",
+    {"dumpState": "after"}
+  ]
+}

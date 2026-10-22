@@ -1,0 +1,23 @@
+{
+  "id": "techno",
+  "name": "Techno",
+  "order": 30,
+  "streams": [
+    {"id": "yt:vqz8c4ZP3Wg", "source": "youtube", "ref": "vqz8c4ZP3Wg", "kind": "mix", "title": "Grand Palais, Paris, for Cercle", "creator": "Boris Brejcha", "durationSec": 8028, "weight": 1.0},
+    {"id": "yt:O8x2WIxpnYg", "source": "youtube", "ref": "O8x2WIxpnYg", "kind": "mix", "title": "Vinyl DJ set, Les Pavillons des Etangs, Paris, for Cercle", "creator": "ANNA", "durationSec": 4866, "weight": 1.0},
+    {"id": "yt:5vHRUsP20dQ", "source": "youtube", "ref": "5vHRUsP20dQ", "kind": "mix", "title": "Boiler Room Berlin DJ Set", "creator": "Maceo Plex", "durationSec": 5446, "weight": 1.0},
+    {"id": "ytl:@bassportmusic", "source": "youtube-live", "ref": "@bassportmusic", "kind": "live", "title": "Deep Techno 24/7", "creator": "Bassport Music", "weight": 0.75},
+    {"id": "sc:platform/misskittin", "source": "soundcloud", "ref": "platform/misskittin", "kind": "mix", "title": "Boiler Room Paris DJ Set", "creator": "Miss Kittin", "durationSec": 3267, "weight": 1.0},
+    {"id": "sc:platform/gesaffelstein", "source": "soundcloud", "ref": "platform/gesaffelstein", "kind": "mix", "title": "Boiler Room x House of Vans Berlin DJ Set", "creator": "Gesaffelstein", "durationSec": 5088, "weight": 1.0},
+    {"id": "sc:platform/entasia-rotterdam", "source": "soundcloud", "ref": "platform/entasia-rotterdam", "kind": "mix", "title": "Boiler Room: Rotterdam", "creator": "Entasia", "durationSec": 3629, "weight": 1.0},
+    {"id": "mc:johndigweed/transitions-john-digweed-fur-coat", "source": "mixcloud", "ref": "johndigweed/transitions-john-digweed-fur-coat", "kind": "mix", "title": "Transitions", "creator": "John Digweed & Fur Coat", "durationSec": 9123, "weight": 1.0},
+    {"id": "mc:CarlCox/carl-cox-global-447-live-from-ibiza-week-14", "source": "mixcloud", "ref": "CarlCox/carl-cox-global-447-live-from-ibiza-week-14", "kind": "mix", "title": "Global 447 - Live from the Space Closing Party 2011", "creator": "Carl Cox", "durationSec": 6721, "weight": 1.0},
+    {"id": "mc:johndigweed/transitions-with-john-digweed-recorded-live-from-space-ibiza", "source": "mixcloud", "ref": "johndigweed/transitions-with-john-digweed-recorded-live-from-space-ibiza", "kind": "mix", "title": "Transitions - Recorded Live from Space, Ibiza", "creator": "John Digweed", "durationSec": 7617, "weight": 1.0},
+    {"id": "mc:adambeyer/dcr841-drumcode-radio-live-adam-beyer-live-from-junction-2-london", "source": "mixcloud", "ref": "adambeyer/dcr841-drumcode-radio-live-adam-beyer-live-from-junction-2-london", "kind": "mix", "title": "Drumcode Radio Live DCR841 - Junction 2, London", "creator": "Adam Beyer", "durationSec": 7123, "weight": 1.0},
+    {"id": "mc:adambeyer/dcr837-drumcode-radio-live-adam-beyer-live-from-awakenings-festival", "source": "mixcloud", "ref": "adambeyer/dcr837-drumcode-radio-live-adam-beyer-live-from-awakenings-festival", "kind": "mix", "title": "Drumcode Radio Live DCR837 - Awakenings Festival", "creator": "Adam Beyer", "durationSec": 7142, "weight": 1.0},
+    {"id": "radio:sunshine-live-techno", "source": "radio", "ref": "https://stream.sunshine-live.de/techno/mp3-192/stream.sunshine-live.de/", "kind": "station", "title": "Techno", "creator": "Sunshine Live", "homepage": "https://www.sunshine-live.de/", "weight": 0.5},
+    {"id": "radio:techno-fm", "source": "radio", "ref": "https://stream.techno.fm/radio.mp3", "kind": "station", "title": "Techno.FM", "creator": "Techno.FM", "homepage": "https://techno.fm/", "weight": 0.5},
+    {"id": "radio:technolovers-techno", "source": "radio", "ref": "https://stream.technolovers.fm/techno", "kind": "station", "title": "Techno", "creator": "Technolovers.FM", "homepage": "https://technolovers.fm/", "weight": 0.5},
+    {"id": "radio:rautemusik-techno", "source": "radio", "ref": "https://streams.rautemusik.fm/techno/mp3-192/", "kind": "station", "title": "Techno", "creator": "RauteMusik.FM", "homepage": "https://www.rautemusik.fm/", "weight": 0.5}
+  ]
+}

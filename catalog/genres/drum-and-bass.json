@@ -1,0 +1,25 @@
+{
+  "id": "drum-and-bass",
+  "name": "Drum & Bass",
+  "order": 40,
+  "streams": [
+    {"id": "yt:Zy_JR9_Y8dE", "source": "youtube", "ref": "Zy_JR9_Y8dE", "kind": "mix", "title": "Boiler Room: London", "creator": "Chase & Status", "durationSec": 3585, "weight": 1.0},
+    {"id": "yt:LuB29bL2kyI", "source": "youtube", "ref": "LuB29bL2kyI", "kind": "mix", "title": "Boiler Room Festival Amsterdam: SYSTEM", "creator": "Calibre", "durationSec": 3562, "weight": 1.0},
+    {"id": "yt:xzj6ehxAsOA", "source": "youtube", "ref": "xzj6ehxAsOA", "kind": "mix", "title": "Boiler Room x Ballantine's True Music Studios: Sao Paulo", "creator": "Roni Size b2b Patife", "durationSec": 3676, "weight": 1.0},
+    {"id": "yt:KTE3i1Q_eOY", "source": "youtube", "ref": "KTE3i1Q_eOY", "kind": "mix", "title": "Boiler Room x VIVA! Festival", "creator": "Goldie", "durationSec": 3805, "weight": 1.0},
+    {"id": "ytl:@hospitalrecords", "source": "youtube-live", "ref": "@hospitalrecords", "kind": "live", "title": "Hospital Records Radio 24/7", "creator": "Hospital Records", "weight": 0.75},
+    {"id": "sc:drumandbassarena/the-sauce-guest-mix-2026", "source": "soundcloud", "ref": "drumandbassarena/the-sauce-guest-mix-2026", "kind": "mix", "title": "Drum&BassArena Guest Mix, Summer '26", "creator": "The Sauce", "durationSec": 3615, "weight": 1.0},
+    {"id": "sc:drumandbassarena/hybrid-minds-drumbassarena-19-years-exclusive-mix", "source": "soundcloud", "ref": "drumandbassarena/hybrid-minds-drumbassarena-19-years-exclusive-mix", "kind": "mix", "title": "Drum&BassArena 19 Years Mix", "creator": "Hybrid Minds", "durationSec": 3320, "weight": 1.0},
+    {"id": "sc:rinsefm/hospitalrecords270116", "source": "soundcloud", "ref": "rinsefm/hospitalrecords270116", "kind": "mix", "title": "Rinse FM Podcast: Hospital Records, 27.01.16", "creator": "Ownglow, Pola & Bryson", "durationSec": 7218, "weight": 1.0},
+    {"id": "sc:skankandbass/boiler-room", "source": "soundcloud", "ref": "skankandbass/boiler-room", "kind": "mix", "title": "Skankandbass x Boiler Room Festival", "creator": "Skankandbass", "durationSec": 5556, "weight": 1.0},
+    {"id": "mc:hospitalrecords/hospital-podcast-with-degs-500", "source": "mixcloud", "ref": "hospitalrecords/hospital-podcast-with-degs-500", "kind": "mix", "title": "Hospital Podcast #500", "creator": "Degs", "durationSec": 6085, "weight": 1.0},
+    {"id": "mc:LTJBukem/ltj-bukem-dekmantel-festival-2025", "source": "mixcloud", "ref": "LTJBukem/ltj-bukem-dekmantel-festival-2025", "kind": "mix", "title": "Dekmantel Festival 2025", "creator": "LTJ Bukem", "durationSec": 5396, "weight": 1.0},
+    {"id": "mc:LTJBukem/ltj-bukem-glastonbury-2023-iicon-stage-full-dj-set", "source": "mixcloud", "ref": "LTJBukem/ltj-bukem-glastonbury-2023-iicon-stage-full-dj-set", "kind": "mix", "title": "Glastonbury 2023, IICON Stage", "creator": "LTJ Bukem", "durationSec": 5347, "weight": 1.0},
+    {"id": "mc:djmarky/dj-marky-live-db-sessions-7th-jan-2026-20260501-204001", "source": "mixcloud", "ref": "djmarky/dj-marky-live-db-sessions-7th-jan-2026-20260501-204001", "kind": "mix", "title": "Live D&B Sessions, 1 May 2026", "creator": "DJ Marky", "durationSec": 5609, "weight": 1.0},
+    {"id": "mc:djmarky/dj-markys-jungle-db-classics-vol-ii", "source": "mixcloud", "ref": "djmarky/dj-markys-jungle-db-classics-vol-ii", "kind": "mix", "title": "Jungle D&B Classics Vol II", "creator": "DJ Marky", "durationSec": 4991, "weight": 1.0},
+    {"id": "radio:bassdrive", "source": "radio", "ref": "https://bassdrive.radioca.st/stream", "kind": "station", "title": "Bassdrive", "creator": "Bassdrive", "homepage": "https://www.bassdrive.com/", "weight": 0.5},
+    {"id": "radio:kool-fm", "source": "radio", "ref": "https://admin.stream.rinse.fm/proxy/kool/stream", "kind": "station", "title": "Kool FM", "creator": "Kool FM", "homepage": "https://rinse.fm/channels/kool/", "weight": 0.5},
+    {"id": "radio:sunshine-live-dnb", "source": "radio", "ref": "https://stream.sunshine-live.de/dnb/mp3-192/stream.sunshine-live.de/", "kind": "station", "title": "Drum 'n' Bass", "creator": "Sunshine Live", "homepage": "https://www.sunshine-live.de/", "weight": 0.5},
+    {"id": "radio:dnbradio", "source": "radio", "ref": "https://azura.drmnbss.org/listen/dnbradio/radio.mp3", "kind": "station", "title": "DNBRadio", "creator": "DNBRadio", "homepage": "https://dnbradio.com/", "weight": 0.5}
+  ]
+}

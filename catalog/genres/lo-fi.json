@@ -1,0 +1,23 @@
+{
+  "id": "lo-fi",
+  "name": "Lo-fi",
+  "order": 50,
+  "streams": [
+    {"id": "yt:CFGLoQIhmow", "source": "youtube", "ref": "CFGLoQIhmow", "kind": "mix", "title": "lofi hip hop mix - beats to relax/study to (Part 1)", "creator": "Lofi Girl", "durationSec": 10241, "weight": 1.0},
+    {"id": "yt:lTRiuFIWV54", "source": "youtube", "ref": "lTRiuFIWV54", "kind": "mix", "title": "1 A.M Study Session [lofi hip hop]", "creator": "Lofi Girl", "durationSec": 3674, "weight": 1.0},
+    {"id": "yt:9M4jZuqdw04", "source": "youtube", "ref": "9M4jZuqdw04", "kind": "mix", "title": "In the Zone [lofi focus beats / work mix]", "creator": "Chillhop Music", "durationSec": 7235, "weight": 1.0},
+    {"id": "ytl:@LofiGirl", "source": "youtube-live", "ref": "@LofiGirl", "kind": "live", "title": "lofi hip hop radio 24/7", "creator": "Lofi Girl", "weight": 0.75},
+    {"id": "ytl:@ChillhopMusic", "source": "youtube-live", "ref": "@ChillhopMusic", "kind": "live", "title": "Chillhop Radio 24/7", "creator": "Chillhop Music", "weight": 0.75},
+    {"id": "sc:nigeldelviero/chill-study-beats-lofi-hip-hop-mix-2018", "source": "soundcloud", "ref": "nigeldelviero/chill-study-beats-lofi-hip-hop-mix-2018", "kind": "mix", "title": "Chill Study Beats - Lofi Hip Hop Mix [2018]", "creator": "nigeldelviero", "durationSec": 7200, "weight": 1.0},
+    {"id": "sc:daud-metiary/chill-study-beats-4-jazz-lofi-hiphop-mix-2017", "source": "soundcloud", "ref": "daud-metiary/chill-study-beats-4-jazz-lofi-hiphop-mix-2017", "kind": "mix", "title": "Chill Study Beats 4 - Jazz Lofi Hiphop Mix [2017]", "creator": "Daud Metiary", "durationSec": 7371, "weight": 1.0},
+    {"id": "sc:nourish/lofi-hiphop-mix", "source": "soundcloud", "ref": "nourish/lofi-hiphop-mix", "kind": "mix", "title": "lofi hiphop mix - smooth beats to relax/study to [2018]", "creator": "nourish.", "durationSec": 5409, "weight": 1.0},
+    {"id": "sc:pueblo-vista/sleep-better-tonight-lofi-hip-hop-mix-71", "source": "soundcloud", "ref": "pueblo-vista/sleep-better-tonight-lofi-hip-hop-mix-71", "kind": "mix", "title": "#71 Sleep better tonight [Lofi Hip Hop Mix]", "creator": "pueblo vista", "durationSec": 4793, "weight": 1.0},
+    {"id": "mc:Bamf/lazy-mornings-lofi-hiphop-jazzhop-chill", "source": "mixcloud", "ref": "Bamf/lazy-mornings-lofi-hiphop-jazzhop-chill", "kind": "mix", "title": "Lazy Mornings - Lofi Hiphop / Jazzhop / chill", "creator": "Bamf Radio", "durationSec": 3010, "weight": 1.0},
+    {"id": "mc:pueblovista/morning-coffee-mixtape-chillhop-lofi-hip-hop", "source": "mixcloud", "ref": "pueblovista/morning-coffee-mixtape-chillhop-lofi-hip-hop", "kind": "mix", "title": "Morning Coffee Mixtape [Chillhop / Lofi Hip Hop]", "creator": "Pueblo Vista", "durationSec": 3222, "weight": 1.0},
+    {"id": "mc:Jazzmo/guidos-lo-fi-cafe-068-motivational-lo-fi-jams", "source": "mixcloud", "ref": "Jazzmo/guidos-lo-fi-cafe-068-motivational-lo-fi-jams", "kind": "mix", "title": "Guido's Lo-Fi Cafe 068 Motivational Lo-Fi Jams", "creator": "Guido's Lounge Cafe", "durationSec": 3656, "weight": 1.0},
+    {"id": "mc:Bamf/best-of-the-year-lofi-hiphop-mix", "source": "mixcloud", "ref": "Bamf/best-of-the-year-lofi-hiphop-mix", "kind": "mix", "title": "Best of the Year - Lofi HipHop Mix", "creator": "Bamf Radio", "durationSec": 8705, "weight": 1.0},
+    {"id": "radio:reyfm-lofi", "source": "radio", "ref": "https://listen.reyfm.de/lofi_320kbps.mp3", "kind": "station", "title": "#lofi", "creator": "REYFM", "homepage": "https://www.reyfm.de/", "weight": 0.5},
+    {"id": "radio:hunter-fm-lofi", "source": "radio", "ref": "https://live.hunter.fm/lofi_high", "kind": "station", "title": "Lo-Fi", "creator": "Hunter.FM", "homepage": "https://hunter.fm/lofi/", "weight": 0.5},
+    {"id": "radio:hotmix-lofi", "source": "radio", "ref": "https://streaming.hotmixradio.com/hotmix-lofi-en-mp3", "kind": "station", "title": "Hotmix Lo-Fi", "creator": "Hotmix Radio", "homepage": "https://hotmixradio.com/", "weight": 0.5}
+  ]
+}

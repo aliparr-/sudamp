@@ -1,0 +1,23 @@
+# Dormant until the repository has a GitHub remote (DESIGN §9 "CI and the macOS 15 floor").
+name: ci
+on:
+  push:
+  pull_request:
+jobs:
+  macos-15:
+    runs-on: macos-15
+    steps:
+      - uses: actions/checkout@v4
+      - name: Toolchain
+        run: swift --version && xcrun --show-sdk-version
+      - uses: actions/cache@v4
+        with:
+          path: |
+            .build
+            ~/Library/Caches/org.swift.swiftpm
+            ~/Library/Caches/sudamp-dev
+          key: spm-${{ runner.os }}-${{ hashFiles('Package.resolved') }}
+      - name: Build and test
+        run: make build test
+      - name: Third-party notices
+        run: scripts/check-notices.sh

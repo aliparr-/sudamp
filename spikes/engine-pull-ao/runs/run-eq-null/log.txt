@@ -1,0 +1,87 @@
+[   0.047] EVENT idle
+[   0.307] SET af=@eq:lavfi=[volume@pre=volume=0.0dB:precision=float,equalizer@b0=f=60:t=q:w=1.0:g=0.0,equalizer@b1=f=170:t=q:w=1.0:g=0.0,equalizer@b2=f=310:t=q:w=1.0:g=0.0,equalizer@b3=f=600:t=q:w=1.0:g=0.0,equalizer@b4=f=1000:t=q:w=1.0:g=0.0,equalizer@b5=f=3000:t=q:w=1.0:g=0.0,equalizer@b6=f=6000:t=q:w=1.0:g=0.0,equalizer@b7=f=12000:t=q:w=1.4:g=0.0,equalizer@b8=f=14000:t=q:w=1.8:g=0.0,equalizer@b9=f=16000:t=q:w=1.8:g=0.0] -> 0 (success) took 0.1 ms
+[   0.307] af property readback: @eq:lavfi=graph=%397%volume@pre=volume=0.0dB:precision=float,equalizer@b0=f=60:t=q:w=1.0:g=0.0,equalizer@b1=f=170:t=q:w=1.0:g=0.0,equalizer@b2=f=310:t=q:w=1.0:g=0.0,equalizer@b3=f=600:t=q:w=1.0:g=0.0,equalizer@b4=f=1000:t=q:w=1.0:g=0.0,equalizer@b5=f=3000:t=q:w=1.0:g=0.0,equalizer@b6=f=6000:t=q:w=1.0:g=0.0,equalizer@b7=f=12000:t=q:w=1.4:g=0.0,equalizer@b8=f=14000:t=q:w=1.8:g=0.0,equalizer@b9=f=16000:t=q:w=1.8:g=0.0
+[   1.009] EVENT start-file
+[   1.009] CMD loadfile /tmp/sudamp-spike/engine/media/a.wav -> 0 (success) took 0.1 ms
+[   1.015] EVENT audio-reconfig
+[   1.016] EVENT audio-reconfig
+[   1.016] EVENT file-loaded
+[   1.016]   mpv[v af] User filter list:
+[   1.016]   mpv[v af]   lavfi (eq)
+[   1.017]   mpv[v af] [in] 44100Hz stereo 2ch float
+[   1.017]   mpv[v af] [lavfi] 44100Hz stereo 2ch float
+[   1.017]   mpv[v af] [userspeed] 44100Hz stereo 2ch floatp
+[   1.017]   mpv[v af] [userspeed] (disabled)
+[   1.017]   mpv[v af] [convert] 44100Hz stereo 2ch floatp
+[   1.017] EVENT audio-reconfig
+[   1.017]   mpv[v ao] Trying audio driver 'null'
+[   1.017]   mpv[v ao/null] requested format: 48000 Hz, stereo channels, float
+[   1.017]   mpv[v ao/null] Channel layouts:
+[   1.017]   mpv[v ao/null]  - anything
+[   1.017]   mpv[v ao/null] result: stereo
+[   1.017]   mpv[v ao/null] device buffer: 9472 samples.
+[   1.017]   mpv[v ao/null] using soft-buffer of 9600 samples.
+[   1.017]   mpv[v af] [out] 48000Hz stereo 2ch float
+[   1.018] EVENT playback-restart
+[   1.018]   mpv[v ao/null] starting AO
+[   5.003] CMD af-command eq g 12 b4 -> -12 (error running command) took 0.0 ms
+[   5.003] CMD af-command eq g 12 equalizer@b4 -> 0 (success) took 0.0 ms
+[  10.003] CMD seek 30 absolute -> 0 (success) took 0.0 ms
+[  10.003] EVENT seek
+[  10.006] EVENT playback-restart
+[  10.006]   mpv[v ao/null] starting AO
+[  15.010] CMD af-command eq g 12 equalizer@b4 -> 0 (success) took 0.1 ms
+[  20.005] CMD seek 20 absolute -> 0 (success) took 0.0 ms
+[  20.006] EVENT seek
+[  20.006] CMD af-command eq g 6 equalizer@b4 -> -12 (error running command) took 0.7 ms
+[  20.008] EVENT playback-restart
+[  20.008]   mpv[v ao/null] starting AO
+[  25.008] CMD af-command eq g 12 equalizer@b4 -> 0 (success) took 0.1 ms
+[  30.003] CMD loadfile /tmp/sudamp-spike/engine/media/a.wav replace -> 0 (success) took 0.0 ms
+[  30.003] EVENT audio-reconfig
+[  30.004] EVENT end-file reason=2 error=0
+[  30.004] EVENT start-file
+[  30.008] EVENT audio-reconfig
+[  30.008] EVENT audio-reconfig
+[  30.008] EVENT file-loaded
+[  30.008]   mpv[v af] User filter list:
+[  30.008]   mpv[v af]   lavfi (eq)
+[  30.008]   mpv[v af] [in] 44100Hz stereo 2ch float
+[  30.008]   mpv[v af] [lavfi] 44100Hz stereo 2ch float
+[  30.009]   mpv[v af] [userspeed] 44100Hz stereo 2ch floatp
+[  30.009]   mpv[v af] [userspeed] (disabled)
+[  30.009]   mpv[v af] [convert] 44100Hz stereo 2ch floatp
+[  30.009]   mpv[v af] [out] 48000Hz stereo 2ch float
+[  30.009] EVENT playback-restart
+[  30.009]   mpv[v ao/null] starting AO
+[  35.009] CMD af-command eq g 3 equalizer -> 0 (success) took 0.1 ms
+[  40.003] CMD af-command eq g 0 all -> -12 (error running command) took 0.1 ms
+[  45.003] CMD af-command eq volume 6dB pre -> -12 (error running command) took 0.0 ms
+[  45.003] CMD af-command eq volume 6dB volume@pre -> 0 (success) took 0.0 ms
+[  50.006] EVENT audio-reconfig
+[  50.006] SET af=@eq:lavfi=[volume@pre=volume=0.0dB:precision=float,equalizer@b0=f=60:t=q:w=1.0:g=0.0,equalizer@b1=f=170:t=q:w=1.0:g=0.0,equalizer@b2=f=310:t=q:w=1.0:g=0.0,equalizer@b3=f=600:t=q:w=1.0:g=0.0,equalizer@b4=f=1000:t=q:w=1.0:g=12.0,equalizer@b5=f=3000:t=q:w=1.0:g=0.0,equalizer@b6=f=6000:t=q:w=1.0:g=0.0,equalizer@b7=f=12000:t=q:w=1.4:g=0.0,equalizer@b8=f=14000:t=q:w=1.8:g=0.0,equalizer@b9=f=16000:t=q:w=1.8:g=0.0] -> 0 (success) took 1.1 ms
+[  50.006]   mpv[v af] User filter list:
+[  50.006]   mpv[v af]   lavfi (eq)
+[  50.006]   mpv[v af] [lavfi] 44100Hz stereo 2ch float
+[  55.010] CMD seek 10 absolute -> 0 (success) took 0.0 ms
+[  55.011] EVENT seek
+[  55.013] EVENT playback-restart
+[  55.013]   mpv[v ao/null] starting AO
+[  60.009] CMD loadfile /tmp/sudamp-spike/engine/media/a.wav replace -> 0 (success) took 0.0 ms
+[  60.010] EVENT audio-reconfig
+[  60.010] EVENT end-file reason=2 error=0
+[  60.010] EVENT start-file
+[  60.014] EVENT audio-reconfig
+[  60.014] EVENT audio-reconfig
+[  60.014] EVENT file-loaded
+[  60.014]   mpv[v af] User filter list:
+[  60.014]   mpv[v af]   lavfi (eq)
+[  60.014]   mpv[v af] [in] 44100Hz stereo 2ch float
+[  60.014]   mpv[v af] [lavfi] 44100Hz stereo 2ch float
+[  60.015]   mpv[v af] [userspeed] 44100Hz stereo 2ch floatp
+[  60.015]   mpv[v af] [userspeed] (disabled)
+[  60.015]   mpv[v af] [convert] 44100Hz stereo 2ch floatp
+[  60.015]   mpv[v af] [out] 48000Hz stereo 2ch float
+[  60.016] EVENT playback-restart
+[  60.016]   mpv[v ao/null] starting AO
+[  66.345] 50 af-commands during drag, worst call latency 0.52 ms

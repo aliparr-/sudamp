@@ -1,0 +1,4 @@
+{
+  "window": "eq",
+  "eq": {"on": true, "auto": false, "preamp": 62, "bands": [80, 72, 60, 50, 42, 38, 46, 58, 70, 88]}
+}

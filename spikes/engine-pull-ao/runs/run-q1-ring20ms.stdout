@@ -1,0 +1,120 @@
+[   0.000] consumer ring = 960 frames (20.0 ms)
+[   0.054] EVENT idle
+[   0.509] CMD loadfile /tmp/sudamp-spike/engine/media/a.wav -> 0 (success) took 0.1 ms
+[   0.509] EVENT start-file
+[   0.516] EVENT audio-reconfig
+[   0.517] EVENT audio-reconfig
+[   0.517] EVENT file-loaded
+[   0.517]   mpv[v af] User filter list:
+[   0.517]   mpv[v af]   (empty)
+[   0.517]   mpv[v af] [in] 44100Hz stereo 2ch float
+[   0.517]   mpv[v af] [userspeed] 44100Hz stereo 2ch float
+[   0.517]   mpv[v af] [userspeed] (disabled)
+[   0.517]   mpv[v af] [convert] 44100Hz stereo 2ch float
+[   0.517]   mpv[v ao] Trying audio driver 'pcm'
+[   0.517]   mpv[v ao/pcm] requested format: 48000 Hz, stereo channels, float
+[   0.517] EVENT audio-reconfig
+[   0.517]   mpv[v ao/pcm] Channel layouts:
+[   0.517]   mpv[v ao/pcm]  - waveext
+[   0.517]   mpv[v ao/pcm] result: stereo
+[   0.517]   mpv[info ao/pcm] File: /tmp/sudamp-spike/engine/run-q1-ring20ms/audio.fifo (RAW PCM)
+[   0.517]   mpv[info ao/pcm] PCM: Samplerate: 48000 Hz Channels: 2 Format: float
+[   0.517]   mpv[v ao/pcm] device buffer: 65536 samples.
+[   0.517]   mpv[v ao/pcm] using soft-buffer of 65536 samples.
+[   0.517]   mpv[v af] [out] 48000Hz stereo 2ch float
+[   0.519] EVENT playback-restart
+[   1.854]   mpv[v ao/pcm] starting AO
+[  25.010] == pause (mpv only, consumer keeps pulling)
+[  26.944] SET pause=yes -> 0 (success) took 1933.6 ms
+[  28.010] SET pause=no -> 0 (success) took 0.1 ms
+[  33.004] == pause (consumer stops first, then sync mpv pause from a side thread)
+[  36.006] consumer resumes pulling
+[  37.944] SET pause=yes -> 0 (success) took 4939.6 ms
+[  37.944] SET pause=no -> 0 (success) took 1438.4 ms
+[  40.004] == seek 10 absolute, no flush
+[  40.726] CMD seek 10 absolute -> 0 (success) took 722.4 ms
+[  42.124] EVENT seek
+[  42.127] EVENT playback-restart
+[  43.494]   mpv[v ao/pcm] starting AO
+[  46.010] == seek 40 absolute, flush right after command
+[  46.316] CMD seek 40 absolute -> 0 (success) took 306.5 ms
+[  47.684] EVENT seek
+[  47.686] EVENT playback-restart
+[  49.044]   mpv[v ao/pcm] starting AO
+[  52.001] == seek 10 absolute, flush on playback-restart
+[  53.277] CMD seek 10 absolute -> 0 (success) took 1274.7 ms
+[  54.662] EVENT seek
+[  54.665] EVENT playback-restart
+[  54.665] FLUSH on playback-restart
+[  56.002]   mpv[v ao/pcm] starting AO
+[  58.007] == seek 40 absolute, flush on seek event
+[  58.826] CMD seek 40 absolute -> 0 (success) took 818.3 ms
+[  60.223] EVENT seek
+[  60.224] FLUSH on seek
+[  60.226] EVENT playback-restart
+[  61.563]   mpv[v ao/pcm] starting AO
+[  64.010] == loadfile b.wav replace, flush on end-file
+[  64.397] CMD loadfile /tmp/sudamp-spike/engine/media/b.wav replace -> 0 (success) took 387.0 ms
+[  65.796] EVENT audio-reconfig
+[  65.796] EVENT end-file reason=2 error=0
+[  65.796] FLUSH on end-file
+[  65.796] EVENT start-file
+[  65.812] EVENT audio-reconfig
+[  65.812] EVENT audio-reconfig
+[  65.812] EVENT file-loaded
+[  65.812]   mpv[v af] User filter list:
+[  65.812]   mpv[v af]   (empty)
+[  65.812]   mpv[v af] [in] 48000Hz stereo 2ch s16
+[  65.812]   mpv[v af] [userspeed] 48000Hz stereo 2ch s16
+[  65.812]   mpv[v af] [userspeed] (disabled)
+[  65.812]   mpv[v af] [convert] 48000Hz stereo 2ch s16
+[  65.812]   mpv[v af] [out] 48000Hz stereo 2ch float
+[  65.812] EVENT playback-restart
+[  67.144]   mpv[v ao/pcm] starting AO
+[  70.004] == consumer stops reading the pipe (stuck reader) for 5 s
+[  75.010] consumer reading again
+[  76.404] get time-pos issued during stuck reader took 3393.9 ms (5.632000000000005)
+[  76.404] SET volume=90 -> 0 (success) took 4394.0 ms
+[  99.364]   mpv[v af] filter input EOF
+[  99.364]   mpv[v af] filter output EOF
+[ 100.774]   mpv[v ao/pcm] audio end or underrun
+[ 100.774] EVENT audio-reconfig
+[ 100.774] EVENT end-file reason=0 error=0
+[ 100.784] EVENT audio-reconfig
+[ 100.784] EVENT idle
+[ 101.034] idle-active=yes after b.wav; ao still open? audio-params=nil
+[ 104.044] == loadfile a.wav then reader closes FIFO at +4 s (SIGPIPE ignored)
+[ 104.044] CMD loadfile /tmp/sudamp-spike/engine/media/a.wav -> 0 (success) took 0.0 ms
+[ 104.044] EVENT start-file
+[ 104.046] EVENT audio-reconfig
+[ 104.046] EVENT audio-reconfig
+[ 104.046] EVENT file-loaded
+[ 104.046]   mpv[v af] User filter list:
+[ 104.046]   mpv[v af]   (empty)
+[ 104.046]   mpv[v af] [in] 44100Hz stereo 2ch float
+[ 104.046]   mpv[v af] [userspeed] 44100Hz stereo 2ch float
+[ 104.046]   mpv[v af] [userspeed] (disabled)
+[ 104.046]   mpv[v af] [convert] 44100Hz stereo 2ch float
+[ 104.046] EVENT audio-reconfig
+[ 104.046]   mpv[v ao] Trying audio driver 'pcm'
+[ 104.046]   mpv[v ao/pcm] requested format: 48000 Hz, stereo channels, float
+[ 104.046]   mpv[v ao/pcm] Channel layouts:
+[ 104.046]   mpv[v ao/pcm]  - waveext
+[ 104.046]   mpv[v ao/pcm] result: stereo
+[ 104.046]   mpv[info ao/pcm] File: /tmp/sudamp-spike/engine/run-q1-ring20ms/audio.fifo (RAW PCM)
+[ 104.046]   mpv[info ao/pcm] PCM: Samplerate: 48000 Hz Channels: 2 Format: float
+[ 104.046]   mpv[v ao/pcm] device buffer: 65536 samples.
+[ 104.046]   mpv[v ao/pcm] using soft-buffer of 65536 samples.
+[ 104.046]   mpv[v af] [out] 48000Hz stereo 2ch float
+[ 104.047] EVENT playback-restart
+[ 105.384]   mpv[v ao/pcm] starting AO
+[ 108.881]   mpv[v af] filter input EOF
+[ 108.881]   mpv[v af] filter output EOF
+[ 108.881] EVENT audio-reconfig
+[ 108.881]   mpv[v ao/pcm] audio end or underrun
+[ 108.881] EVENT end-file reason=0 error=0
+[ 108.881] EVENT audio-reconfig
+[ 108.881] EVENT idle
+[ 111.039] after reader close: 3 s wall, user CPU 0.04 s, time-pos 4.829541666666669 -> nil, idle=yes
+[ 111.610] EOF events on FIFO: ["100.804"], resumed after EOF: ["104.054"], flushes: ["46.322:12040 B", "54.671:12872 B", "60.234:12752 B", "65.801:8472 B"]
+[ 111.610] done

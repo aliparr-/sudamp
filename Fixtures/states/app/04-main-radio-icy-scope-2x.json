@@ -1,0 +1,210 @@
+{
+  "genre": "deep-house",
+  "genreName": "Deep House",
+  "streams": [
+    {
+      "source": "youtube",
+      "ref": "sUdAmP00001",
+      "title": "Sunset Sessions",
+      "creator": "Solar Crew",
+      "durationSec": 3720
+    },
+    {
+      "source": "radio",
+      "id": "radio:deep-radio",
+      "ref": "https://stream.deepradio.fm/live",
+      "title": "Deep Radio",
+      "creator": "Deep Radio"
+    },
+    {
+      "source": "soundcloud",
+      "ref": "nightdrive/extended-mix",
+      "title": "Nightdrive (Extended Mix)",
+      "creator": "Nightdrive",
+      "durationSec": 461
+    },
+    {
+      "source": "mixcloud",
+      "ref": "WarehouseSessions/session-004",
+      "title": "Warehouse Session 004",
+      "creator": "Warehouse Sessions",
+      "durationSec": 3492
+    },
+    {
+      "source": "youtube-live",
+      "ref": "@deephouse247",
+      "title": "Deep House 24/7",
+      "creator": "Deep House Radio"
+    },
+    {
+      "source": "youtube",
+      "ref": "sUdAmP00002",
+      "title": "Boiler Room: Lisbon",
+      "creator": "Ana Lua",
+      "durationSec": 5400
+    },
+    {
+      "source": "soundcloud",
+      "ref": "afterhours/tape-07",
+      "title": "Afterhours Tape 07",
+      "creator": "Afterhours",
+      "durationSec": 2711
+    },
+    {
+      "source": "radio",
+      "id": "radio:house-fm",
+      "ref": "https://live.housefm.net/aac",
+      "title": "House FM",
+      "creator": "House FM"
+    },
+    {
+      "source": "mixcloud",
+      "ref": "BerlinBasement/basement-12",
+      "title": "Berlin Basement 12",
+      "creator": "Berlin Basement",
+      "durationSec": 4210
+    },
+    {
+      "source": "youtube",
+      "ref": "sUdAmP00003",
+      "title": "Rooftop Sunrise Set",
+      "creator": "Mira Kade",
+      "durationSec": 3305
+    },
+    {
+      "source": "soundcloud",
+      "ref": "midnightgarage/side-a",
+      "title": "Midnight Garage",
+      "creator": "MG Collective",
+      "durationSec": 389
+    },
+    {
+      "source": "youtube",
+      "ref": "sUdAmP00004",
+      "title": "Coastal Drive",
+      "creator": "Low Tide",
+      "durationSec": 2980
+    },
+    {
+      "source": "mixcloud",
+      "ref": "SundaySelections/morning-01",
+      "title": "Sunday Morning Selections",
+      "creator": "Sunday Selections",
+      "durationSec": 3600
+    },
+    {
+      "source": "radio",
+      "id": "radio:minimal-waves",
+      "ref": "https://radio.minimalwaves.org/stream",
+      "title": "Minimal Waves",
+      "creator": "Minimal Waves"
+    },
+    {
+      "source": "youtube",
+      "ref": "sUdAmP00005",
+      "title": "Warm Up Mix",
+      "creator": "Kofi Lane",
+      "durationSec": 4012
+    },
+    {
+      "source": "soundcloud",
+      "ref": "lagoon/sessions-3",
+      "title": "Lagoon Sessions 3",
+      "creator": "Lagoon",
+      "durationSec": 3133
+    }
+  ],
+  "volume": 80,
+  "balance": 0,
+  "window": "main",
+  "scale": 2,
+  "phase": "playing",
+  "current": 1,
+  "statusText": "[DEEP HOUSE] DJ NOVA - MIDNIGHT DRIVE",
+  "icyTitle": "DJ Nova - Midnight Drive",
+  "position": 95,
+  "kbps": 128,
+  "sampleRate": 44100,
+  "channels": 2,
+  "visualizerMode": "oscilloscope",
+  "visualizer": {
+    "scope": [
+      0.0,
+      0.3446,
+      0.5279,
+      0.5068,
+      0.3833,
+      0.3209,
+      0.414,
+      0.6125,
+      0.7588,
+      0.7099,
+      0.4497,
+      0.1043,
+      -0.1504,
+      -0.2189,
+      -0.1537,
+      -0.1083,
+      -0.2125,
+      -0.4663,
+      -0.7352,
+      -0.85,
+      -0.7352,
+      -0.4663,
+      -0.2125,
+      -0.1083,
+      -0.1537,
+      -0.2189,
+      -0.1504,
+      0.1043,
+      0.4497,
+      0.7099,
+      0.7588,
+      0.6125,
+      0.414,
+      0.3209,
+      0.3833,
+      0.5068,
+      0.5279,
+      0.3446,
+      0.0,
+      -0.3446,
+      -0.5279,
+      -0.5068,
+      -0.3833,
+      -0.3209,
+      -0.414,
+      -0.6125,
+      -0.7588,
+      -0.7099,
+      -0.4497,
+      -0.1043,
+      0.1504,
+      0.2189,
+      0.1537,
+      0.1083,
+      0.2125,
+      0.4663,
+      0.7352,
+      0.85,
+      0.7352,
+      0.4663,
+      0.2125,
+      0.1083,
+      0.1537,
+      0.2189,
+      0.1504,
+      -0.1043,
+      -0.4497,
+      -0.7099,
+      -0.7588,
+      -0.6125,
+      -0.414,
+      -0.3209,
+      -0.3833,
+      -0.5068,
+      -0.5279,
+      -0.3446
+    ]
+  }
+}

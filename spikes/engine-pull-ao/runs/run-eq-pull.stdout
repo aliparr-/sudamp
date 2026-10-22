@@ -1,0 +1,134 @@
+[   0.145] EVENT idle
+[   0.310] SET af=@eq:lavfi=[volume@pre=volume=0.0dB:precision=float,equalizer@b0=f=60:t=q:w=1.0:g=0.0,equalizer@b1=f=170:t=q:w=1.0:g=0.0,equalizer@b2=f=310:t=q:w=1.0:g=0.0,equalizer@b3=f=600:t=q:w=1.0:g=0.0,equalizer@b4=f=1000:t=q:w=1.0:g=0.0,equalizer@b5=f=3000:t=q:w=1.0:g=0.0,equalizer@b6=f=6000:t=q:w=1.0:g=0.0,equalizer@b7=f=12000:t=q:w=1.4:g=0.0,equalizer@b8=f=14000:t=q:w=1.8:g=0.0,equalizer@b9=f=16000:t=q:w=1.8:g=0.0] -> 0 (success) took 0.1 ms
+[   1.006] EVENT start-file
+[   1.006] CMD loadfile /tmp/sudamp-spike/engine/media/a.wav -> 0 (success) took 0.1 ms
+[   1.014] EVENT audio-reconfig
+[   1.015] EVENT audio-reconfig
+[   1.015] EVENT file-loaded
+[   1.015]   mpv[v af] User filter list:
+[   1.015]   mpv[v af]   lavfi (eq)
+[   1.015]   mpv[v af] [in] 44100Hz stereo 2ch float
+[   1.015]   mpv[v af] [lavfi] 44100Hz stereo 2ch float
+[   1.015]   mpv[v af] [userspeed] 44100Hz stereo 2ch floatp
+[   1.015]   mpv[v af] [userspeed] (disabled)
+[   1.015] EVENT audio-reconfig
+[   1.015]   mpv[v af] [convert] 44100Hz stereo 2ch floatp
+[   1.015]   mpv[v ao] Trying audio driver 'pcm'
+[   1.015]   mpv[v ao/pcm] requested format: 48000 Hz, stereo channels, floatp
+[   1.015]   mpv[v ao/pcm] device buffer: 1024 samples.
+[   1.015]   mpv[v ao/pcm] using soft-buffer of 9600 samples.
+[   1.015]   mpv[v af] [out] 48000Hz stereo 2ch floatp
+[   1.016] EVENT playback-restart
+[   3.002] -- mark: baseline flat
+[   3.003] CMD af-command eq g 12 b4 -> -12 (error running command) took 0.0 ms
+[   3.003] CMD af-command eq g 12 equalizer@b4 -> 0 (success) took 0.0 ms
+[   6.003] -- mark: af-command g 12 equalizer@b4 (after failed 'b4')
+[   6.003] CMD seek 30 absolute -> 0 (success) took 0.0 ms
+[   6.004] EVENT seek
+[   6.006] EVENT playback-restart
+[   9.000] -- mark: after seek, no re-send
+[   9.001] CMD af-command eq g 12 equalizer@b4 -> 0 (success) took 0.0 ms
+[  12.005] -- mark: re-sent g 12
+[  12.006] CMD seek 20 absolute -> 0 (success) took 0.0 ms
+[  12.006] EVENT seek
+[  12.006] CMD af-command eq g 6 equalizer@b4 -> -12 (error running command) took 0.3 ms
+[  12.008] EVENT playback-restart
+[  15.004] -- mark: seek + immediate af-command g 6
+[  15.004] CMD af-command eq g 12 equalizer@b4 -> 0 (success) took 0.0 ms
+[  18.002] -- mark: g 12 again
+[  18.002] CMD loadfile /tmp/sudamp-spike/engine/media/a.wav replace -> 0 (success) took 0.0 ms
+[  18.003] EVENT audio-reconfig
+[  18.003] EVENT end-file reason=2 error=0
+[  18.003] EVENT start-file
+[  18.006] EVENT audio-reconfig
+[  18.007] EVENT audio-reconfig
+[  18.007] EVENT file-loaded
+[  18.007]   mpv[v af] User filter list:
+[  18.007]   mpv[v af]   lavfi (eq)
+[  18.007]   mpv[v af] [in] 44100Hz stereo 2ch float
+[  18.007]   mpv[v af] [lavfi] 44100Hz stereo 2ch float
+[  18.007]   mpv[v af] [userspeed] 44100Hz stereo 2ch floatp
+[  18.007]   mpv[v af] [userspeed] (disabled)
+[  18.007]   mpv[v af] [convert] 44100Hz stereo 2ch floatp
+[  18.007]   mpv[v af] [out] 48000Hz stereo 2ch floatp
+[  18.008] EVENT playback-restart
+[  21.003] -- mark: after loadfile replace, no re-send
+[  21.003] CMD seek 40 absolute -> 0 (success) took 0.0 ms
+[  21.004] EVENT seek
+[  21.006] EVENT playback-restart
+[  21.006] CMD af-command eq g 12 equalizer@b4 -> 0 (success) took 0.0 ms
+[  24.010] -- mark: seek + re-apply g 12 on playback-restart
+[  24.010] CMD loadfile /tmp/sudamp-spike/engine/media/a.wav replace -> 0 (success) took 0.0 ms
+[  24.010] EVENT audio-reconfig
+[  24.010] EVENT end-file reason=2 error=0
+[  24.010] EVENT start-file
+[  24.012] EVENT audio-reconfig
+[  24.013] EVENT audio-reconfig
+[  24.013] EVENT file-loaded
+[  24.013]   mpv[v af] User filter list:
+[  24.013]   mpv[v af]   lavfi (eq)
+[  24.013]   mpv[v af] [in] 44100Hz stereo 2ch float
+[  24.013]   mpv[v af] [lavfi] 44100Hz stereo 2ch float
+[  24.013]   mpv[v af] [userspeed] 44100Hz stereo 2ch floatp
+[  24.013]   mpv[v af] [userspeed] (disabled)
+[  24.013]   mpv[v af] [convert] 44100Hz stereo 2ch floatp
+[  24.013]   mpv[v af] [out] 48000Hz stereo 2ch floatp
+[  24.013] EVENT playback-restart
+[  24.013] CMD af-command eq g 12 equalizer@b4 -> 0 (success) took 0.0 ms
+[  27.002] -- mark: loadfile + re-apply g 12 on playback-restart
+[  27.003] CMD af-command eq g 3 equalizer -> 0 (success) took 0.1 ms
+[  30.007] -- mark: target 'equalizer' (type name) g 3 -> all bands
+[  30.007] CMD af-command eq g 0 all -> -12 (error running command) took 0.1 ms
+[  33.002] -- mark: target 'all' g 0
+[  33.003] CMD af-command eq volume 6dB pre -> -12 (error running command) took 0.0 ms
+[  33.003] CMD af-command eq volume 6dB volume@pre -> 0 (success) took 0.0 ms
+[  36.000] -- mark: volume 6dB volume@pre (after failed 'pre')
+[  36.001] EVENT audio-reconfig
+[  36.002] SET af=@eq:lavfi=[volume@pre=volume=0.0dB:precision=float,equalizer@b0=f=60:t=q:w=1.0:g=0.0,equalizer@b1=f=170:t=q:w=1.0:g=0.0,equalizer@b2=f=310:t=q:w=1.0:g=0.0,equalizer@b3=f=600:t=q:w=1.0:g=0.0,equalizer@b4=f=1000:t=q:w=1.0:g=12.0,equalizer@b5=f=3000:t=q:w=1.0:g=0.0,equalizer@b6=f=6000:t=q:w=1.0:g=0.0,equalizer@b7=f=12000:t=q:w=1.4:g=0.0,equalizer@b8=f=14000:t=q:w=1.8:g=0.0,equalizer@b9=f=16000:t=q:w=1.8:g=0.0] -> 0 (success) took 1.1 ms
+[  36.002]   mpv[v af] User filter list:
+[  36.002]   mpv[v af]   lavfi (eq)
+[  36.002]   mpv[v af] [lavfi] 44100Hz stereo 2ch float
+[  39.004] -- mark: af string set with b4 g=12, pre 0 (mid-playback)
+[  39.004] CMD seek 10 absolute -> 0 (success) took 0.0 ms
+[  39.005] EVENT seek
+[  39.007] EVENT playback-restart
+[  42.002] -- mark: seek with string-synced gains
+[  42.002] CMD loadfile /tmp/sudamp-spike/engine/media/a.wav replace -> 0 (success) took 0.0 ms
+[  42.002] EVENT audio-reconfig
+[  42.003] EVENT end-file reason=2 error=0
+[  42.003] EVENT start-file
+[  42.007] EVENT audio-reconfig
+[  42.007] EVENT audio-reconfig
+[  42.007] EVENT file-loaded
+[  42.007]   mpv[v af] User filter list:
+[  42.007]   mpv[v af]   lavfi (eq)
+[  42.007]   mpv[v af] [in] 44100Hz stereo 2ch float
+[  42.008]   mpv[v af] [lavfi] 44100Hz stereo 2ch float
+[  42.008]   mpv[v af] [userspeed] 44100Hz stereo 2ch floatp
+[  42.008]   mpv[v af] [userspeed] (disabled)
+[  42.008]   mpv[v af] [convert] 44100Hz stereo 2ch floatp
+[  42.008]   mpv[v af] [out] 48000Hz stereo 2ch floatp
+[  42.009] EVENT playback-restart
+[  45.008] -- mark: loadfile with string-synced gains
+[  46.366] drag: 50 af-commands over 1.36 s, fails 0, worst call 0.51 ms
+[  48.007] -- mark: after drag to 0.24 dB
+[  48.007] af readback: @eq:lavfi=graph=%398%volume@pre=volume=0.0dB:precision=float,equalizer@b0=f=60:t=q:w=1.0:g=0.0,equalizer@b1=f=170:t=q:w=1.0:g=0.0,equalizer@b2=f=310:t=q:w=1.0:g=0.0,equalizer@b3=f=600:t=q:w=1.0:g=0.0,equalizer@b4=f=1000:t=q:w=1.0:g=12.0,equalizer@b5=f=3000:t=q:w=1.0:g=0.0,equalizer@b6=f=6000:t=q:w=1.0:g=0.0,equalizer@b7=f=12000:t=q:w=1.4:g=0.0,equalizer@b8=f=14000:t=q:w=1.8:g=0.0,equalizer@b9=f=16000:t=q:w=1.8:g=0.0
+[  48.009] --- 1 kHz level at render (post mpv af), window = 1.0 s before each mark ---
+[  48.010]   3.00    -0.00 dB  baseline flat
+[  48.010]   6.00   +12.00 dB  af-command g 12 equalizer@b4 (after failed 'b4')
+[  48.011]   9.00    +0.00 dB  after seek, no re-send
+[  48.012]  12.01   +12.00 dB  re-sent g 12
+[  48.012]  15.00    +0.00 dB  seek + immediate af-command g 6
+[  48.013]  18.00   +12.00 dB  g 12 again
+[  48.013]  21.00    +0.00 dB  after loadfile replace, no re-send
+[  48.014]  24.01   +12.00 dB  seek + re-apply g 12 on playback-restart
+[  48.014]  27.00   +12.00 dB  loadfile + re-apply g 12 on playback-restart
+[  48.015]  30.01    +5.27 dB  target 'equalizer' (type name) g 3 -> all bands
+[  48.015]  33.00    -0.00 dB  target 'all' g 0
+[  48.016]  36.00    +6.00 dB  volume 6dB volume@pre (after failed 'pre')
+[  48.016]  39.00   +12.00 dB  af string set with b4 g=12, pre 0 (mid-playback)
+[  48.016]  42.00   +12.00 dB  seek with string-synced gains
+[  48.017]  45.01   +12.00 dB  loadfile with string-synced gains
+[  48.017]  48.01    +0.24 dB  after drag to 0.24 dB
+[  48.018] af string change at 36.00: silent callbacks 0, position jumps []
+[  48.019] drag window: silent callbacks 0, position jumps []

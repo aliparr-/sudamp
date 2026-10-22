@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom" xml:lang="en-US">
+  <!-- Trimmed from https://github.com/yt-dlp/yt-dlp/releases.atom on 2026-10-22: ids, links, titles and dates only. -->
+  <entry>
+    <id>tag:github.com,2008:Repository/307260205/2026.10.21</id>
+    <updated>2026-10-21T21:54:37Z</updated>
+    <link rel="alternate" type="text/html" href="https://github.com/yt-dlp/yt-dlp/releases/tag/2026.10.21"/>
+    <title>yt-dlp 2026.10.21</title>
+  </entry>
+  <entry>
+    <id>tag:github.com,2008:Repository/307260205/2026.08.19</id>
+    <updated>2026-08-19T23:48:43Z</updated>
+    <link rel="alternate" type="text/html" href="https://github.com/yt-dlp/yt-dlp/releases/tag/2026.08.19"/>
+    <title>yt-dlp 2026.08.19</title>
+  </entry>
+  <entry>
+    <id>tag:github.com,2008:Repository/307260205/2026.07.04</id>
+    <updated>2026-07-04T22:41:44Z</updated>
+    <link rel="alternate" type="text/html" href="https://github.com/yt-dlp/yt-dlp/releases/tag/2026.07.04"/>
+    <title>yt-dlp 2026.07.04</title>
+  </entry>
+  <entry>
+    <id>tag:github.com,2008:Repository/307260205/2026.06.09</id>
+    <updated>2026-06-09T23:26:57Z</updated>
+    <link rel="alternate" type="text/html" href="https://github.com/yt-dlp/yt-dlp/releases/tag/2026.06.09"/>
+    <title>yt-dlp 2026.06.09</title>
+  </entry>
+  <entry>
+    <id>tag:github.com,2008:Repository/307260205/2026.03.17</id>
+    <updated>2026-03-17T23:42:35Z</updated>
+    <link rel="alternate" type="text/html" href="https://github.com/yt-dlp/yt-dlp/releases/tag/2026.03.17"/>
+    <title>yt-dlp 2026.03.17</title>
+  </entry>
+  <entry>
+    <id>tag:github.com,2008:Repository/307260205/2026.03.13</id>
+    <updated>2026-03-13T09:02:01Z</updated>
+    <link rel="alternate" type="text/html" href="https://github.com/yt-dlp/yt-dlp/releases/tag/2026.03.13"/>
+    <title>yt-dlp 2026.03.13</title>
+  </entry>
+</feed>
