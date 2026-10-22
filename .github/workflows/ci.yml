@@ -23,8 +23,9 @@ jobs:
           key: spm-${{ runner.os }}-xcode26.3-${{ hashFiles('Package.resolved') }}
       - name: Build
         run: make build
+      # One test at a time: in parallel, the 3-core runner starved tests that wait on timers (a 20 s JSON decode).
       - name: Test
-        run: set -o pipefail; make test 2>&1 | tee .build/test.log
+        run: set -o pipefail; make test TEST_MODE=--no-parallel 2>&1 | tee .build/test.log
       - name: Third-party notices
         run: scripts/check-notices.sh
       # Job logs need a GitHub login; annotations are public. Surface errors, warnings and failing tests there.

@@ -18,10 +18,12 @@ build:
 # Tests that assert real elapsed time run in a second, quiet pass: on a small machine (the 3-core CI runner) the
 # parallel suite saturates the CPU and their sub-second budgets fail.
 TIMING_TESTS := FeedsTests\.|CoreTests\.SubprocessTests|ResolverTests\.
+# CI passes TEST_MODE=--no-parallel: the 3-core runner is too slow for parallel runs (a JSON decode test took 20 s).
+TEST_MODE ?= --parallel
 
 test:
-	swift test --parallel $(TEST_FLAGS) --skip '$(TIMING_TESTS)'
-	swift test --parallel $(TEST_FLAGS) --filter '$(TIMING_TESTS)'
+	swift test $(TEST_MODE) $(TEST_FLAGS) --skip '$(TIMING_TESTS)'
+	swift test $(TEST_MODE) $(TEST_FLAGS) --filter '$(TIMING_TESTS)'
 	scripts/count-escapes.sh
 
 app: build
