@@ -15,8 +15,13 @@ build:
 	set -o pipefail; SUDAMP_LINK_MAP=1 swift build -c $(CONFIG) 2>&1 | tee .build/build-$(CONFIG).log
 	scripts/check-warnings.sh .build/build-$(CONFIG).log
 
+# Tests that assert real elapsed time run in a second, quiet pass: on a small machine (the 3-core CI runner) the
+# parallel suite saturates the CPU and their sub-second budgets fail.
+TIMING_TESTS := FeedsTests\.|CoreTests\.SubprocessTests|ResolverTests\.
+
 test:
-	swift test --parallel $(TEST_FLAGS)
+	swift test --parallel $(TEST_FLAGS) --skip '$(TIMING_TESTS)'
+	swift test --parallel $(TEST_FLAGS) --filter '$(TIMING_TESTS)'
 	scripts/count-escapes.sh
 
 app: build
