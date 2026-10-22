@@ -63,12 +63,11 @@ public final class OfflineWindowPath: NetworkPathObserving {
 
     public func updates() -> AsyncStream<NetworkPathStatus> {
         let (stream, continuation) = AsyncStream.makeStream(of: NetworkPathStatus.self, bufferingPolicy: .bufferingNewest(8))
-        // (latest real status, inside the window)
-        let state = Mutex<(latest: NetworkPathStatus?, offline: Bool)>((nil, false))
+        let state = WindowState()
         let upstream = base.updates()
         let forward = Task {
             for await status in upstream {
-                let emit = state.withLock { s -> Bool in
+                let emit = state.lock.withLock { s -> Bool in
                     s.latest = status
                     return !s.offline
                 }
@@ -79,11 +78,11 @@ public final class OfflineWindowPath: NetworkPathObserving {
         let window = Task {
             try? await Task.sleep(for: .seconds(after), tolerance: .milliseconds(20))
             guard !Task.isCancelled else { return }
-            state.withLock { $0.offline = true }
+            state.lock.withLock { $0.offline = true }
             continuation.yield(Self.offline)
             try? await Task.sleep(for: .seconds(duration), tolerance: .milliseconds(20))
             guard !Task.isCancelled else { return }
-            let latest = state.withLock { s -> NetworkPathStatus? in
+            let latest = state.lock.withLock { s -> NetworkPathStatus? in
                 s.offline = false
                 return s.latest
             }
@@ -94,5 +93,12 @@ public final class OfflineWindowPath: NetworkPathObserving {
             window.cancel()
         }
         return stream
+    }
+
+    /// The latest real status and whether the window is open, shared by the forwarding and window tasks. A class
+    /// rather than a local `Mutex`: Swift 6.2 and 6.3 reject sending two task closures that capture one local
+    /// noncopyable value (SendingRisksDataRace); 6.4 accepts it.
+    private final class WindowState: Sendable {
+        let lock = Mutex<(latest: NetworkPathStatus?, offline: Bool)>((nil, false))
     }
 }
