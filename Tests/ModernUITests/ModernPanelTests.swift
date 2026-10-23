@@ -71,8 +71,12 @@ import Testing
             let shadows = CardShadowView(frame: CGRect(origin: .zero, size: size))
             shadows.apply(ModernPalette(tint: .teal, appearance: NSAppearance(named: dark ? .darkAqua : .aqua)!))
             let frames = ModernGeometry.frames(open: [.stations])
-            shadows.update(frames.map { CardShadowView.Card(id: ObjectIdentifier(NSNumber(value: $0.key.hashValue)),
-                                                             frame: $0.value, opacity: 1) })
+            // One live object per card: an identifier taken from a temporary can repeat once it is freed, and two cards
+            // sharing one would share a shadow (the last placed wins, in dictionary order, which varies by run).
+            let tokens = frames.keys.map { ($0, NSObject()) }
+            shadows.update(tokens.map { card, token in
+                CardShadowView.Card(id: ObjectIdentifier(token), frame: frames[card]!, opacity: 1)
+            })
             let layer = try #require(shadows.layer)
             let width = Int(size.width), height = Int(size.height)
             let context = try #require(CGContext(data: nil, width: width, height: height, bitsPerComponent: 8, bytesPerRow: width * 4,
