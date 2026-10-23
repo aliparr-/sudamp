@@ -44,7 +44,7 @@ extension SkinnedPlayerUI: PlayerFrontEnd {
         guard let view = manager.windows[.main]?.skinView, let picture = SkinPicture.composite(view) else {
             throw SkinPicture.Failure(description: "no frame drawn yet")
         }
-        guard let png = SkinPicture.upscaled(picture, by: view.scale).pngData() else {
+        guard let png = SkinPicture.resized(picture, to: SkinScale.intSize(view.kind, scale: view.scale)).pngData() else {
             throw SkinPicture.Failure(description: "PNG encoding failed")
         }
         try png.write(to: url, options: .atomic)

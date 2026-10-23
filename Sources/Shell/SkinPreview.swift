@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
-// `sudamp --skin-preview [--skin <wsz>] [--scale 1|2|3] [--exit-after <seconds>] [--verify-capture]`
+// `sudamp --skin-preview [--skin <wsz>] [--scale 1|1.2|1.5|2|2.5|3] [--exit-after <seconds>] [--verify-capture]`
 //
 // Opens Main + Equalizer + Playlist docked, with an animated fake player state (scrolling title, ticking time,
 // fake visualiser), so the owner can try a skin before M5 wires SkinUI to playback. Every SkinControlEvent is
@@ -23,14 +23,14 @@ import SkinUI
 enum SkinPreview {
     struct Options: Equatable {
         var skinPath: String?
-        var scale: Int?
+        var scale: Double?
         var exitAfter: Double?
         var verifyCapture = false
         var exercise = false
         var ignoreOcclusion = false
     }
 
-    static let usage = "usage: sudamp --skin-preview [--skin <file.wsz>] [--scale 1|2|3] [--exit-after <seconds>] [--verify-capture] [--exercise] [--ignore-occlusion]"
+    static let usage = "usage: sudamp --skin-preview [--skin <file.wsz>] [--scale 1|1.2|1.5|2|2.5|3] [--exit-after <seconds>] [--verify-capture] [--exercise] [--ignore-occlusion]"
 
     struct UsageError: Error, Equatable {
         let message: String
@@ -51,8 +51,9 @@ enum SkinPreview {
                 guard let path = value(argument) else { return .failure(UsageError(message: "--skin needs a path")) }
                 options.skinPath = path
             case "--scale":
-                guard let text = value(argument), let scale = Int(text), SkinScale.allowed.contains(scale) else {
-                    return .failure(UsageError(message: "--scale must be 1, 2 or 3"))
+                guard let text = value(argument), let scale = Double(text), SkinScale.allowed.contains(scale) else {
+                    let scales = SkinScale.allowed.map { SkinScale.label($0).dropLast() }.joined(separator: ", ")
+                    return .failure(UsageError(message: "--scale must be one of \(scales)"))
                 }
                 options.scale = scale
             case "--exit-after":
@@ -178,7 +179,7 @@ final class PreviewController: NSObject, NSApplicationDelegate {
         manager.show()
         NSApp.activate()
         let backing = NSScreen.main?.backingScaleFactor ?? 0
-        SkinPreview.log("skin preview: windows created (scale \(manager.scale), display backing \(backing)x):\n"
+        SkinPreview.log("skin preview: windows created (scale \(SkinScale.label(manager.scale)), display backing \(backing)x):\n"
                         + manager.describeFrames())
         let timer = Timer(timeInterval: 0.25, repeats: true) { [weak self] _ in
             MainActor.assumeIsolated { self?.tick() }
@@ -343,10 +344,12 @@ final class PreviewController: NSObject, NSApplicationDelegate {
         menu.popUp(positioning: nil, at: screenPoint, in: nil)
     }
 
-    private func item(_ title: String, _ action: Selector, tag: Int = 0, on: Bool = false, key: String = "") -> NSMenuItem {
+    private func item(_ title: String, _ action: Selector, tag: Int = 0, on: Bool = false, key: String = "",
+                      represented: Any? = nil) -> NSMenuItem {
         let item = NSMenuItem(title: title, action: action, keyEquivalent: key)
         item.target = self
         item.tag = tag
+        item.representedObject = represented
         item.state = on ? .on : .off
         return item
     }
@@ -382,11 +385,15 @@ final class PreviewController: NSObject, NSApplicationDelegate {
 
     private func viewItems() -> [NSMenuItem] {
         guard let manager else { return [] }
-        let items = [
-            item("Double Size", #selector(toggleScale(_:)), on: manager.scale >= 2, key: "d"),
-            item("Scale 1x", #selector(setScale(_:)), tag: 1, on: manager.scale == 1),
-            item("Scale 2x", #selector(setScale(_:)), tag: 2, on: manager.scale == 2),
-            item("Scale 3x", #selector(setScale(_:)), tag: 3, on: manager.scale == 3),
+        // ⌘D (double size) has no visible item: Scale 2x is the same thing.
+        let doubleSize = item("Double Size", #selector(toggleScale(_:)), key: "d")
+        doubleSize.keyEquivalentModifierMask = .command
+        doubleSize.isHidden = true
+        doubleSize.allowsKeyEquivalentWhenHidden = true
+        let scales = SkinScale.allowed.map { scale in
+            item("Scale \(SkinScale.label(scale))", #selector(setScale(_:)), on: manager.scale == scale, represented: scale)
+        }
+        return [doubleSize] + scales + [
             item("Always on Top", #selector(toggleOnTop(_:)), on: manager.alwaysOnTop),
             item("Window Shade", #selector(toggleShade(_:)), on: manager.isShaded(.main)),
             item("Equalizer", #selector(toggleEqualizer(_:)), on: manager.isOpen(.equalizer)),
@@ -394,8 +401,6 @@ final class PreviewController: NSObject, NSApplicationDelegate {
             item("Region Shaping", #selector(toggleRegion(_:)), on: manager.regionEnabled),
             item("Regroup Windows", #selector(regroup(_:))),
         ]
-        items[0].keyEquivalentModifierMask = .command
-        return items
     }
 
     private func buildMainMenu() {
@@ -427,7 +432,11 @@ final class PreviewController: NSObject, NSApplicationDelegate {
     }
 
     @objc private func toggleScale(_ sender: NSMenuItem) { manager?.toggleScale(); logFrames() }
-    @objc private func setScale(_ sender: NSMenuItem) { manager?.setScale(sender.tag); logFrames() }
+    @objc private func setScale(_ sender: NSMenuItem) {
+        guard let scale = sender.representedObject as? Double else { return }
+        manager?.setScale(scale)
+        logFrames()
+    }
     @objc private func toggleOnTop(_ sender: NSMenuItem) { manager.map { $0.setAlwaysOnTop(!$0.alwaysOnTop) } }
     @objc private func toggleShade(_ sender: NSMenuItem) { manager?.toggleShade(.main) }
     @objc private func toggleEqualizer(_ sender: NSMenuItem) { manager?.toggleOpen(.equalizer) }
@@ -463,6 +472,11 @@ enum CaptureCheck {
             return false
         }
         let create = unsafeBitCast(symbol, to: CreateImage.self)
+        guard SkinScale.isWhole(manager.scale) else {
+            SkinPreview.log("capture: needs scale 1x, 2x or 3x; at \(SkinScale.label(manager.scale)) skin pixels are not "
+                            + "uniform blocks")
+            return false
+        }
         let primaryHeight = NSScreen.screens.first?.frame.height ?? 0
         var ok = true
         for role in SkinWindowRole.allCases {
@@ -486,7 +500,7 @@ enum CaptureCheck {
             let result = compare(image, base: base, view: window.skinView, within: skinRects)
             SkinPreview.log("capture: \(role) \(image.width)x\(image.height) px for \(base.width)x\(base.height) skin px "
                             + "(\(skinRects.map(\.description)) on screen) at scale "
-                            + "\(window.skinView.scale): \(result.nonUniform) non-uniform blocks, max channel delta \(result.maxDelta), "
+                            + "\(SkinScale.label(window.skinView.scale)): \(result.nonUniform) non-uniform blocks, max channel delta \(result.maxDelta), "
                             + "\(result.checked) pixels checked (marquee and visualiser layers included), "
                             + "\(result.transparent) region pixels transparent with \(result.regionLeaks) leaks"
                             + (result.mismatches.isEmpty ? "" : "; first mismatches at skin px \(result.mismatches)"))
@@ -585,8 +599,8 @@ enum CaptureCheck {
             try? await Task.sleep(for: .milliseconds(200))
         }
         func screenPoint(_ window: SkinWindow, skin: CGPoint) -> CGPoint {
-            let s = CGFloat(window.skinView.scale)
-            let inWindow = window.skinView.convert(CGPoint(x: skin.x * s, y: skin.y * s), to: nil)
+            let f = SkinScale.pointsPerSkinPixel(window.skinView.kind, scale: window.skinView.scale)
+            let inWindow = window.skinView.convert(CGPoint(x: skin.x * f.x, y: skin.y * f.y), to: nil)
             return window.convertPoint(toScreen: inWindow)
         }
         func send(_ type: NSEvent.EventType, _ window: SkinWindow, at screen: CGPoint, clicks: Int = 1) {
@@ -653,8 +667,10 @@ enum CaptureCheck {
         // 3. Double-clicking the title bar shades Main; what hangs below follows its bottom edge.
         click(main, skin: CGPoint(x: 150, y: 5), clicks: 2)
         await settle()
-        let s = CGFloat(manager.scale)
-        check("double-click shades Main", manager.isShaded(.main) && main.frame.height == 14 * s && main.frame.maxY == mainFrame.maxY
+        let s = SkinScale.pointsPerSkinPixel(.main, scale: manager.scale).x
+        let shadeHeight = SkinScale.pointSize(.shade, scale: manager.scale).height
+        check("double-click shades Main", manager.isShaded(.main) && main.frame.height == shadeHeight
+              && main.frame.maxY == mainFrame.maxY
               && eq.frame.maxY == main.frame.minY && playlist.frame.maxY == eq.frame.minY, "main \(main.frame) eq \(eq.frame)")
         click(main, skin: CGPoint(x: 40, y: 7), clicks: 2)  // the strip's own title area ((150, 5) is its mini time)
         await settle()
@@ -684,12 +700,13 @@ enum CaptureCheck {
         let scale = manager.scale
         click(main, skin: CGPoint(x: 14, y: 51))
         await settle()
-        check("clutter D toggles the scale", manager.scale != scale && main.frame.width == CGFloat(275 * manager.scale)
+        func mainWidth(_ scale: Double) -> CGFloat { SkinScale.pointSize(.main, scale: scale).width }
+        check("clutter D toggles the scale", manager.scale != scale && main.frame.width == mainWidth(manager.scale)
               && eq.frame.maxY == main.frame.minY && playlist.frame.maxY == eq.frame.minY, "scale \(manager.scale)")
         click(main, skin: CGPoint(x: 14, y: 51))
         await settle()
-        let back = scale == 1 ? 1 : 2  // the toggle is 1x <-> 2x; from 3x it goes 1x, then 2x
-        check("and back", manager.scale == back && main.frame.width == CGFloat(275 * back), "scale \(manager.scale)")
+        let back: Double = scale >= 2 ? 2 : 1  // the toggle is 1x <-> 2x; from 2x and up it goes 1x, then 2x
+        check("and back", manager.scale == back && main.frame.width == mainWidth(back), "scale \(manager.scale)")
         SkinPreview.log("exercise: \(ok ? "all checks passed" : "some checks FAILED")")
         return ok
     }

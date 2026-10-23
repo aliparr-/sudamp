@@ -30,7 +30,7 @@ Time to first audio (TTFA), from menu action to first non-silent sample, is stam
 | Cold YouTube pick (VOD or `/live`) | ≤ 3.0 s p50, ≤ 3.5 s p90 | 1.15–1.4 s VOD resolve [measured] + stream open [unverified, R1] |
 | First launch, engine downloading | ≤ 2 s via radio | Radio needs no yt-dlp |
 
-**Goals:** the north star; `.wsz` skins drawn pixel-exact; no single source failure silences a genre; ≤ 3% CPU playing, ≤ 0.5% paused; a clean licence and trademark trail; every behaviour verifiable from a terminal. **Non-goals:** video, downloads, accounts, cookies; the Mac App Store (guidelines 2.5.2, 2.4.5, 5.2.3 [source]); Milkdrop, local files, telemetry; Intel, Windows, Linux. **After v1.0:** post-EQ visualiser, loudness normalisation, Mixcloud widget mode (if chosen, §13), EQ/Playlist shade and resize, double-size, cursors, 1.5x scale, an in-app skin museum, hotkeys, sleep timer, Preferences, and our own libmpv build.
+**Goals:** the north star; `.wsz` skins drawn pixel-exact; no single source failure silences a genre; ≤ 3% CPU playing, ≤ 0.5% paused; a clean licence and trademark trail; every behaviour verifiable from a terminal. **Non-goals:** video, downloads, accounts, cookies; the Mac App Store (guidelines 2.5.2, 2.4.5, 5.2.3 [source]); Milkdrop, local files, telemetry; Intel, Windows, Linux. **After v1.0:** post-EQ visualiser, loudness normalisation, Mixcloud widget mode (if chosen, §13), EQ/Playlist shade and resize, double-size, cursors, an in-app skin museum, hotkeys, sleep timer, Preferences, and our own libmpv build.
 
 ## 3. User experience
 
@@ -287,7 +287,7 @@ New IDs from a feed change go at random positions after the cursor; ★ Favourit
 **Decision.** A pure compositor draws each window at 1x; AppKit only displays and moves the result.
 - `WindowComposer.render(window, state, skin)` returns an RGBA8 frame at 1x (Main/EQ 275×116, Playlist 275×232 fixed, shade 275×14); it and `Layout.hitTest` are pure. The frame becomes `layer.contents` with `.nearest` filtering; visualiser and marquee are sublayers, so the base recomposes only on state changes.
 - `SkinWindow` is borderless and clear, overrides `canBecomeKey/Main` (both false otherwise [measured]) and drags itself. Docking is Bitamp's `Docking.swift` with Webamp's **15 px** snap and `snapUtils` tests; dragging Main moves its cluster as child windows. MacAmp's screen guard and clamp (`addObserver(forName:)` for macOS 15) recover windows after sleep or display changes.
-- One uniform scale (1, 2 or 3; 2 on Retina), toggled with ⌘D; docking maths stays in skin pixels. EQ sliders use Bitamp's geometry, Webamp's 51 px travel. Every hotspot gets an NSAccessibility element.
+- One uniform scale (1x, 1.2x, 1.5x, 2x, 2.5x or 3x; 2x on Retina), picked in the View menu, with ⌘D toggling 1x and 2x; docking maths stays in skin pixels. 1x, 2x and 3x are pixel-exact; the others round each window to whole points and stretch the 1x frame over it, so some skin pixels are a device pixel wider or taller. EQ sliders use Bitamp's geometry, Webamp's 51 px travel. Every hotspot gets an NSAccessibility element.
 
 ### 8.2 Loading `.wsz`
 - **Reader:** Bitamp's `ZipArchive`, with caps checked **before allocating**: 32 MB per entry (declared, compressed and while inflating), 96 MB total, 512 entries, stored or deflate only. Uncapped, a 1 MB zip bomb pushed the reader to 2.16 GB [measured].

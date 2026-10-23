@@ -272,14 +272,19 @@ extension SkinnedPlayerUI: NSMenuDelegate {
         if let url = URL(string: "https://skins.webamp.org/") { NSWorkspace.shared.open(url) }
     }
 
-    /// Double Size, scales, Always on Top, the windows, shade, time, visualiser, font, region shaping.
+    /// Scales, Always on Top, the windows, shade, time, visualiser, font, region shaping.
     func viewItems() -> [NSMenuItem] {
         let holder = NSMenu()
+        // ⌘D (Winamp's double size, 1x ↔ 2x) keeps working without an item of its own: Scale 2x is the same thing.
         let double = add(holder, "Double Size", #selector(viewToggleScale(_:)), key: "d")
-        double.state = manager.scale >= 2 ? .on : .off
+        double.isHidden = true
+        double.allowsKeyEquivalentWhenHidden = true
         for scale in SkinScale.allowed {
-            let item = add(holder, "Scale \(scale)x", #selector(viewSetScale(_:)), key: "\(scale)", modifiers: [.command, .option])
-            item.tag = scale
+            // ⌘⌥1, ⌘⌥2 and ⌘⌥3 for the whole scales.
+            let key = SkinScale.isWhole(scale) ? "\(Int(scale))" : ""
+            let item = add(holder, "Scale \(SkinScale.label(scale))", #selector(viewSetScale(_:)), key: key,
+                           modifiers: [.command, .option])
+            item.representedObject = scale
             item.state = manager.scale == scale ? .on : .off
         }
         add(holder, "Always on Top", #selector(viewAlwaysOnTop(_:)), key: "a", modifiers: [.command, .option]).state =
@@ -305,7 +310,10 @@ extension SkinnedPlayerUI: NSMenuDelegate {
     }
 
     @objc func viewToggleScale(_ sender: Any?) { toggleScale() }
-    @objc func viewSetScale(_ sender: NSMenuItem) { setScale(sender.tag) }
+    @objc func viewSetScale(_ sender: NSMenuItem) {
+        guard let scale = sender.representedObject as? Double else { return }
+        setScale(scale)
+    }
     @objc func viewAlwaysOnTop(_ sender: Any?) {
         manager.setAlwaysOnTop(!manager.alwaysOnTop)
         publishDebugState()

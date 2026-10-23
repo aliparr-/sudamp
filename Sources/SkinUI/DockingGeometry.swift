@@ -200,16 +200,49 @@ nonisolated public enum DockingGeometry {
         return result
     }
 
-    /// Frames for a new scale: offsets from the anchor's top-left scale by `newScale / oldScale` (so docked
-    /// windows stay docked) and every window takes its new size.
+    /// Frames for a new scale: offsets from the anchor's top-left scale by `newScale / oldScale` and every window
+    /// takes its new size. Sizes round to whole points (a 14 px shade strip is 17 points at 1.2x), so scaled
+    /// offsets alone could open a 1-point gap; instead each window that touched another is placed against it
+    /// again, on the same edge and with the same edges aligned, so docked windows stay docked.
     public static func rescale(_ frames: Frames, sizes: [SkinWindowRole: IntSize], anchor: SkinWindowRole,
-                               oldScale: Int, newScale: Int) -> Frames {
+                               oldScale: Double, newScale: Double) -> Frames {
         guard let a = frames[anchor], oldScale > 0 else { return frames }
-        func scaled(_ v: Int) -> Int { Int((Double(v) * Double(newScale) / Double(oldScale)).rounded()) }
+        let ratio = newScale / oldScale
+        func scaled(_ v: Int) -> Int { Int((Double(v) * ratio).rounded()) }
+        let roles = SkinWindowRole.allCases.filter { frames[$0] != nil }
         var result: Frames = [:]
-        for (role, frame) in frames {
-            let size = sizes[role] ?? IntSize(scaled(frame.width), scaled(frame.height))
-            result[role] = IntRect(a.x + scaled(frame.x - a.x), a.y + scaled(frame.y - a.y), size.width, size.height)
+        func size(_ role: SkinWindowRole) -> IntSize {
+            sizes[role] ?? IntSize(scaled(frames[role]!.width), scaled(frames[role]!.height))
+        }
+        /// One axis of `role` against the placed `parent`: beyond its far or near edge, else the same edge aligned,
+        /// else the scaled offset.
+        func axis(_ o: (min: Int, max: Int), _ p: (min: Int, max: Int), _ placed: (min: Int, max: Int),
+                  length: Int) -> Int {
+            if o.min == p.max { return placed.max }
+            if o.max == p.min { return placed.min - length }
+            if o.min == p.min { return placed.min }
+            if o.max == p.max { return placed.max - length }
+            return placed.min + scaled(o.min - p.min)
+        }
+        func docked(_ role: SkinWindowRole, to parent: SkinWindowRole) -> IntRect {
+            let o = frames[role]!, p = frames[parent]!, placed = result[parent]!, s = size(role)
+            return IntRect(axis((o.minX, o.maxX), (p.minX, p.maxX), (placed.minX, placed.maxX), length: s.width),
+                           axis((o.minY, o.maxY), (p.minY, p.maxY), (placed.minY, placed.maxY), length: s.height),
+                           s.width, s.height)
+        }
+        // Each docked group breadth-first from its first window (the anchor's group first), which is placed by
+        // its scaled offset from the anchor.
+        for root in [anchor] + roles where result[root] == nil {
+            let old = frames[root]!, s = size(root)
+            result[root] = IntRect(a.x + scaled(old.x - a.x), a.y + scaled(old.y - a.y), s.width, s.height)
+            var queue = [root]
+            while !queue.isEmpty {
+                let parent = queue.removeFirst()
+                for role in roles where result[role] == nil && SnapGeometry.areTouching(frames[role]!, frames[parent]!) {
+                    result[role] = docked(role, to: parent)
+                    queue.append(role)
+                }
+            }
         }
         return result
     }

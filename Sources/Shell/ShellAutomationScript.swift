@@ -10,7 +10,7 @@ import Foundation
 /// | `{"openGenreMenu": "marquee"\|"options"\|"contextMenu"}` | open the genre menu at that anchor (on screen, as a click would) |
 /// | `{"waitForMenu": "genre"\|"presets"\|"context"\|"any"\|"auto", "timeout": s}` | wait until such a menu is open; `auto` first asks for the first-launch auto-open |
 /// | `{"selectMenuItem": "Deep House"}` or `"Recently Played/…"` | choose an item of the open menu through the menu |
-/// | `{"selectMenuBarItem": "View/Double Size"}` | choose a menu-bar item by its title path |
+/// | `{"selectMenuBarItem": "View/Scale 2x"}` | choose a menu-bar item by its title path |
 /// | `"cancelMenu"` | close the open menu |
 /// | `{"pressControl": "<SkinKit control>", "window": "main"\|"equalizer"\|"playlist"}` | click a hotspot (`play`, `shuffle`, `eqOn`, `marquee`, `options`, …) |
 /// | `{"dragSlider": "<control>", "value": v, "window": …}` | drag a slider: volume 0…1, balance -1…1, position 0…1, preamp/band0…band9 in dB |

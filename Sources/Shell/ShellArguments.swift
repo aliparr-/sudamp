@@ -1,11 +1,12 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 import Foundation
+import SkinUI
 
 /// The app's own command-line options on top of Core's `LaunchArguments` (which keeps M2's): they are taken out
 /// first and the rest goes to `LaunchArguments.parse`.
 ///
 /// ```
-/// sudamp [<skin.wsz> …] [--scale 1|2|3] [--no-region] [--ignore-occlusion]
+/// sudamp [<skin.wsz> …] [--scale 1|1.2|1.5|2|2.5|3] [--no-region] [--ignore-occlusion]
 /// sudamp --snapshot <dir> --states <state.json> [<state.json> …]
 /// ```
 /// - `.wsz`/`.zip` paths load that skin (a second launch forwards them to the running instance, absolute).
@@ -15,7 +16,7 @@ import Foundation
 /// - `--snapshot` renders app states offscreen to PNG, `.rgba` and `.sha256` and exits (PLAN M5 snapshot goldens).
 nonisolated struct ShellArguments: Equatable, Sendable {
     var skinFiles: [String] = []
-    var scale: Int?
+    var scale: Double?
     var noRegion = false
     var ignoreOcclusion = false
     var snapshotDirectory: String?
@@ -56,7 +57,7 @@ nonisolated struct ShellArguments: Equatable, Sendable {
             switch arg {
             case "--scale":
                 let v = try value()
-                guard let n = Int(v), [1, 2, 3].contains(n) else { throw .badValue(arg, v) }
+                guard let n = Double(v), SkinScale.allowed.contains(n) else { throw .badValue(arg, v) }
                 a.scale = n
             case "--no-region": a.noRegion = true
             case "--ignore-occlusion": a.ignoreOcclusion = true

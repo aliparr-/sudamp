@@ -28,13 +28,20 @@ enum SkinPicture {
     /// Every skin pixel as a `scale` × `scale` block.
     static func upscaled(_ bitmap: Bitmap, by scale: Int) -> Bitmap {
         guard scale > 1 else { return bitmap }
-        let w = bitmap.width * scale, h = bitmap.height * scale
+        return resized(bitmap, to: IntSize(bitmap.width * scale, bitmap.height * scale))
+    }
+
+    /// Nearest-neighbour resize sampling each pixel's centre, as the windows' `.nearest` layers do: whole blocks
+    /// at whole scales, a few wider or taller pixels at the in-between ones.
+    static func resized(_ bitmap: Bitmap, to size: IntSize) -> Bitmap {
+        guard size.width > 0, size.height > 0, size != bitmap.size else { return bitmap }
+        let w = size.width, h = size.height
         var pixels = [UInt8](repeating: 0, count: w * h * 4)
         let source = bitmap.pixels
         for y in 0..<h {
-            let sy = y / scale
+            let sy = (2 * y + 1) * bitmap.height / (2 * h)
             for x in 0..<w {
-                let s = (sy * bitmap.width + x / scale) * 4
+                let s = (sy * bitmap.width + (2 * x + 1) * bitmap.width / (2 * w)) * 4
                 let d = (y * w + x) * 4
                 pixels[d] = source[s]
                 pixels[d + 1] = source[s + 1]
@@ -194,8 +201,8 @@ enum AppSnapshot {
         let state = SkinDisplay.playerState(snapshot, playlist: refs.map(StreamInfo.init),
                                             equalizer: fixture.equalizerSettings, prefs: prefs,
                                             rememberedGenre: fixture.rememberedGenre)
-        let scale = SkinScale.clamp(fixture.scale ?? 1)
-        let view = SkinView(role: fixture.role, skin: skin, scale: scale, shaded: fixture.shaded)
+        let scale = min(max(fixture.scale ?? 1, 1), 3)  // goldens are at whole scales: skin pixels as blocks
+        let view = SkinView(role: fixture.role, skin: skin, scale: Double(scale), shaded: fixture.shaded)
         let now = 100.0
         view.clock = { now }
         view.setFocused(fixture.focused ?? true)

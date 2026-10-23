@@ -23,8 +23,10 @@ nonisolated struct MenuNode: Codable, Equatable, Sendable {
 }
 
 enum MenuDump {
+    /// The items a user sees (hidden ones, such as the View menu's ⌘D, are left out).
     static func nodes(_ menu: NSMenu, only tag: Int? = nil) -> [MenuNode] {
         menu.items.compactMap { item in
+            if item.isHidden { return nil }
             if let tag, item.tag != tag { return nil }
             return node(item, tag: tag)
         }

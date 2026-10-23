@@ -156,6 +156,33 @@ func dragLanding(_ role: SkinWindowRole, frames: DockingGeometry.Frames, by delt
         #expect(DockingGeometry.cluster(of: .main, frames: doubled) == [.main, .equalizer, .playlist])
     }
 
+    @Test func rescaleThroughInBetweenScalesKeepsDockedWindowsTouching() {
+        func sizes(_ scale: Double) -> [SkinWindowRole: IntSize] {
+            [.main: SkinScale.intSize(.shade, scale: scale), .equalizer: SkinScale.intSize(.eq, scale: scale),
+             .playlist: SkinScale.intSize(.playlist, scale: scale)]
+        }
+        // Shaded Main, the EQ under it, the playlist beside the EQ. Scaled offsets alone would drift: the 17-point
+        // strip at 1.2x is 42.5 points at 3x, the strip itself 42.
+        let start: DockingGeometry.Frames = [.main: IntRect(0, 0, 275, 14), .equalizer: IntRect(0, 14, 275, 116),
+                                             .playlist: IntRect(275, 14, 275, 232)]
+        var frames = start
+        var scale = 1.0
+        for next in [1.2, 3, 1.5, 2.5, 1.2, 2, 1] {
+            frames = DockingGeometry.rescale(frames, sizes: sizes(next), anchor: .main, oldScale: scale, newScale: next)
+            scale = next
+            let main = frames[.main]!, eq = frames[.equalizer]!, playlist = frames[.playlist]!
+            #expect(main == IntRect(0, 0, sizes(next)[.main]!.width, sizes(next)[.main]!.height))
+            #expect(eq == IntRect(0, main.maxY, eq.width, eq.height), "EQ under Main at \(next)x")
+            #expect(playlist == IntRect(eq.maxX, eq.y, playlist.width, playlist.height), "playlist beside the EQ at \(next)x")
+        }
+        #expect(frames == start)
+        // A window docked to nothing keeps its scaled offset from Main.
+        let apart = DockingGeometry.rescale([.main: IntRect(0, 0, 275, 116), .playlist: IntRect(600, 300, 275, 232)],
+                                            sizes: [.main: IntSize(413, 174), .playlist: IntSize(413, 348)],
+                                            anchor: .main, oldScale: 1, newScale: 1.5)
+        #expect(apart[.playlist] == IntRect(900, 450, 413, 348))
+    }
+
     @Test func newWindowsOpenDockedUnderTheCluster() {
         let frames: DockingGeometry.Frames = [.main: IntRect(0, 0, 275, 116), .playlist: IntRect(0, 116, 275, 232)]
         #expect(DockingGeometry.dockedBelowCluster(.equalizer, size: IntSize(275, 116), frames: frames) == IntRect(0, 348, 275, 116))
@@ -277,8 +304,8 @@ func dragLanding(_ role: SkinWindowRole, frames: DockingGeometry.Frames, by delt
         #expect(manager.windows[.main]?.skinView.chrome.playlistOpen == true)
     }
 
-    @Test(arguments: [1, 2, 3])
-    func windowsArePixelExactAtEveryScale(scale: Int) {
+    @Test(arguments: SkinScale.allowed)
+    func windowsAreWholePointsAtEveryScale(scale: Double) {
         let manager = makeManager(scale: scale)
         defer { manager.close() }
         for (role, window) in manager.windows {
@@ -351,7 +378,14 @@ func dragLanding(_ role: SkinWindowRole, frames: DockingGeometry.Frames, by delt
         #expect(manager.scale == 1)
         manager.cycleScale()
         manager.cycleScale()
-        #expect(manager.scale == 3)
+        #expect(manager.scale == 1.5)
+        let at15 = manager.frames()
+        #expect(at15[.main]?.size == IntSize(413, 174) && at15[.equalizer]?.y == at15[.main]?.maxY
+                && at15[.playlist]?.y == at15[.equalizer]?.maxY && at15[.playlist]?.x == at15[.main]?.x)
+        manager.toggleScale()
+        #expect(manager.scale == 2, "double size from below 2x turns it on")
+        manager.setScale(1.3)
+        #expect(manager.scale == 1.2, "the nearest allowed scale")
         manager.setShaded(true, .playlist)
         #expect(!manager.isShaded(.playlist), "no playlist shade in v1")
     }
@@ -409,6 +443,26 @@ func dragLanding(_ role: SkinWindowRole, frames: DockingGeometry.Frames, by delt
         #expect(text.contains("\"equalizer\"") && text.contains("\"shaded\" : true"))
     }
 
+    @Test func inBetweenScalesPersist() throws {
+        let dir = try TempDir()
+        let url = dir.url.appending(path: "layout.json")
+        do {
+            let manager = makeManager(scale: 1, layoutURL: url)
+            manager.setScale(1.5)
+            let saved = manager.frames()
+            manager.close()
+            let restored = makeManager(scale: nil, layoutURL: url)
+            defer { restored.close() }
+            #expect(restored.scale == 1.5 && restored.frames() == saved)
+        }
+        // A scale that is no longer offered keeps the layout and takes the nearest one.
+        try WindowLayout(scale: 1.3, alwaysOnTop: false, windows: [:]).save(to: url)
+        #expect(WindowLayout.load(from: url)?.scale == 1.3)
+        let manager = makeManager(scale: nil, layoutURL: url)
+        defer { manager.close() }
+        #expect(manager.scale == 1.2)
+    }
+
     @Test func badLayoutFilesAreIgnored() throws {
         let dir = try TempDir()
         let url = dir.url.appending(path: "layout.json")
@@ -420,6 +474,8 @@ func dragLanding(_ role: SkinWindowRole, frames: DockingGeometry.Frames, by delt
         try future.save(to: url)
         #expect(WindowLayout.load(from: url) == nil)
         try WindowLayout(scale: 5, alwaysOnTop: false, windows: [:]).save(to: url)
+        #expect(WindowLayout.load(from: url) == nil)
+        try WindowLayout(scale: 0.5, alwaysOnTop: false, windows: [:]).save(to: url)
         #expect(WindowLayout.load(from: url) == nil)
         try WindowLayout(scale: 2, alwaysOnTop: false, windows: [.main: .init(x: 1e9, top: 0, open: true, shaded: false)])
             .save(to: url)

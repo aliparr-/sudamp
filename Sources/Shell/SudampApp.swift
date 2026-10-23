@@ -95,7 +95,7 @@ public enum SudampApp {
     }
 
     static let usage = """
-      skinned player: sudamp [<skin.wsz>] [--scale 1|2|3] [--no-region] [--ignore-occlusion] (default; --plain for M2's window)
+      skinned player: sudamp [<skin.wsz>] [--scale 1|1.2|1.5|2|2.5|3] [--no-region] [--ignore-occlusion] (default; --plain for M2's window)
       snapshots:      sudamp --snapshot <dir> --states <state.json> …
     """
 

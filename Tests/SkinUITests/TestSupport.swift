@@ -53,7 +53,7 @@ let testScreen = DockScreen(frame: IntRect(0, -900, 1440, 900), visible: IntRect
 }
 
 /// A headless WindowManager: windows are real but never ordered on screen; screens are injected.
-@MainActor func makeManager(scale: Int? = 1, open: Set<SkinWindowRole> = [.main, .equalizer, .playlist],
+@MainActor func makeManager(scale: Double? = 1, open: Set<SkinWindowRole> = [.main, .equalizer, .playlist],
                             layoutURL: URL? = nil, screens: ScreenBox = ScreenBox([testScreen]),
                             skin: Skin = SudampDark.skin) -> WindowManager {
     TestApp.prepare()

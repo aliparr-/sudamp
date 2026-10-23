@@ -1,48 +1,74 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
-// Uniform window scale (DESIGN §8.1): every window is its 1x skin frame drawn at 1, 2 or 3 points per skin pixel
-// with nearest-neighbour filtering. Window origins and sizes stay on whole points, so on a 2x display a skin pixel
-// is exactly 2, 4 or 6 device pixels and the picture is pixel-exact at every scale.
+// Uniform window scale (DESIGN §8.1): every window is its 1x skin frame drawn at `scale` points per skin pixel
+// with nearest-neighbour filtering. Window origins and sizes stay on whole points. At 1x, 2x and 3x a skin pixel
+// is a whole number of points, so on a 2x display it is exactly 2, 4 or 6 device pixels and the picture is
+// pixel-exact. The in-between scales (1.2x, 1.5x, 2.5x) round each window to whole points and stretch the 1x
+// frame over it, so some skin pixels are a device pixel wider or taller than others.
 
 import CoreGraphics
 import SkinKit
 
 nonisolated public enum SkinScale {
-    public static let allowed = [1, 2, 3]
+    /// The scales on offer, smallest first.
+    public static let allowed: [Double] = [1, 1.2, 1.5, 2, 2.5, 3]
 
     /// 2 on Retina (backing scale ≥ 2), else 1.
-    public static func defaultScale(backingScaleFactor: CGFloat) -> Int {
+    public static func defaultScale(backingScaleFactor: CGFloat) -> Double {
         backingScaleFactor >= 2 ? 2 : 1
     }
 
-    /// The nearest allowed scale.
-    public static func clamp(_ scale: Int) -> Int {
-        min(max(scale, allowed.first!), allowed.last!)
+    /// The nearest allowed scale (1x for NaN).
+    public static func clamp(_ scale: Double) -> Double {
+        guard !scale.isNaN else { return allowed[0] }
+        let bounded = min(max(scale, allowed.first!), allowed.last!)
+        return allowed.min { abs($0 - bounded) < abs($1 - bounded) }!
     }
 
-    /// Window content size in points for a composer window at `scale`.
-    public static func pointSize(_ kind: WindowKind, scale: Int) -> CGSize {
-        CGSize(width: kind.size.width * scale, height: kind.size.height * scale)
+    /// A whole number of points per skin pixel (1x, 2x, 3x).
+    public static func isWhole(_ scale: Double) -> Bool { scale == scale.rounded() }
+
+    /// "1x", "1.5x".
+    public static func label(_ scale: Double) -> String {
+        isWhole(scale) ? "\(Int(scale))x" : "\(scale)x"
+    }
+
+    /// Window content size in points for a composer window at `scale`, rounded to whole points.
+    public static func pointSize(_ kind: WindowKind, scale: Double) -> CGSize {
+        let size = intSize(kind, scale: scale)
+        return CGSize(width: size.width, height: size.height)
     }
 
     /// Integer point size (docking geometry works in whole points).
-    public static func intSize(_ kind: WindowKind, scale: Int) -> IntSize {
-        IntSize(kind.size.width * scale, kind.size.height * scale)
+    public static func intSize(_ kind: WindowKind, scale: Double) -> IntSize {
+        IntSize(Int((Double(kind.size.width) * scale).rounded()), Int((Double(kind.size.height) * scale).rounded()))
     }
 
-    /// A skin rect (top-left origin, y down) as a view rect in a flipped view (also top-left, y down).
-    public static func viewRect(_ rect: IntRect, scale: Int) -> CGRect {
-        CGRect(x: rect.x * scale, y: rect.y * scale, width: rect.width * scale, height: rect.height * scale)
+    /// Points per skin pixel across and down a window: its whole-point size over its skin size. Exactly `scale` at
+    /// whole scales; at the others the window's rounding is spread over it, as the base layer stretches its image.
+    public static func pointsPerSkinPixel(_ kind: WindowKind, scale: Double) -> (x: CGFloat, y: CGFloat) {
+        let size = intSize(kind, scale: scale)
+        return (CGFloat(size.width) / CGFloat(kind.size.width), CGFloat(size.height) / CGFloat(kind.size.height))
+    }
+
+    /// A skin rect (top-left origin, y down) as a view rect in a flipped view (also top-left, y down) of a `kind`
+    /// window, lined up with the base layer's pixels.
+    public static func viewRect(_ rect: IntRect, in kind: WindowKind, scale: Double) -> CGRect {
+        let f = pointsPerSkinPixel(kind, scale: scale)
+        return CGRect(x: CGFloat(rect.x) * f.x, y: CGFloat(rect.y) * f.y,
+                      width: CGFloat(rect.width) * f.x, height: CGFloat(rect.height) * f.y)
     }
 
     /// A skin rect as a rect in an unflipped view of `viewHeight` points (bottom-left origin).
-    public static func unflippedViewRect(_ rect: IntRect, scale: Int, viewHeight: CGFloat) -> CGRect {
-        let r = viewRect(rect, scale: scale)
+    public static func unflippedViewRect(_ rect: IntRect, in kind: WindowKind, scale: Double,
+                                         viewHeight: CGFloat) -> CGRect {
+        let r = viewRect(rect, in: kind, scale: scale)
         return CGRect(x: r.minX, y: viewHeight - r.maxY, width: r.width, height: r.height)
     }
 
-    /// A point in a flipped view → fractional skin pixels.
-    public static func skinPoint(_ viewPoint: CGPoint, scale: Int) -> CGPoint {
-        CGPoint(x: viewPoint.x / CGFloat(scale), y: viewPoint.y / CGFloat(scale))
+    /// A point in a flipped view of a `kind` window → fractional skin pixels.
+    public static func skinPoint(_ viewPoint: CGPoint, in kind: WindowKind, scale: Double) -> CGPoint {
+        let f = pointsPerSkinPixel(kind, scale: scale)
+        return CGPoint(x: viewPoint.x / f.x, y: viewPoint.y / f.y)
     }
 
     /// The skin pixel containing a fractional skin point.
@@ -51,7 +77,7 @@ nonisolated public enum SkinScale {
     }
 
     /// Device pixels per skin pixel; ≥ 2 allows the Core Text overlay for titles the skin font cannot draw.
-    public static func devicePixelsPerSkinPixel(scale: Int, backingScaleFactor: CGFloat) -> CGFloat {
+    public static func devicePixelsPerSkinPixel(scale: Double, backingScaleFactor: CGFloat) -> CGFloat {
         CGFloat(scale) * backingScaleFactor
     }
 }

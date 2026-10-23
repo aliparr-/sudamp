@@ -6,42 +6,74 @@ import Testing
 @testable import SkinUI
 
 @Suite struct ScaleTests {
-    @Test(arguments: [1, 2, 3])
-    func everyWindowIsItsSkinSizeTimesTheScale(scale: Int) {
+    @Test(arguments: [1.0, 2, 3])
+    func everyWindowIsItsSkinSizeTimesTheScale(scale: Double) {
+        let s = Int(scale)
         for kind in WindowKind.allCases {
             let size = SkinScale.pointSize(kind, scale: scale)
-            #expect(size.width == CGFloat(kind.size.width * scale))
-            #expect(size.height == CGFloat(kind.size.height * scale))
-            #expect(SkinScale.intSize(kind, scale: scale) == IntSize(kind.size.width * scale, kind.size.height * scale))
+            #expect(size.width == CGFloat(kind.size.width * s))
+            #expect(size.height == CGFloat(kind.size.height * s))
+            #expect(SkinScale.intSize(kind, scale: scale) == IntSize(kind.size.width * s, kind.size.height * s))
+            #expect(SkinScale.pointsPerSkinPixel(kind, scale: scale) == (CGFloat(s), CGFloat(s)))
         }
-        #expect(SkinScale.pointSize(.main, scale: scale) == CGSize(width: 275 * scale, height: 116 * scale))
-        #expect(SkinScale.pointSize(.playlist, scale: scale) == CGSize(width: 275 * scale, height: 232 * scale))
-        #expect(SkinScale.pointSize(.shade, scale: scale) == CGSize(width: 275 * scale, height: 14 * scale))
+        #expect(SkinScale.pointSize(.main, scale: scale) == CGSize(width: 275 * s, height: 116 * s))
+        #expect(SkinScale.pointSize(.playlist, scale: scale) == CGSize(width: 275 * s, height: 232 * s))
+        #expect(SkinScale.pointSize(.shade, scale: scale) == CGSize(width: 275 * s, height: 14 * s))
+    }
+
+    @Test func inBetweenScalesRoundWindowsToWholePoints() {
+        #expect(SkinScale.intSize(.main, scale: 1.2) == IntSize(330, 139))  // 139.2
+        #expect(SkinScale.intSize(.shade, scale: 1.2) == IntSize(330, 17))  // 16.8
+        #expect(SkinScale.intSize(.playlist, scale: 1.2) == IntSize(330, 278))  // 278.4
+        #expect(SkinScale.intSize(.main, scale: 1.5) == IntSize(413, 174))  // 412.5
+        #expect(SkinScale.intSize(.eqShade, scale: 2.5) == IntSize(688, 35))  // 687.5
+        let f = SkinScale.pointsPerSkinPixel(.main, scale: 1.2)
+        #expect(f.x == 330.0 / 275 && f.y == 139.0 / 116)
     }
 
     @Test func scalesAreClampedAndDefaultToTwoOnRetina() {
+        #expect(SkinScale.allowed == [1, 1.2, 1.5, 2, 2.5, 3])
         #expect(SkinScale.clamp(0) == 1)
         #expect(SkinScale.clamp(2) == 2)
         #expect(SkinScale.clamp(7) == 3)
+        #expect(SkinScale.clamp(1.3) == 1.2)
+        #expect(SkinScale.clamp(1.4) == 1.5)
+        #expect(SkinScale.clamp(.nan) == 1 && SkinScale.clamp(.infinity) == 3)
         #expect(SkinScale.defaultScale(backingScaleFactor: 2) == 2)
         #expect(SkinScale.defaultScale(backingScaleFactor: 1) == 1)
         #expect(SkinScale.defaultScale(backingScaleFactor: 3) == 2)
     }
 
+    @Test func scalesHaveMenuLabels() {
+        #expect(SkinScale.allowed.map(SkinScale.label) == ["1x", "1.2x", "1.5x", "2x", "2.5x", "3x"])
+        #expect(SkinScale.allowed.filter(SkinScale.isWhole) == [1, 2, 3])
+    }
+
     @Test func skinRectsMapToWholePointRects() {
-        #expect(SkinScale.viewRect(MainLayout.marqueeText, scale: 2) == CGRect(x: 222, y: 54, width: 308, height: 12))
-        #expect(SkinScale.viewRect(MainLayout.visualizer, scale: 3) == CGRect(x: 72, y: 129, width: 228, height: 48))
-        #expect(SkinScale.unflippedViewRect(IntRect(0, 0, 275, 14), scale: 2, viewHeight: 232)
+        #expect(SkinScale.viewRect(MainLayout.marqueeText, in: .main, scale: 2)
+            == CGRect(x: 222, y: 54, width: 308, height: 12))
+        #expect(SkinScale.viewRect(MainLayout.visualizer, in: .main, scale: 3) == CGRect(x: 72, y: 129, width: 228, height: 48))
+        #expect(SkinScale.unflippedViewRect(IntRect(0, 0, 275, 14), in: .main, scale: 2, viewHeight: 232)
             == CGRect(x: 0, y: 204, width: 550, height: 28))
     }
 
+    @Test func atInBetweenScalesSkinRectsFollowTheRoundedWindow() {
+        // Main at 1.5x is 413 x 174 points: the whole window maps onto the whole view, as the base layer stretches.
+        #expect(SkinScale.viewRect(IntRect(0, 0, 275, 116), in: .main, scale: 1.5) == CGRect(x: 0, y: 0, width: 413, height: 174))
+        let marquee = SkinScale.viewRect(MainLayout.marqueeText, in: .main, scale: 1.5)
+        #expect(abs(marquee.minX - 111 * 413 / 275) < 1e-9 && marquee.minY == 27 * 1.5 && marquee.height == 6 * 1.5)
+    }
+
     @Test func viewPointsMapToSkinPixels() {
-        let p = SkinScale.skinPoint(CGPoint(x: 223.9, y: 55), scale: 2)
+        let p = SkinScale.skinPoint(CGPoint(x: 223.9, y: 55), in: .main, scale: 2)
         #expect(p == CGPoint(x: 111.95, y: 27.5))
         #expect(SkinScale.skinPixel(p) == IntPoint(111, 27))
-        #expect(SkinScale.skinPixel(SkinScale.skinPoint(CGPoint(x: 2.99, y: 0), scale: 3)) == IntPoint(0, 0))
-        #expect(SkinScale.skinPixel(SkinScale.skinPoint(CGPoint(x: 3, y: 0), scale: 3)) == IntPoint(1, 0))
+        #expect(SkinScale.skinPixel(SkinScale.skinPoint(CGPoint(x: 2.99, y: 0), in: .main, scale: 3)) == IntPoint(0, 0))
+        #expect(SkinScale.skinPixel(SkinScale.skinPoint(CGPoint(x: 3, y: 0), in: .main, scale: 3)) == IntPoint(1, 0))
         #expect(SkinScale.skinPixel(CGPoint(x: -0.5, y: 0)) == IntPoint(-1, 0))
+        // 1.2x: the bottom-right point of a 330 x 139 Main is its last skin pixel.
+        #expect(SkinScale.skinPixel(SkinScale.skinPoint(CGPoint(x: 329.9, y: 138.9), in: .main, scale: 1.2))
+            == IntPoint(274, 115))
     }
 
     @Test func theTitleOverlayNeedsTwoDevicePixelsPerSkinPixel() {

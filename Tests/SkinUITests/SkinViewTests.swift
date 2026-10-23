@@ -25,7 +25,7 @@ func fixtureVisualizer(_ state: WindowState) -> VisualizerSnapshot? {
     return frame
 }
 
-@MainActor func makeView(_ role: SkinWindowRole, shaded: Bool = false, scale: Int = 2, skin: Skin = SudampDark.skin,
+@MainActor func makeView(_ role: SkinWindowRole, shaded: Bool = false, scale: Double = 2, skin: Skin = SudampDark.skin,
                          state: SkinPlayerState, now: Double = 100, provider: VisualizerProvider? = nil) -> SkinView {
     TestApp.prepare()
     let view = SkinView(role: role, skin: skin, scale: scale, shaded: shaded)
@@ -115,8 +115,8 @@ func fixtureVisualizer(_ state: WindowState) -> VisualizerSnapshot? {
         #expect(eq.marqueeLayer.isHidden && eq.visualizerLayer.isHidden)
     }
 
-    @Test(arguments: [1, 2, 3])
-    func layerGeometryIsWholePointsAtEveryScale(scale: Int) {
+    @Test(arguments: [1.0, 2, 3])
+    func layerGeometryIsWholePointsAtEveryScale(scale: Double) {
         let view = makeView(.main, scale: scale, state: Self.mainPlaying())
         let s = CGFloat(scale)
         #expect(view.frame.size == CGSize(width: 275 * s, height: 116 * s))
@@ -129,6 +129,20 @@ func fixtureVisualizer(_ state: WindowState) -> VisualizerSnapshot? {
         }
         #expect(view.layer?.isGeometryFlipped == true, "sublayer frames use the skin's top-left origin")
         #expect(view.isFlipped)
+    }
+
+    @Test(arguments: [1.2, 1.5, 2.5])
+    func atInBetweenScalesTheLayersLineUpWithTheBase(scale: Double) {
+        let view = makeView(.main, scale: scale, state: Self.mainPlaying())
+        let size = SkinScale.pointSize(.main, scale: scale)
+        #expect(size.width == size.width.rounded() && size.height == size.height.rounded(), "whole points")
+        #expect(view.frame.size == size && view.baseLayer.frame == CGRect(origin: .zero, size: size))
+        // CALayer keeps a frame as position and bounds, so it reads back within rounding of what was set.
+        func near(_ a: CGRect, _ b: CGRect) -> Bool {
+            [a.minX - b.minX, a.minY - b.minY, a.width - b.width, a.height - b.height].allSatisfy { abs($0) < 1e-9 }
+        }
+        #expect(near(view.marqueeLayer.frame, SkinScale.viewRect(MainLayout.marqueeText, in: .main, scale: scale)))
+        #expect(near(view.visualizerLayer.frame, SkinScale.viewRect(MainLayout.visualizer, in: .main, scale: scale)))
     }
 
     @Test func theBaseOnlyRecomposesWhenItsPixelsChange() throws {
@@ -250,12 +264,12 @@ func fixtureVisualizer(_ state: WindowState) -> VisualizerSnapshot? {
 }
 
 @MainActor @Suite(.serialized) struct SkinWindowTests {
-    @Test(arguments: [1, 2, 3])
-    func windowsAreBorderlessClearAndSizedPerScale(scale: Int) {
+    @Test(arguments: SkinScale.allowed)
+    func windowsAreBorderlessClearAndSizedPerScale(scale: Double) {
         TestApp.prepare()
         let window = SkinWindow(role: .playlist, skin: SudampDark.skin, scale: scale)
         defer { window.skinView.stopDisplayLink() }
-        #expect(window.frame.size == CGSize(width: 275 * scale, height: 232 * scale))
+        #expect(window.frame.size == SkinScale.pointSize(.playlist, scale: scale))
         #expect(window.styleMask == [.borderless, .miniaturizable])
         #expect(!window.isOpaque && window.backgroundColor == .clear && window.hasShadow)
         #expect(window.canBecomeKey && window.canBecomeMain)
@@ -322,6 +336,25 @@ func fixtureVisualizer(_ state: WindowState) -> VisualizerSnapshot? {
         try send(.leftMouseUp, CGPoint(x: 200, y: 232 - 10))
         try send(.rightMouseDown, play)
         #expect(outputs.last == .event(.contextMenu(screenPoint: CGPoint(x: 401, y: 438))))
+    }
+
+    @Test func clicksLandOnTheirControlAtInBetweenScales() throws {
+        TestApp.prepare()
+        let window = SkinWindow(role: .main, skin: SudampDark.skin, scale: 1.5)
+        defer { window.skinView.stopDisplayLink() }
+        let view = window.skinView
+        #expect(window.frame.size == CGSize(width: 413, height: 174))
+        var outputs: [SkinInteractionOutput] = []
+        view.onOutput = { output, _ in outputs.append(output) }
+        // Play's centre (50.5, 97) in skin px → (50.5 × 413/275, 145.5) flipped view points.
+        let play = CGPoint(x: 50.5 * 413 / 275, y: 174 - 145.5)
+        for type in [NSEvent.EventType.leftMouseDown, .leftMouseUp] {
+            let event = try #require(NSEvent.mouseEvent(with: type, location: play, modifierFlags: [], timestamp: 0,
+                                                        windowNumber: window.windowNumber, context: nil, eventNumber: 0,
+                                                        clickCount: 1, pressure: 1))
+            if type == .leftMouseDown { view.mouseDown(with: event) } else { view.mouseUp(with: event) }
+        }
+        #expect(outputs == [.event(.play)])
     }
 
     @Test func aWindowWithoutAManagerDragsItself() throws {
@@ -467,7 +500,7 @@ func fixtureVisualizer(_ state: WindowState) -> VisualizerSnapshot? {
         #expect((view.baseLayer.contents as AnyObject?) === base, "the base image stays")
         let patch = try #require(view.patchRect)
         #expect(!view.patchLayer.isHidden && MainLayout.time.contains(patch), "only the time digits: \(patch)")
-        #expect(view.patchLayer.frame == SkinScale.viewRect(patch, scale: 2))
+        #expect(view.patchLayer.frame == SkinScale.viewRect(patch, in: .main, scale: 2))
         // base layer image + patch == the composer's frame for the new state.
         let shown = try #require(rawRGBA(view.baseLayer.contents as! CGImage))
         var picture = Bitmap(width: 275, height: 116, pixels: shown)

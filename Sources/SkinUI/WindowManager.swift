@@ -5,7 +5,7 @@
 // - docking: dragging Main carries its docked cluster (attached as child windows only for the drag), other
 //   windows move alone; everything snaps to the other windows and the screen edges at 15 points
 //   (DockingGeometry over SkinKit's SnapGeometry);
-// - shade (Main and EQ; what hangs below follows), uniform scale 1/2/3 (rescaled around Main's top-left so
+// - shade (Main and EQ; what hangs below follows), uniform scale 1x to 3x (rescaled around Main's top-left so
 //   docked windows stay docked), always on top, opening and closing EQ and Playlist, minimise-all;
 // - layout persistence to a JSON file (WindowLayout), restored at launch;
 // - screen guard: after display changes or wake, stranded docked groups move back on screen as a unit;
@@ -48,7 +48,7 @@ import SkinKit
 public final class WindowManager {
     public struct Configuration {
         /// Explicit scale (e.g. `--scale`); nil: the saved layout's, else 2 on Retina and 1 otherwise.
-        public var scale: Int?
+        public var scale: Double?
         /// Windows open on first launch (DESIGN §3: Main and Playlist). Main is always open.
         public var initialOpen: Set<SkinWindowRole> = [.main, .playlist]
         /// Where the layout is saved; nil disables persistence.
@@ -71,7 +71,7 @@ public final class WindowManager {
 
     public let windows: [SkinWindowRole: SkinWindow]
     public private(set) var skin: Skin
-    public private(set) var scale: Int
+    public private(set) var scale: Double
     public private(set) var alwaysOnTop = false
     public private(set) var regionEnabled: Bool
     public private(set) var openWindows: Set<SkinWindowRole>
@@ -200,8 +200,8 @@ public final class WindowManager {
 
     public func toggleShade(_ role: SkinWindowRole) { setShaded(!isShaded(role), role) }
 
-    /// Uniform scale 1, 2 or 3, rescaled around Main's top-left so docked windows stay docked.
-    public func setScale(_ newScale: Int) {
+    /// One of SkinScale.allowed (the nearest), rescaled around Main's top-left so docked windows stay docked.
+    public func setScale(_ newScale: Double) {
         let target = SkinScale.clamp(newScale)
         guard target != scale else { return }
         let old = scale
@@ -214,11 +214,11 @@ public final class WindowManager {
         layoutChanged()
     }
 
-    /// ⌘D / clutter D: 1x ↔ 2x (from 3x back to 1x).
-    public func toggleScale() { setScale(scale == 1 ? 2 : 1) }
+    /// ⌘D / clutter D, Winamp's double size: off (1x) when lit (2x and up), else 2x.
+    public func toggleScale() { setScale(scale >= 2 ? 1 : 2) }
 
-    /// 1 → 2 → 3 → 1.
-    public func cycleScale() { setScale(scale >= 3 ? 1 : scale + 1) }
+    /// The next allowed scale, from the largest back to 1x.
+    public func cycleScale() { setScale(SkinScale.allowed.first { $0 > scale } ?? SkinScale.allowed[0]) }
 
     public func setAlwaysOnTop(_ on: Bool) {
         alwaysOnTop = on

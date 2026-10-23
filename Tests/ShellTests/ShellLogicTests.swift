@@ -282,6 +282,8 @@ import Testing
         #expect(a.skinFiles == ["x/AndAmp.wsz"] && a.scale == 2 && a.noRegion && a.ignoreOcclusion)
         #expect(a.remaining == ["--mute", "--profile", "/tmp/p", "sudamp://genre/techno"])
         #expect(throws: ShellArguments.ParseError.self) { _ = try ShellArguments.parse(["--scale", "4"]) }
+        #expect(throws: ShellArguments.ParseError.self) { _ = try ShellArguments.parse(["--scale", "1.3"]) }
+        #expect(try ShellArguments.parse(["--scale", "1.5"]).scale == 1.5)
     }
 
     @Test func snapshotStatesTakeEveryFollowingPath() throws {
@@ -376,5 +378,9 @@ import Testing
         let big = SkinPicture.upscaled(bitmap, by: 3)
         #expect(big.width == 6 && big.height == 3)
         #expect(big[2, 2] == .clear && big[3, 0] == .white && big[5, 2] == .white)
+        // In between, each pixel samples the skin pixel under its centre.
+        let wider = SkinPicture.resized(bitmap, to: IntSize(3, 2))
+        #expect(wider.width == 3 && wider.height == 2)
+        #expect(wider[0, 0] == .clear && wider[1, 0] == .white && wider[2, 1] == .white)
     }
 }

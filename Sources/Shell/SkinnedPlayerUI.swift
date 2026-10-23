@@ -90,7 +90,7 @@ final class SkinnedPlayerUI: NSObject {
         }
         context.observeSnapshots { [weak self] s in self?.render(s) }
         if let rejected { reject(rejected, origin: "launch") }
-        log.info("skinned UI: skin \(entry.id, privacy: .public), scale \(self.manager.scale)")
+        log.info("skinned UI: skin \(entry.id, privacy: .public), scale \(SkinScale.label(self.manager.scale), privacy: .public)")
         publishDebugState()
     }
 
@@ -341,7 +341,7 @@ final class SkinnedPlayerUI: NSObject {
 
     // MARK: Window management (View menu)
 
-    func setScale(_ scale: Int) {
+    func setScale(_ scale: Double) {
         manager.setScale(scale)
         publishDebugState()
     }

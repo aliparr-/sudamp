@@ -16,7 +16,7 @@ public final class SkinWindow: NSWindow {
     /// The app's undo manager (Edit ▸ Undo reaches it through the responder chain from a skinned window).
     public var undoManagerProvider: (() -> UndoManager?)?
 
-    public init(role: SkinWindowRole, skin: Skin, scale: Int, shaded: Bool = false) {
+    public init(role: SkinWindowRole, skin: Skin, scale: Double, shaded: Bool = false) {
         self.role = role
         skinView = SkinView(role: role, skin: skin, scale: scale, shaded: shaded)
         super.init(contentRect: CGRect(origin: .zero, size: skinView.frame.size),

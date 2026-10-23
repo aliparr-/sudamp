@@ -29,11 +29,11 @@ nonisolated public struct WindowLayout: Codable, Equatable, Sendable {
     }
 
     public var version = WindowLayout.currentVersion
-    public var scale: Int
+    public var scale: Double
     public var alwaysOnTop: Bool
     public var windows: [String: Entry]
 
-    public init(scale: Int, alwaysOnTop: Bool, windows: [SkinWindowRole: Entry]) {
+    public init(scale: Double, alwaysOnTop: Bool, windows: [SkinWindowRole: Entry]) {
         self.scale = scale
         self.alwaysOnTop = alwaysOnTop
         self.windows = Dictionary(uniqueKeysWithValues: windows.map { ($0.key.rawValue, $0.value) })
@@ -41,11 +41,14 @@ nonisolated public struct WindowLayout: Codable, Equatable, Sendable {
 
     public func entry(_ role: SkinWindowRole) -> Entry? { windows[role.rawValue] }
 
-    /// Loads a layout; nil when the file is missing, unreadable, from a newer version or nonsensical.
+    /// Loads a layout; nil when the file is missing, unreadable, from a newer version or nonsensical. Any scale
+    /// from 1x to 3x is kept (WindowManager takes the nearest allowed one), so the positions survive a change to
+    /// the scales on offer.
     public static func load(from url: URL) -> WindowLayout? {
         guard let data = try? Data(contentsOf: url),
               let layout = try? JSONDecoder().decode(WindowLayout.self, from: data),
-              layout.version <= currentVersion, SkinScale.allowed.contains(layout.scale),
+              layout.version <= currentVersion,
+              layout.scale >= SkinScale.allowed.first!, layout.scale <= SkinScale.allowed.last!,
               layout.windows.values.allSatisfy({ $0.x.isFinite && $0.top.isFinite && abs($0.x) < 1e6 && abs($0.top) < 1e6 })
         else { return nil }
         return layout

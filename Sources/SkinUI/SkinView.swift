@@ -9,12 +9,12 @@
 //   ├─ marquee     154x6 marquee text over the base's pixels, redrawn when the scroll step changes
 //   └─ overlay     Core Text title for characters the skin font lacks (≥ 2 device px per skin px)
 //
-// Every layer shows a whole-pixel 1x image stretched by an integer factor with nearest-neighbour filtering at
-// whole-point frames, so the window is pixel-exact at scale 1, 2 and 3. The base recomposes only when what it
-// shows changes (whole seconds, a pressed button, a moved slider, state from the app); the 30 Hz display link
-// runs only while the visualiser animates and redraws only it; marquee steps (every 220 ms) and the pause blink
-// (every second) are redrawn by a one-shot timer set for the moment they change, so a scrolling title or a paused
-// clock costs a few redraws a second instead of thirty.
+// Every layer shows a whole-pixel 1x image stretched with nearest-neighbour filtering, so the window is pixel-exact
+// at scale 1, 2 and 3 (whole-point frames); at the in-between scales the layers line up with the base's pixels
+// (SkinScale.viewRect). The base recomposes only when what it shows changes (whole seconds, a pressed button, a
+// moved slider, state from the app); the 30 Hz display link runs only while the visualiser animates and redraws
+// only it; marquee steps (every 220 ms) and the pause blink (every second) are redrawn by a one-shot timer set for
+// the moment they change, so a scrolling title or a paused clock costs a few redraws a second instead of thirty.
 //
 // Input goes through SkinInteraction (pure); its outputs reach WindowManager via `onOutput`.
 
@@ -38,7 +38,7 @@ nonisolated public struct SkinChrome: Equatable, Sendable {
 public final class SkinView: NSView {
     public let role: SkinWindowRole
     public private(set) var kind: WindowKind
-    public private(set) var scale: Int
+    public private(set) var scale: Double
     public private(set) var skin: Skin
 
     /// What to draw; set by WindowManager (or directly when used alone).
@@ -129,12 +129,12 @@ public final class SkinView: NSView {
 
     private struct ShapeKey: Equatable {
         var kind: WindowKind
-        var scale: Int
+        var scale: Double
         var skin: Int
         var region: Bool
     }
 
-    public init(role: SkinWindowRole, skin: Skin, scale: Int, shaded: Bool = false) {
+    public init(role: SkinWindowRole, skin: Skin, scale: Double, shaded: Bool = false) {
         self.role = role
         self.skin = skin
         self.scale = SkinScale.clamp(scale)
@@ -189,7 +189,7 @@ public final class SkinView: NSView {
     // MARK: Configuration
 
     /// Switches window kind (shade), scale or skin; resizes the view (the window follows in WindowManager).
-    public func configure(kind newKind: WindowKind? = nil, scale newScale: Int? = nil, skin newSkin: Skin? = nil) {
+    public func configure(kind newKind: WindowKind? = nil, scale newScale: Double? = nil, skin newSkin: Skin? = nil) {
         if let newKind { kind = newKind }
         if let newScale { scale = SkinScale.clamp(newScale) }
         if let newSkin {
@@ -239,15 +239,15 @@ public final class SkinView: NSView {
         case .shade: ShadeLayout.visualizer
         default: nil
         }
-        visualizerLayer.frame = visRect.map { SkinScale.viewRect($0, scale: scale) } ?? .zero
+        visualizerLayer.frame = visRect.map { SkinScale.viewRect($0, in: kind, scale: scale) } ?? .zero
         if visRect == nil { visualizerLayer.isHidden = true }  // otherwise visualizerStateChanged() decides
-        let marqueeRect = SkinScale.viewRect(MainLayout.marqueeText, scale: scale)
+        let marqueeRect = SkinScale.viewRect(MainLayout.marqueeText, in: kind, scale: scale)
         marqueeLayer.frame = kind == .main ? marqueeRect : .zero
         marqueeLayer.isHidden = kind != .main
         overlayClip.frame = marqueeRect
         if kind != .main { overlayClip.isHidden = true }
         let contentsScale = backingScale
-        if let patchRect { patchLayer.frame = SkinScale.viewRect(patchRect, scale: scale) }
+        if let patchRect { patchLayer.frame = SkinScale.viewRect(patchRect, in: kind, scale: scale) }
         for l in [rootLayer, baseLayer, patchLayer, visualizerLayer, marqueeLayer, overlayClip, overlayText] {
             l.contentsScale = contentsScale
         }
@@ -323,7 +323,7 @@ public final class SkinView: NSView {
             if union.width * union.height * Self.patchAreaDivisor <= new.width * new.height {
                 patchRect = union
                 patchLayer.contents = new.cropped(union).cgImage()
-                patchLayer.frame = SkinScale.viewRect(union, scale: scale)
+                patchLayer.frame = SkinScale.viewRect(union, in: kind, scale: scale)
                 if patchLayer.isHidden { patchLayer.isHidden = false }
                 return
             }
@@ -659,7 +659,8 @@ public final class SkinView: NSView {
     private func pointer(_ event: NSEvent) -> SkinPointer {
         let local = convert(event.locationInWindow, from: nil)
         let screen = window.map { $0.convertPoint(toScreen: event.locationInWindow) } ?? event.locationInWindow
-        return SkinPointer(skin: SkinScale.skinPoint(local, scale: scale), screen: screen, clickCount: event.clickCount)
+        return SkinPointer(skin: SkinScale.skinPoint(local, in: kind, scale: scale), screen: screen,
+                           clickCount: event.clickCount)
     }
 
     override public func mouseDown(with event: NSEvent) {
@@ -860,7 +861,7 @@ public final class SkinView: NSView {
 
     /// The screen rect of a skin rect, for accessibility frames and menu anchors.
     public func screenRect(forSkinRect rect: IntRect) -> CGRect {
-        let local = SkinScale.viewRect(rect, scale: scale)
+        let local = SkinScale.viewRect(rect, in: kind, scale: scale)
         let inWindow = convert(local, to: nil)
         return window?.convertToScreen(inWindow) ?? inWindow
     }

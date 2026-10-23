@@ -343,7 +343,7 @@ nonisolated public struct AppUIDebugInfo: Sendable, Equatable, Codable {
 
     /// `skinned` or `plain`.
     public var mode: String
-    public var scale: Int?
+    public var scale: Double?
     public var windows: [String: Window]?
     public var alwaysOnTop: Bool?
     /// region.txt shaping (spike S1's kill switch).
@@ -359,7 +359,7 @@ nonisolated public struct AppUIDebugInfo: Sendable, Equatable, Codable {
     public var lastSheet: String?
     public var sheetOpen: Bool
 
-    public init(mode: String, scale: Int? = nil, windows: [String: Window]? = nil, alwaysOnTop: Bool? = nil,
+    public init(mode: String, scale: Double? = nil, windows: [String: Window]? = nil, alwaysOnTop: Bool? = nil,
                 regionEnabled: Bool? = nil, menuAutoOpened: Bool = false, openMenu: String? = nil,
                 equalizer: Equalizer? = nil, timeDisplay: String? = nil, visualizerMode: String? = nil,
                 lastSheet: String? = nil, sheetOpen: Bool = false) {
