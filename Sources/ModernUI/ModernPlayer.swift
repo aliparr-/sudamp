@@ -22,6 +22,10 @@ public final class ModernPlayer: NSObject {
     private let root: ModernRootView
     private let configuration: Configuration
     private var displayLink: CADisplayLink?
+    /// Rechecks whether the window shows while WindowServer says it is hidden (see `windowCanBeSeen`).
+    private var visibilityTimer: Timer?
+    private var uncoveredCheck: (at: CFTimeInterval, uncovered: Bool)?
+    private var reportedOcclusionMismatch = false
     private var observers: [(center: NotificationCenter, token: NSObjectProtocol)] = []
     private var popover: NSPopover?
     private var saveTask: Task<Void, Never>?
@@ -114,7 +118,8 @@ public final class ModernPlayer: NSObject {
     /// For logs: why the visualiser is or isn't running.
     public var visualizerDiagnostics: String {
         "animating \(state.isAnimating), mode \(state.visualizer.rawValue), visible \(window.isVisible), "
-            + "occlusion visible \(window.occlusionState.contains(.visible)), link paused \(displayLink?.isPaused ?? true)"
+            + "occlusion visible \(window.occlusionState.contains(.visible)), "
+            + "uncovered \(uncoveredCheck.map { String($0.uncovered) } ?? "unchecked"), link paused \(displayLink?.isPaused ?? true)"
     }
 
     /// Fades out and hides (switching skins).
@@ -141,6 +146,8 @@ public final class ModernPlayer: NSObject {
         popover?.close()
         displayLink?.invalidate()
         displayLink = nil
+        visibilityTimer?.invalidate()
+        visibilityTimer = nil
         root.stopAnimations()
         for observer in observers { observer.center.removeObserver(observer.token) }
         observers = []
@@ -297,24 +304,62 @@ public final class ModernPlayer: NSObject {
         displayLink = link
     }
 
+    /// Playing, with a visualiser, in a window that is up (whether it can be seen is checked apart).
+    private var visualizerMayRun: Bool {
+        state.isAnimating && state.visualizer != .off && window.isVisible && !window.isMiniaturized
+    }
+
     private var visualizerWanted: Bool {
-        guard state.isAnimating, state.visualizer != .off, window.isVisible, !window.isMiniaturized else { return false }
-        return !pausesWhenOccluded || window.occlusionState.contains(.visible)
+        visualizerMayRun && (!pausesWhenOccluded || windowCanBeSeen())
+    }
+
+    /// Whether any of the window can be seen. WindowServer's occlusion state answers first; when it says hidden, the
+    /// windows above are checked by hand. A window that is nearly all clear (its glass is composited apart from its
+    /// own pixels) can be reported hidden while it shows: the likely reason the visualiser stood still on macOS 26.6.
+    private func windowCanBeSeen() -> Bool {
+        if window.occlusionState.contains(.visible) { return true }
+        let now = CACurrentMediaTime()
+        if let check = uncoveredCheck, now - check.at < 0.5 { return check.uncovered }
+        let areas = root.shownCardFrames().map { window.convertToScreen(root.convert($0, to: nil)) }
+        let uncovered = WindowVisibility.isUncovered(window, areas: areas)
+        uncoveredCheck = (now, uncovered)
+        if uncovered, !reportedOcclusionMismatch {
+            reportedOcclusionMismatch = true
+            onNotice?("modern window: WindowServer reports the window hidden while it shows; the visualizer checks the windows above it instead")
+        }
+        return uncovered
     }
 
     private func updateDisplayLink() {
         guard let displayLink else { return }
         let wanted = visualizerWanted
-        if displayLink.isPaused == wanted { displayLink.isPaused = !wanted }
-        if !wanted { root.nowPlaying.artwork.update(with: nil) }
+        if displayLink.isPaused == wanted {
+            displayLink.isPaused = !wanted
+            if !wanted { root.nowPlaying.artwork.update(with: nil) }
+        }
+        // While WindowServer says hidden, look again every second: covering or uncovering the window may not bring
+        // an occlusion notification.
+        let recheck = pausesWhenOccluded && visualizerMayRun && !window.occlusionState.contains(.visible)
+        if recheck, visibilityTimer == nil {
+            visibilityTimer = Timer.scheduledTimer(withTimeInterval: 1, repeats: true) { [weak self] _ in
+                MainActor.assumeIsolated { self?.updateDisplayLink() }
+            }
+        } else if !recheck, let timer = visibilityTimer {
+            timer.invalidate()
+            visibilityTimer = nil
+        }
     }
 
     public var isVisualizerRunning: Bool { displayLink.map { !$0.isPaused } ?? false }
     public private(set) var visualizerTicks = 0
+    /// The loudest bar seen so far (0...1): frames are arriving with sound in them.
+    public private(set) var visualizerPeak: Float = 0
 
     @objc private func displayLinkFired(_ link: CADisplayLink) {
         visualizerTicks += 1
-        root.nowPlaying.artwork.update(with: visualizerProvider?())
+        let frame = visualizerProvider?()
+        if let loudest = frame?.bars.max(), loudest > visualizerPeak { visualizerPeak = loudest }
+        root.nowPlaying.artwork.update(with: frame)
     }
 
     // MARK: Click routing
@@ -435,6 +480,44 @@ public final class ModernPlayer: NSObject {
 
     /// The scrolling title is moving.
     public var isTitleScrolling: Bool { root.nowPlaying.titleView.isAnimating }
+}
+
+/// Whether a window shows, worked out from the windows above it (no Screen Recording permission needed for their
+/// bounds).
+enum WindowVisibility {
+    /// Whether any of `areas` (screen rects, AppKit coordinates) is clear of the on-screen windows above `window`.
+    /// False when the window itself isn't on screen (another Space) or the screen is locked (the login window's
+    /// shield covers everything).
+    static func isUncovered(_ window: NSWindow, areas: [CGRect]) -> Bool {
+        let id = CGWindowID(window.windowNumber)
+        guard let own = (CGWindowListCopyWindowInfo(.optionIncludingWindow, id) as? [[String: Any]])?.first,
+              own[kCGWindowIsOnscreen as String] as? Bool == true else { return false }
+        let infos = CGWindowListCopyWindowInfo(.optionOnScreenAboveWindow, id) as? [[String: Any]] ?? []
+        let above = infos.compactMap { info -> CGRect? in
+            guard (info[kCGWindowAlpha as String] as? Double ?? 1) > 0.01,
+                  let bounds = info[kCGWindowBounds as String] as? NSDictionary else { return nil }
+            return CGRect(dictionaryRepresentation: bounds as CFDictionary)
+        }
+        // Window bounds are in Quartz coordinates: from the primary screen's top-left, y down.
+        let primaryHeight = NSScreen.screens.first?.frame.height ?? 0
+        let flipped = areas.map { CGRect(x: $0.minX, y: primaryHeight - $0.maxY, width: $0.width, height: $0.height) }
+        return uncovered(flipped, above: above)
+    }
+
+    /// Pure: whether any of a grid of points across each area lies outside every rect in `above`.
+    static func uncovered(_ areas: [CGRect], above: [CGRect]) -> Bool {
+        let steps = 5
+        for area in areas where area.width > 0 && area.height > 0 {
+            for i in 0..<steps {
+                for j in 0..<steps {
+                    let p = CGPoint(x: area.minX + area.width * (CGFloat(i) + 0.5) / CGFloat(steps),
+                                    y: area.minY + area.height * (CGFloat(j) + 0.5) / CGFloat(steps))
+                    if !above.contains(where: { $0.contains(p) }) { return true }
+                }
+            }
+        }
+        return false
+    }
 }
 
 /// Own-window capture through CGWindowListCreateImage: obsoleted in the macOS 15 SDK but still exported, so it is

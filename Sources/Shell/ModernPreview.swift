@@ -1,7 +1,8 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 // `sudamp --modern-preview [--appearance auto|light|dark] [--tint <name>] [--panels equalizer,stations]
 //                          [--state playing|paused|idle|live|tuning|failed|engine] [--backdrop]
-//                          [--capture <file.png>] [--capture-delay <seconds>] [--exit-after <seconds>] [--probe-hits]`
+//                          [--capture <file.png>] [--capture-delay <seconds>] [--exit-after <seconds>] [--probe-hits]
+//                          [--open-later|--close-later equalizer|stations]`
 //
 // Opens the modern skin with an animated fake player state (ticking time, a fake visualiser), the way
 // `--skin-preview` does for the classic skins: no audio, no network, nothing persisted. Every ModernEvent is logged
@@ -29,6 +30,8 @@ enum ModernPreview {
         var popover = false
         /// Opens this panel (animated) a second after launch.
         var openLater: ModernPanel?
+        /// Closes this panel (animated) a second after launch.
+        var closeLater: ModernPanel?
         /// Prints which window WindowServer would send a click to at points on the player, then quits.
         var probeHits = false
     }
@@ -70,6 +73,9 @@ enum ModernPreview {
             case "--open-later":
                 guard let v = value(), let panel = ModernPanel(rawValue: v) else { return fail("bad --open-later") }
                 options.openLater = panel
+            case "--close-later":
+                guard let v = value(), let panel = ModernPanel(rawValue: v) else { return fail("bad --close-later") }
+                options.closeLater = panel
             case "--artwork-sheet":
                 guard let v = value() else { return fail("--artwork-sheet needs a file") }
                 options.artworkSheet = v
@@ -223,9 +229,10 @@ final class ModernPreviewController: NSObject, NSApplicationDelegate {
                 MainActor.assumeIsolated { player?.showAppearancePopover() }
             }
         }
-        if let panel = options.openLater {
+        for (panel, open) in [(options.openLater, true), (options.closeLater, false)] {
+            guard let panel else { continue }
             DispatchQueue.main.asyncAfter(deadline: .now() + 1) { [weak player] in
-                MainActor.assumeIsolated { player?.setPanel(panel, open: true) }
+                MainActor.assumeIsolated { player?.setPanel(panel, open: open) }
             }
         }
         timer = Timer.scheduledTimer(withTimeInterval: 1, repeats: true) { [weak self] _ in
@@ -386,7 +393,7 @@ final class ModernPreviewController: NSObject, NSApplicationDelegate {
             return "?"
         }
         let f = window.frame
-        let m = 34.0
+        let m = Double(ModernGeometry.cardInset)
         RunLoop.main.run(until: Date().addingTimeInterval(0.6))
         let points: [(String, CGPoint)] = [
             ("play button", CGPoint(x: f.minX + m + 190, y: f.maxY - m - 184)),

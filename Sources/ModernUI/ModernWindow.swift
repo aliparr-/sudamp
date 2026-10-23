@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 // The modern window: borderless and clear, so all you see is the glass cards and their shadows. Clicks on the clear
 // margins reach whatever is underneath (WindowServer routes clicks on transparent pixels, spike S1). Drag it by any
-// part of a card that isn't a control. The cards sit in one NSGlassEffectContainerView, so when a panel slides out
-// from under the player the glass flows apart like liquid.
+// part of a card that isn't a control. The cards sit in one NSGlassEffectContainerView. A panel opens downwards from
+// its top edge like a drawer and closes back up into it, so no card ever passes over another.
 
 import AppKit
 import QuartzCore
@@ -37,8 +37,8 @@ nonisolated public struct ModernLayout: Codable, Equatable, Sendable {
     }
 }
 
-/// The cards' frames for a set of open panels, pure and unit-tested. Root-view coordinates (flipped), margin
-/// included: the player on top, then the Equalizer, then the stations.
+/// The cards' frames, pure and unit-tested. Root-view coordinates (flipped), margin included: the player on top, then
+/// the Equalizer, then the stations.
 nonisolated public enum ModernGeometry {
     public enum Card: CaseIterable, Sendable { case nowPlaying, equalizer, stations }
 
@@ -60,28 +60,26 @@ nonisolated public enum ModernGeometry {
 
     /// Frames of the shown cards.
     public static func frames(open: Set<ModernPanel>) -> [Card: CGRect] {
+        frames(presence: presence(open: open)).filter { card, _ in panel(card).map(open.contains) ?? true }
+    }
+
+    /// 1 for the player and each open panel, 0 for the closed ones.
+    static func presence(open: Set<ModernPanel>) -> [Card: CGFloat] {
+        Dictionary(uniqueKeysWithValues: Card.allCases.map { card in (card, panel(card).map { open.contains($0) ? 1 : 0 } ?? 1) })
+    }
+
+    /// Every card's frame for how far each one is open (0...1; the player is always 1). A panel opens downwards from
+    /// its top edge like a drawer and closes back up into it: its top stays a gap below the card above, its height
+    /// and the gap after it scale with how open it is, and the cards below follow. So no card ever passes over another.
+    static func frames(presence: [Card: CGFloat]) -> [Card: CGRect] {
         var out: [Card: CGRect] = [:]
         var y = Metrics.margin
         for card in Card.allCases {
-            if let panel = panel(card), !open.contains(panel) { continue }
-            out[card] = CGRect(x: Metrics.margin, y: y, width: Metrics.cardWidth, height: height(card))
-            y += height(card) + Metrics.gap
+            let open = min(max(presence[card] ?? 0, 0), 1)
+            out[card] = CGRect(x: Metrics.margin, y: y, width: Metrics.cardWidth, height: height(card) * open)
+            y += (height(card) + Metrics.gap) * open
         }
         return out
-    }
-
-    /// How much of a closed panel is left: a strip hidden inside the bottom of the card above it.
-    static let tuckedHeight: CGFloat = 24
-
-    /// Where a closed panel waits, for the cards shown in `open`: a strip inside the bottom of the card above, so its
-    /// glass is part of that card's shape (glass in one container merges) and it can grow out of it like liquid.
-    public static func tuckedFrame(_ card: Card, open: Set<ModernPanel>) -> CGRect {
-        var without = open
-        if let panel = panel(card) { without.remove(panel) }
-        let shown = frames(open: without)
-        let above = Card.allCases.prefix { $0 != card }.reversed().compactMap { shown[$0] }.first
-        let bottom = above?.maxY ?? Metrics.margin + tuckedHeight
-        return CGRect(x: Metrics.margin, y: bottom - tuckedHeight - 2, width: Metrics.cardWidth, height: tuckedHeight)
     }
 
     /// The window's content size.
@@ -95,40 +93,33 @@ nonisolated public enum ModernGeometry {
     public static var cardInset: CGFloat { Metrics.margin }
 }
 
-/// The panels' motion: a slightly underdamped spring (a touch of overshoot, settled in about half a second), pure
-/// and unit-tested.
+/// The panels' motion, pure and unit-tested: a critically damped spring (no bounce: a drawer that overshot would
+/// open past its content, or close to less than nothing), most of the way there in a fifth of a second and settled in
+/// half a second.
 nonisolated enum CardSpring {
-    static let duration = 0.6
-    static let dampingRatio = 0.78
-    static let frequency = 13.0
+    static let duration = 0.5
+    static let frequency = 15.0
 
-    /// Progress 0...1 of the move at `t` (0...1 of `duration`); may overshoot 1 a little, and is exactly 1 at the end.
+    /// Progress 0...1 of the move at `t` (0...1 of `duration`): never past 1, and exactly 1 at the end.
     static func position(_ t: Double) -> Double {
         guard t < 1 else { return 1 }
-        let time = max(t, 0) * duration
-        let z = dampingRatio, w = frequency
-        let wd = w * (1 - z * z).squareRoot()
-        let decay = exp(-z * w * time)
-        let value = 1 - decay * (cos(wd * time) + (z * w / wd) * sin(wd * time))
-        // Fade the residual wobble out so the last frame lands exactly.
+        let x = frequency * max(t, 0) * duration
+        let value = 1 - (1 + x) * exp(-x)
+        // Fade the last sliver of the tail out so the last frame lands exactly.
         let settle = max(0, (t - 0.85) / 0.15)
         return value + (1 - value) * settle
     }
 
-    /// A page's opacity at `t`: appearing, it waits for the glass to clear the card above, then fades in; leaving,
-    /// it fades out before the glass has gone far.
+    /// A page's opacity at `t`: opening, it fades in once the drawer has some depth; closing, it is gone before the
+    /// last quarter of the drawer has shut.
     static func fade(_ t: Double, from a: CGFloat, to b: CGFloat) -> CGFloat {
         guard a != b else { return b }
-        let p = b > a ? min(max((t - 0.12) / 0.45, 0), 1) : min(max(t / 0.3, 0), 1)
+        let p = b > a ? min(max((t - 0.16) / 0.42, 0), 1) : min(max(t / 0.34, 0), 1)
         let eased = p * p * (3 - 2 * p)
         return a + (b - a) * CGFloat(eased)
     }
 
-    static func interpolate(_ a: CGRect, _ b: CGRect, _ p: Double) -> CGRect {
-        let p = CGFloat(p)
-        return CGRect(x: a.minX + (b.minX - a.minX) * p, y: a.minY + (b.minY - a.minY) * p,
-                      width: a.width + (b.width - a.width) * p, height: a.height + (b.height - a.height) * p)
-    }
+    static func interpolate(_ a: CGFloat, _ b: CGFloat, _ p: Double) -> CGFloat { a + (b - a) * CGFloat(p) }
 }
 
 public final class ModernWindow: NSWindow {
@@ -183,6 +174,8 @@ final class ModernRootView: FlippedView {
     private let container: NSView
     private let stack = FlippedView()
     private(set) var openPanels: Set<ModernPanel> = []
+    /// How far each card is open right now (0...1), moving while a panel opens or closes.
+    private var presence = ModernGeometry.presence(open: [])
     private var palette: ModernPalette?
     var onEvent: ((ModernEvent) -> Void)?
     /// Called when the panels need a different window size: before an opening animation, after a closing one.
@@ -201,8 +194,8 @@ final class ModernRootView: FlippedView {
     override init(frame frameRect: NSRect) {
         if GlassCard.systemGlassAvailable, #available(macOS 26.0, *) {
             let glassContainer = NSGlassEffectContainerView(frame: frameRect)
-            // Cards closer than this flow into each other: only while a panel slides out or back.
-            glassContainer.spacing = 10
+            // Cards blend only where they touch: never, with the gaps between them.
+            glassContainer.spacing = 0
             container = glassContainer
         } else {
             container = FlippedView(frame: frameRect)
@@ -231,7 +224,7 @@ final class ModernRootView: FlippedView {
         equalizer.setAccessibilityLabel("Equalizer")
         stations.setAccessibilityLabel("Stations")
         registerForDraggedTypes([.fileURL])
-        layoutCards(animated: false)
+        moveCards(animated: false)
     }
 
     // MARK: Drag and drop (classic skins)
@@ -271,8 +264,8 @@ final class ModernRootView: FlippedView {
         }
     }
 
-    /// Opens and closes panels. Growing, the window grows first and the cards then slide out; shrinking, the cards
-    /// slide back and the window shrinks after.
+    /// Opens and closes panels. Growing, the window grows first and the panels then open; shrinking, the panels close
+    /// and the window shrinks after.
     func setPanels(_ open: Set<ModernPanel>, animated: Bool) {
         guard open != openPanels else { return }
         let old = openPanels
@@ -282,65 +275,72 @@ final class ModernRootView: FlippedView {
         let newSize = ModernGeometry.windowSize(open: open)
         let oldSize = ModernGeometry.windowSize(open: old)
         if newSize.height >= oldSize.height { onResize?(newSize) }
-        layoutCards(animated: animated && window?.isVisible == true, from: old) { [weak self] in
+        moveCards(animated: animated && (window?.isVisible == true || animatesOffscreen)) { [weak self] in
             guard let self, self.openPanels == open else { return }
             if newSize.height < oldSize.height { self.onResize?(newSize) }
-            for card in ModernGeometry.Card.allCases {
-                if let panel = ModernGeometry.panel(card), !open.contains(panel) { self.card(card).isHidden = true }
-            }
         }
     }
 
-    private func layoutCards(animated: Bool, from old: Set<ModernPanel>? = nil, completion: (@MainActor () -> Void)? = nil) {
-        let frames = ModernGeometry.frames(open: openPanels)
-        let duration = animated ? (Motion.reduced ? 0.25 : CardSpring.duration) : 0
-        var moves: [(GlassCard, CGRect, CGFloat, ModernGeometry.Card)] = []
-        for kind in ModernGeometry.Card.allCases {
+    private func moveCards(animated: Bool, completion: (@MainActor () -> Void)? = nil) {
+        let target = ModernGeometry.presence(open: openPanels)
+        for kind in ModernGeometry.Card.allCases where (target[kind] ?? 0) > 0 {
             let card = self.card(kind)
-            if let frame = frames[kind] {
-                if card.isHidden {
-                    // Start as a strip inside the card above, its page clear.
-                    card.frame = Motion.reduced ? frame : ModernGeometry.tuckedFrame(kind, open: openPanels)
-                    card.content.alphaValue = 0
-                    card.isHidden = false
-                    card.layoutSubtreeIfNeeded()
-                }
-                moves.append((card, frame, 1, kind))
-            } else if !card.isHidden {
-                moves.append((card, Motion.reduced ? card.frame : ModernGeometry.tuckedFrame(kind, open: openPanels), 0, kind))
-            }
+            guard card.isHidden else { continue }
+            // Opens from nothing at its top edge, its page clear.
+            presence[kind] = 0
+            card.content.alphaValue = 0
+            card.isHidden = false
         }
+        let duration = animated ? (Motion.reduced ? 0.25 : CardSpring.duration) : 0
         guard duration > 0 else {
             cardAnimation = nil
-            for (card, frame, alpha, _) in moves {
-                card.frame = frame
-                card.content.alphaValue = alpha
-                shadows.setShadow(for: card, frame: frame, opacity: Float(alpha), animation: nil, duration: 0)
-            }
+            presence = target
+            for kind in ModernGeometry.Card.allCases { card(kind).content.alphaValue = (target[kind] ?? 0) > 0 ? 1 : 0 }
+            applyPresence()
+            hideClosedCards()
             completion?()
             return
         }
         // Liquid Glass is drawn from each view's real frame, not from Core Animation's in-flight values, so the
-        // cards' frames are stepped on every display frame (positions and opacity only: nothing relayouts).
+        // cards' frames are stepped on every display frame (frames and opacity only: the pages don't relayout).
         cardAnimation = CardAnimation(
-            tracks: moves.map { card, frame, alpha, _ in
-                .init(card: card, fromFrame: card.frame, toFrame: frame, fromAlpha: card.content.alphaValue, toAlpha: alpha)
-            },
+            from: presence, to: target,
+            fromAlpha: Dictionary(uniqueKeysWithValues: ModernGeometry.Card.allCases.map { ($0, card($0).content.alphaValue) }),
             start: CACurrentMediaTime(), duration: duration, completion: completion)
         startCardLink()
+    }
+
+    /// Puts every shown card where `presence` says, with its page and shadow.
+    private func applyPresence() {
+        let frames = ModernGeometry.frames(presence: presence)
+        for kind in ModernGeometry.Card.allCases {
+            let card = self.card(kind)
+            guard !card.isHidden, let frame = frames[kind] else { continue }
+            if card.frame != frame { card.frame = frame }
+            // The page glides a little as the drawer opens and closes, as if it were drawn along with it.
+            card.pageOffset = -(1 - (presence[kind] ?? 1)) * 10
+        }
+        updateShadows()
+    }
+
+    private func hideClosedCards() {
+        for kind in ModernGeometry.Card.allCases where (presence[kind] ?? 0) <= 0 { card(kind).isHidden = true }
+    }
+
+    private func updateShadows() {
+        shadows.update(ModernGeometry.Card.allCases.compactMap { kind in
+            let card = self.card(kind)
+            guard !card.isHidden else { return nil }
+            return CardShadowView.Card(id: ObjectIdentifier(card), frame: card.frame, opacity: Float(presence[kind] ?? 1))
+        })
     }
 
     // MARK: Card animation
 
     private struct CardAnimation {
-        struct Track {
-            let card: GlassCard
-            let fromFrame: CGRect
-            let toFrame: CGRect
-            let fromAlpha: CGFloat
-            let toAlpha: CGFloat
-        }
-        var tracks: [Track]
+        var from: [ModernGeometry.Card: CGFloat]
+        var to: [ModernGeometry.Card: CGFloat]
+        var fromAlpha: [ModernGeometry.Card: CGFloat]
         var start: CFTimeInterval
         var duration: Double
         var completion: (@MainActor () -> Void)?
@@ -363,46 +363,50 @@ final class ModernRootView: FlippedView {
         stepCards(at: CACurrentMediaTime())
     }
 
-    private func stepCards(at now: CFTimeInterval) {
+    /// Tests: animate panels in a window that was never ordered on screen, stepping them with `stepCards(at:)`.
+    var animatesOffscreen = false
+    /// When the running panel animation started.
+    var cardAnimationStart: CFTimeInterval? { cardAnimation?.start }
+
+    func stepCards(at now: CFTimeInterval) {
         guard let animation = cardAnimation else {
             cardLink?.isPaused = true
             return
         }
         let t = min(max((now - animation.start) / animation.duration, 0), 1)
-        let move = Motion.reduced ? 1 : CardSpring.position(t)
-        for track in animation.tracks {
-            let f = CardSpring.interpolate(track.fromFrame, track.toFrame, move)
-            if f.size != track.card.frame.size {
-                track.card.frame = f
-            } else {
-                track.card.setFrameOrigin(f.origin)
-            }
-            let alpha = CardSpring.fade(t, from: track.fromAlpha, to: track.toAlpha)
-            track.card.content.alphaValue = alpha
-            shadows.setShadow(for: track.card, frame: f, opacity: Float(alpha), animation: nil, duration: 0)
+        for kind in ModernGeometry.Card.allCases {
+            let from = animation.from[kind] ?? 0, to = animation.to[kind] ?? 0
+            // Reduce Motion: nothing moves; a panel appears at once and fades in, or fades out and then goes.
+            let move = Motion.reduced ? (to >= from || t >= 1 ? 1 : 0) : CardSpring.position(t)
+            presence[kind] = CardSpring.interpolate(from, to, move)
+            card(kind).content.alphaValue = CardSpring.fade(t, from: animation.fromAlpha[kind] ?? 0, to: to > 0 ? 1 : 0)
         }
+        applyPresence()
         guard t >= 1 else { return }
-        for track in animation.tracks {
-            track.card.frame = track.toFrame
-            track.card.content.alphaValue = track.toAlpha
-            shadows.setShadow(for: track.card, frame: track.toFrame, opacity: Float(track.toAlpha), animation: nil, duration: 0)
-        }
+        finishCardAnimation()
+    }
+
+    private func finishCardAnimation() {
+        guard let animation = cardAnimation else { return }
+        presence = animation.to
+        for kind in ModernGeometry.Card.allCases { card(kind).content.alphaValue = (animation.to[kind] ?? 0) > 0 ? 1 : 0 }
+        applyPresence()
+        hideClosedCards()
         cardAnimation = nil
         cardLink?.isPaused = true
         animation.completion?()
     }
 
-    /// Whether a panel is sliding (tests, automation).
+    /// Whether a panel is opening or closing (tests, automation).
     var isAnimatingCards: Bool { cardAnimation != nil }
 
     /// Final: the display link holds this view, so it must be invalidated when the window goes.
     func stopAnimations() {
-        if let animation = cardAnimation {
-            for track in animation.tracks {
-                track.card.frame = track.toFrame
-                track.card.content.alphaValue = track.toAlpha
-            }
-            cardAnimation = nil
+        if var animation = cardAnimation {
+            // Land, without the completion (the window is going).
+            animation.completion = nil
+            cardAnimation = animation
+            finishCardAnimation()
         }
         cardLink?.invalidate()
         cardLink = nil
@@ -410,12 +414,9 @@ final class ModernRootView: FlippedView {
 
     override func layout() {
         super.layout()
-        // Keep shadows in place after a window resize (cards don't move: the top-left stays put).
-        for kind in ModernGeometry.Card.allCases {
-            let card = self.card(kind)
-            guard !card.isHidden, cardAnimation == nil else { continue }
-            shadows.setShadow(for: card, frame: card.frame, opacity: Float(card.content.alphaValue), animation: nil, duration: 0)
-        }
+        // The shadows' cut-out spans the view: redo it after a window resize (the cards don't move: the top-left
+        // stays put).
+        if cardAnimation == nil { updateShadows() }
     }
 
     override func viewDidChangeEffectiveAppearance() {
@@ -435,6 +436,11 @@ final class ModernRootView: FlippedView {
             if let hit = card.routedHit(parent.convert(local, from: self)) { return hit }
         }
         return nil
+    }
+
+    /// The shown cards' frames, in this view's coordinates.
+    func shownCardFrames() -> [CGRect] {
+        ModernGeometry.Card.allCases.map(card).filter { !$0.isHidden && $0.frame.height > 0 }.map(\.frame)
     }
 
     /// The visible card under a point in this view, if any.

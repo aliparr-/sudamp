@@ -305,5 +305,7 @@ public struct ModernPalette {
     public var knob: CGColor { CGColor(gray: 1, alpha: 1) }
     /// Card drop shadows.
     public var shadow: CGColor { CGColor(gray: 0, alpha: 1) }
-    public var shadowOpacity: Float { isDark ? 0.42 : 0.2 }
+    public var shadowOpacity: Float { isDark ? 0.36 : 0.17 }
+    /// The tight shadow where a card meets the desktop.
+    public var contactShadowOpacity: Float { isDark ? 0.22 : 0.1 }
 }

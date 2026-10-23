@@ -18,15 +18,27 @@ import Testing
         #expect(ModernGeometry.windowSize(open: []).width == Metrics.cardWidth + Metrics.margin * 2)
     }
 
-    /// A closed panel waits as a strip inside the bottom of the card above it (its glass merges into that card's).
-    @Test func tuckedPanelsHideInsideTheCardAbove() {
+    /// A panel opens like a drawer from its top edge, a gap under the card above, and the cards below follow it: no
+    /// card ever passes over another (the closing Equalizer used to slide up into the player).
+    @Test func panelsOpenAndCloseLikeDrawers() {
         let np = ModernGeometry.frames(open: [])[.nowPlaying]!
-        let eq = ModernGeometry.tuckedFrame(.equalizer, open: [])
-        #expect(np.contains(eq) && eq.height == ModernGeometry.tuckedHeight)
-        let eqOpen = ModernGeometry.frames(open: [.equalizer])[.equalizer]!
-        #expect(eqOpen.contains(ModernGeometry.tuckedFrame(.stations, open: [.equalizer])))
-        #expect(np.contains(ModernGeometry.tuckedFrame(.stations, open: [])), "under the player when the EQ is closed")
-        #expect(ModernGeometry.tuckedFrame(.stations, open: [.equalizer, .stations]) == ModernGeometry.tuckedFrame(.stations, open: [.equalizer]))
+        let half = ModernGeometry.frames(presence: [.nowPlaying: 1, .equalizer: 0.5, .stations: 1])
+        #expect(half[.nowPlaying] == np)
+        #expect(half[.equalizer]!.minY == np.maxY + Metrics.gap, "the top edge stays put")
+        #expect(half[.equalizer]!.height == Metrics.equalizerHeight / 2)
+        #expect(half[.stations]!.minY == half[.equalizer]!.maxY + Metrics.gap / 2)
+        let closed = ModernGeometry.frames(presence: [.nowPlaying: 1, .equalizer: 0, .stations: 1])
+        #expect(closed[.equalizer]!.height == 0)
+        #expect(closed[.stations] == ModernGeometry.frames(open: [.stations])[.stations], "lands where it rests")
+        #expect(ModernGeometry.frames(presence: ModernGeometry.presence(open: [.equalizer, .stations]))
+            == ModernGeometry.frames(open: [.equalizer, .stations]))
+        for e in stride(from: 0.0, through: 1.0, by: 0.05) {
+            for s in stride(from: 0.0, through: 1.0, by: 0.25) {
+                let f = ModernGeometry.frames(presence: [.nowPlaying: 1, .equalizer: CGFloat(e), .stations: CGFloat(s)])
+                #expect(f[.equalizer]!.minY >= np.maxY + Metrics.gap && f[.stations]!.minY >= f[.equalizer]!.maxY,
+                        "no overlap at equalizer \(e), stations \(s)")
+            }
+        }
     }
 
     @Test func layoutRoundTripsAndKnowsItsPanels() throws {
@@ -42,22 +54,23 @@ import Testing
 }
 
 @Suite struct MotionTests {
-    @Test func theSpringStartsAtZeroLandsExactlyAndOvershootsALittle() {
+    @Test func theSpringStartsAtZeroLandsExactlyAndNeverOvershoots() {
         #expect(CardSpring.position(0) == 0)
         #expect(CardSpring.position(1) == 1 && CardSpring.position(2) == 1)
         let samples = stride(from: 0.0, through: 1.0, by: 0.01).map(CardSpring.position)
-        let peak = samples.max()!
-        #expect(peak > 1 && peak < 1.08, "a touch of overshoot, \(peak)")
-        #expect(samples[30] > 0.7, "most of the move is early: \(samples[30])")
+        #expect(zip(samples, samples.dropFirst()).allSatisfy { $0 <= $1 }, "always onwards")
+        #expect(samples.max()! <= 1, "a drawer never opens past its content or closes past shut")
+        #expect(samples[40] > 0.75, "most of the move is early: \(samples[40])")
     }
 
     @Test func pagesFadeInLateAndOutEarly() {
-        #expect(CardSpring.fade(0.1, from: 0, to: 1) == 0, "waits for the glass to clear the card above")
+        #expect(CardSpring.fade(0.1, from: 0, to: 1) == 0, "waits for the drawer to have some depth")
         #expect(CardSpring.fade(1, from: 0, to: 1) == 1)
-        #expect(CardSpring.fade(0.3, from: 1, to: 0) == 0, "gone before the glass is")
+        #expect(CardSpring.fade(0.35, from: 1, to: 0) == 0, "gone before the drawer has shut")
+        #expect(CardSpring.position(0.35) < 0.8)
+        #expect(CardSpring.fade(0.15, from: 1, to: 0) > 0.3, "still there while the drawer starts to move")
         #expect(CardSpring.fade(0.5, from: 1, to: 1) == 1)
-        let r = CardSpring.interpolate(CGRect(x: 0, y: 0, width: 10, height: 10), CGRect(x: 10, y: 20, width: 30, height: 40), 0.5)
-        #expect(r == CGRect(x: 5, y: 10, width: 20, height: 25))
+        #expect(CardSpring.interpolate(10, 30, 0.5) == 20)
     }
 
     @Test func theMarqueeGlidesOnlyWhenTheTitleDoesNotFit() {

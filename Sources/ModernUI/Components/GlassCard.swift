@@ -5,9 +5,8 @@
 // drop shadow is drawn outside the glass by `CardShadowView`, so it never darkens the glass itself.
 //
 // The controls sit on a page of the card's natural size, pinned to the top of a clipping view inside the glass. A
-// panel can then grow out of the card above it (the glass changes size; the page doesn't move or stretch, it is
-// only revealed) and fade its page in: inside a glass container a glass view's own alpha is ignored, its content's
-// isn't.
+// panel can then open like a drawer (the glass changes size; the page doesn't stretch, it is only revealed) and fade
+// its page in: inside a glass container a glass view's own alpha is ignored, its content's isn't.
 
 import AppKit
 import QuartzCore
@@ -18,6 +17,10 @@ class GlassCard: NSView {
     /// The card's full height; the glass may be shorter while it opens or closes.
     var naturalHeight: CGFloat = 100 {
         didSet { needsLayout = true }
+    }
+    /// The page's vertical offset while the card opens or closes (0 at rest).
+    var pageOffset: CGFloat = 0 {
+        didSet { if pageOffset != oldValue { content.frame.origin.y = pageOffset } }
     }
     private let clip: FlippedView = DragSurface()
     private let glass: NSView
@@ -32,6 +35,8 @@ class GlassCard: NSView {
     var cornerRadius: CGFloat = Metrics.cardRadius {
         didSet { applyCornerRadius() }
     }
+    /// The radius drawn: `cornerRadius`, or less while the card is too short for it (a closing drawer).
+    private var drawnRadius: CGFloat = Metrics.cardRadius
 
     /// `SUDAMP_GLASS=frosted` shows the macOS 15 material on any system (to check it).
     static let forceFallback = ProcessInfo.processInfo.environment["SUDAMP_GLASS"] == "frosted"
@@ -99,17 +104,19 @@ class GlassCard: NSView {
     override var isFlipped: Bool { true }
 
     private func applyCornerRadius() {
+        let radius = min(cornerRadius, max(bounds.height, 0) / 2)
+        drawnRadius = radius
         if usesSystemGlass, #available(macOS 26.0, *), let g = glass as? NSGlassEffectView {
-            g.cornerRadius = cornerRadius
+            g.cornerRadius = radius
         } else {
-            glass.layer?.cornerRadius = cornerRadius
+            glass.layer?.cornerRadius = radius
             glass.layer?.cornerCurve = .continuous
         }
-        light.cornerRadius = cornerRadius
+        light.cornerRadius = radius
         light.cornerCurve = .continuous
-        clip.layer?.cornerRadius = cornerRadius
+        clip.layer?.cornerRadius = radius
         clip.layer?.cornerCurve = .continuous
-        rim.cornerRadius = cornerRadius
+        rim.cornerRadius = radius
         rim.cornerCurve = .continuous
     }
 
@@ -117,7 +124,8 @@ class GlassCard: NSView {
         super.layout()
         glass.frame = bounds
         if !usesSystemGlass { clip.frame = glass.bounds }
-        content.frame = CGRect(x: 0, y: 0, width: bounds.width, height: naturalHeight)
+        if min(cornerRadius, bounds.height / 2) != drawnRadius { applyCornerRadius() }
+        content.frame = CGRect(x: 0, y: pageOffset, width: bounds.width, height: naturalHeight)
         // From the card's own bounds: the glass may not have sized its content view yet. The light covers the glass
         // as it is (shorter while opening); the sheen and glow keep the page's proportions.
         light.frame = CGRect(origin: .zero, size: bounds.size)
@@ -171,22 +179,43 @@ class GlassCard: NSView {
     }
 }
 
-/// Soft two-part drop shadows (a wide ambient one and a tight contact one) for every card, drawn behind the glass and
-/// masked to outside each card, so the translucent glass never shows its own shadow through itself.
+/// Soft two-part drop shadows (an ambient one and a tight contact one) for every card, drawn behind the glass and
+/// masked to outside all the cards: the translucent glass never shows a shadow through itself, its own or the card
+/// above's. They are sized to fade out completely inside the window's clear margin, so no edge of them shows.
 final class CardShadowView: FlippedView {
-    private var shadows: [ObjectIdentifier: (ambient: StillShapeLayer, contact: StillShapeLayer, mask: StillShapeLayer,
-                                             holder: StillLayer)] = [:]
+    struct Card: Equatable {
+        let id: ObjectIdentifier
+        let frame: CGRect
+        /// 0...1: a closing panel's shadow fades as it shuts.
+        let opacity: Float
+    }
+
+    /// Ambient: a soft pool under the card. Contact: where it meets the desktop.
+    static let ambient = (radius: CGFloat(13), offset: CGFloat(9))
+    static let contact = (radius: CGFloat(2.5), offset: CGFloat(1))
+
+    /// Liquid Glass draws its 30 pt corners a little tighter than a 30 pt arc (about 27.5 pt, measured); the shadow's
+    /// shape and cut-out sit just inside that, so neither a crescent of shadow under the glass nor a gap beside it
+    /// shows at the corners.
+    static func shapeRadius(height: CGFloat) -> CGFloat { min(Metrics.cardRadius - 2, height / 2) }
+
+    private let holder = StillLayer()
+    private let cutout = StillShapeLayer()
+    private var layers: [ObjectIdentifier: (ambient: StillShapeLayer, contact: StillShapeLayer, plate: StillLayer)] = [:]
     /// A nearly clear footprint under each card, outside the glass. WindowServer sends a click in a clear window to
     /// whatever is underneath wherever the window's own pixels are transparent, and Liquid Glass (with everything
     /// inside it) may be composited apart from them; these make the cards' areas the window's own, so clicks on a
     /// card come here while the margins between and around the cards stay click-through.
-    private var plates: [ObjectIdentifier: StillLayer] = [:]
     static let plateColor = CGColor(gray: 0.5, alpha: 0.02)
     private var palette: ModernPalette?
+    private var cards: [Card] = []
 
     override init(frame frameRect: NSRect) {
         super.init(frame: frameRect)
         wantsLayer = true
+        cutout.fillRule = .evenOdd
+        holder.mask = cutout
+        layer?.addSublayer(holder)
     }
 
     @available(*, unavailable)
@@ -196,76 +225,67 @@ final class CardShadowView: FlippedView {
 
     func apply(_ palette: ModernPalette) {
         self.palette = palette
-        for entry in shadows.values { style(entry.ambient, contact: entry.contact) }
+        for entry in layers.values { style(entry.ambient, contact: entry.contact) }
     }
 
     private func style(_ ambient: StillShapeLayer, contact: StillShapeLayer) {
         guard let palette else { return }
-        for (layer, radius, offset, opacity) in [(ambient, CGFloat(26), CGFloat(16), palette.shadowOpacity),
-                                                 (contact, CGFloat(5), CGFloat(2), palette.shadowOpacity * 0.55)] {
+        for (layer, shape, opacity) in [(ambient, Self.ambient, palette.shadowOpacity),
+                                        (contact, Self.contact, palette.contactShadowOpacity)] {
             layer.fillColor = CGColor(gray: 0, alpha: 1)
             layer.shadowColor = palette.shadow
-            layer.shadowRadius = radius
+            layer.shadowRadius = shape.radius
             // The view is flipped: positive y is down.
-            layer.shadowOffset = CGSize(width: 0, height: offset)
+            layer.shadowOffset = CGSize(width: 0, height: shape.offset)
             layer.shadowOpacity = opacity
         }
     }
 
-    /// Places the shadow for `card` at `frame` (in this view's coordinates), animating with the card when asked.
-    func setShadow(for card: NSView, frame: CGRect, opacity: Float, animation: CAMediaTimingFunction?, duration: Double) {
-        let key = ObjectIdentifier(card)
-        let entry: (ambient: StillShapeLayer, contact: StillShapeLayer, mask: StillShapeLayer, holder: StillLayer)
-        if let existing = shadows[key] {
-            entry = existing
-        } else {
-            let holder = StillLayer()
-            let ambient = StillShapeLayer()
-            let contact = StillShapeLayer()
-            let mask = StillShapeLayer()
-            mask.fillRule = .evenOdd
-            holder.mask = mask
-            holder.addSublayer(ambient)
-            holder.addSublayer(contact)
-            layer?.addSublayer(holder)
-            entry = (ambient, contact, mask, holder)
-            shadows[key] = entry
-            style(ambient, contact: contact)
-        }
-        let plate: StillLayer
-        if let existing = plates[key] {
-            plate = existing
-        } else {
-            plate = StillLayer()
-            plate.backgroundColor = Self.plateColor
-            plate.cornerRadius = Metrics.cardRadius
-            plate.cornerCurve = .continuous
-            layer?.insertSublayer(plate, at: 0)
-            plates[key] = plate
-        }
-        plate.frame = frame
-        plate.opacity = opacity > 0.001 ? 1 : 0
-        let cardPath = roundedPath(CGRect(origin: .zero, size: frame.size), radius: Metrics.cardRadius)
+    /// Places every shown card's shadow (frames in this view's coordinates); cards left out lose theirs.
+    func update(_ cards: [Card]) {
+        let size = bounds.size
+        guard cards != self.cards || holder.frame.size != size else { return }
+        self.cards = cards
+        holder.frame = bounds
+        cutout.frame = holder.bounds
         let outside = CGMutablePath()
-        outside.addRect(bounds.insetBy(dx: -200, dy: -200).offsetBy(dx: -frame.minX, dy: -frame.minY))
-        outside.addPath(cardPath)
-        // The shape itself is drawn under the card (covered by it) but masked away; only its shadow shows.
-        let updates: [(CALayer, String, Any)] = [
-            (entry.holder, "position", NSValue(point: frame.origin)),
-            (entry.holder, "opacity", opacity),
-            (entry.ambient, "path", cardPath), (entry.ambient, "shadowPath", cardPath),
-            (entry.contact, "path", cardPath), (entry.contact, "shadowPath", cardPath),
-            (entry.mask, "path", outside),
-        ]
-        entry.holder.anchorPoint = .zero
-        entry.holder.bounds = CGRect(origin: .zero, size: frame.size)
-        for (layer, keyPath, value) in updates {
-            if let animation, duration > 0, !Motion.reduced || keyPath == "opacity" {
-                Motion.animate(keyPath, on: layer, to: value, duration: duration, timing: animation)
-            } else {
-                layer.removeAnimation(forKey: keyPath)
-                layer.setValue(value, forKeyPath: keyPath)
+        outside.addRect(holder.bounds.insetBy(dx: -200, dy: -200))
+        var shown = Set<ObjectIdentifier>()
+        for card in cards {
+            shown.insert(card.id)
+            let entry = layers[card.id] ?? makeLayers(for: card.id)
+            let path = roundedPath(card.frame, radius: Self.shapeRadius(height: card.frame.height))
+            // The shape itself is drawn under the card (covered by it) but masked away; only its shadow shows.
+            for layer in [entry.ambient, entry.contact] {
+                layer.path = path
+                layer.shadowPath = path
+                layer.opacity = card.opacity
             }
+            entry.plate.frame = card.frame
+            entry.plate.cornerRadius = min(Metrics.cardRadius, card.frame.height / 2)
+            entry.plate.opacity = card.opacity > 0.001 ? 1 : 0
+            if card.frame.height > 0.5 { outside.addPath(path) }
         }
+        cutout.path = outside
+        for (id, entry) in layers where !shown.contains(id) {
+            entry.ambient.opacity = 0
+            entry.contact.opacity = 0
+            entry.plate.opacity = 0
+        }
+    }
+
+    private func makeLayers(for id: ObjectIdentifier) -> (ambient: StillShapeLayer, contact: StillShapeLayer, plate: StillLayer) {
+        let ambient = StillShapeLayer()
+        let contact = StillShapeLayer()
+        holder.addSublayer(ambient)
+        holder.addSublayer(contact)
+        style(ambient, contact: contact)
+        let plate = StillLayer()
+        plate.backgroundColor = Self.plateColor
+        plate.cornerCurve = .continuous
+        layer?.insertSublayer(plate, at: 0)
+        let entry = (ambient, contact, plate)
+        layers[id] = entry
+        return entry
     }
 }

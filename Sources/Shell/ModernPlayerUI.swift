@@ -296,6 +296,8 @@ extension ModernPlayerUI: PlayerFrontEnd {
         var report = menuReport
         report["skinId"] = SkinLibrary.modernID
         report["skinClass"] = "modern"
+        report["visualizer"] = ["running": player.isVisualizerRunning, "ticks": player.visualizerTicks,
+                                "peak": Double(player.visualizerPeak), "why": player.visualizerDiagnostics]
         return report
     }
 

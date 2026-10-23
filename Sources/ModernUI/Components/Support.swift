@@ -57,8 +57,9 @@ nonisolated enum Metrics {
     static let padding: CGFloat = 16
     /// Between the cards.
     static let gap: CGFloat = 12
-    /// Transparent space around the cards for their shadows (clicks there reach the windows below).
-    static let margin: CGFloat = 34
+    /// Transparent space around the cards for their shadows, wide enough that they fade out completely inside it
+    /// (clicks there reach the windows below).
+    static let margin: CGFloat = 40
     static let nowPlayingHeight: CGFloat = 262
     static let equalizerHeight: CGFloat = 216
     static let stationsHeight: CGFloat = 312
