@@ -50,8 +50,8 @@ final class CapsuleButton: NSControl {
     private let background = StillGradientLayer()
     private let glow = StillShapeLayer()
     private let label = makeLabel(size: 12, weight: .semibold)
-    private let chevron = NSImageView()
-    private let leading = NSImageView()
+    private let chevron = PassiveImageView()
+    private let leading = PassiveImageView()
     private var palette: ModernPalette?
     private var hovering = false
     private var pressed = false
@@ -87,6 +87,13 @@ final class CapsuleButton: NSControl {
     override var isFlipped: Bool { true }
     override var mouseDownCanMoveWindow: Bool { false }
     override func acceptsFirstMouse(for event: NSEvent?) -> Bool { true }
+
+    /// The whole control takes the click, never the image or text inside it.
+    override func hitTest(_ point: NSPoint) -> NSView? {
+        guard !isHidden, alphaValue > 0.01 else { return nil }
+        // `point` is in the superview's coordinates, like `frame`.
+        return frame.contains(point) ? self : nil
+    }
 
     private var horizontalPadding: CGFloat { style == .prompt ? 14 : 11 }
 
@@ -452,6 +459,9 @@ final class WindowLights: NSView {
             Motion.animate("opacity", on: glyph, to: Float(on ? 1 : 0), duration: 0.12)
         }
     }
+
+    /// Claimed, so the mouse-up comes here (passed up, the card would start a window drag and take it).
+    override func mouseDown(with event: NSEvent) {}
 
     override func mouseUp(with event: NSEvent) {
         let p = convert(event.locationInWindow, from: nil)

@@ -39,7 +39,7 @@ final class GlyphButton: NSControl {
     }
     var onPress: (() -> Void)?
 
-    private let imageView = NSImageView()
+    private let imageView = PassiveImageView()
     private let wash = StillLayer()
     private let disc = StillGradientLayer()
     private let discHighlight = StillGradientLayer()
@@ -106,6 +106,13 @@ final class GlyphButton: NSControl {
     override var mouseDownCanMoveWindow: Bool { false }
     override func acceptsFirstMouse(for event: NSEvent?) -> Bool { true }
     override var acceptsFirstResponder: Bool { false }
+
+    /// The whole control takes the click, never the image or text inside it.
+    override func hitTest(_ point: NSPoint) -> NSView? {
+        guard !isHidden, alphaValue > 0.01 else { return nil }
+        // `point` is in the superview's coordinates, like `frame`.
+        return frame.contains(point) ? self : nil
+    }
 
     override var isEnabled: Bool {
         didSet {

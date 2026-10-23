@@ -115,7 +115,7 @@ final class TintSwatch: NSView {
     var isSelected = false { didSet { updateRing() } }
     private let disc = StillGradientLayer()
     private let ring = StillShapeLayer()
-    private let check = NSImageView()
+    private let check = PassiveImageView()
 
     init(tint: ModernTint) {
         self.tint = tint
@@ -147,6 +147,13 @@ final class TintSwatch: NSView {
     override var isFlipped: Bool { true }
     override var mouseDownCanMoveWindow: Bool { false }
 
+    /// The whole control takes the click, never the image or text inside it.
+    override func hitTest(_ point: NSPoint) -> NSView? {
+        guard !isHidden, alphaValue > 0.01 else { return nil }
+        // `point` is in the superview's coordinates, like `frame`.
+        return frame.contains(point) ? self : nil
+    }
+
     override func viewDidChangeEffectiveAppearance() {
         super.viewDidChangeEffectiveAppearance()
         updateColors()
@@ -177,6 +184,9 @@ final class TintSwatch: NSView {
         check.isHidden = !isSelected
         setAccessibilityValue(isSelected ? 1 : 0)
     }
+
+    /// Claimed, so the mouse-up comes here (passed up, the card would start a window drag and take it).
+    override func mouseDown(with event: NSEvent) {}
 
     override func mouseUp(with event: NSEvent) {
         if bounds.contains(convert(event.locationInWindow, from: nil)) { onPick?() }

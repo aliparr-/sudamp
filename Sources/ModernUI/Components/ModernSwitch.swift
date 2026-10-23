@@ -80,6 +80,9 @@ final class ModernSwitch: NSControl {
         }
     }
 
+    /// Claimed, so the mouse-up comes here (passed up, the card would start a window drag and take it).
+    override func mouseDown(with event: NSEvent) {}
+
     override func mouseUp(with event: NSEvent) {
         guard isEnabled, bounds.contains(convert(event.locationInWindow, from: nil)) else { return }
         toggle()

@@ -64,6 +64,14 @@ final class MarqueeView: NSView {
     required init?(coder: NSCoder) { fatalError("init(coder:) has not been implemented") }
 
     override var isFlipped: Bool { true }
+    override var mouseDownCanMoveWindow: Bool { true }
+    override func acceptsFirstMouse(for event: NSEvent?) -> Bool { true }
+
+    /// The title is a handle for the window, like the card around it.
+    override func mouseDown(with event: NSEvent) {
+        guard let window else { return super.mouseDown(with: event) }
+        window.performDrag(with: event)
+    }
 
     override func layout() {
         super.layout()

@@ -163,6 +163,9 @@ final class ArtworkView: NSView {
     override var mouseDownCanMoveWindow: Bool { onClick == nil }
     override func acceptsFirstMouse(for event: NSEvent?) -> Bool { true }
 
+    /// Claimed, so the mouse-up comes here (passed up, the card would start a window drag and take it).
+    override func mouseDown(with event: NSEvent) {}
+
     override func mouseUp(with event: NSEvent) {
         if bounds.contains(convert(event.locationInWindow, from: nil)) { onClick?() }
     }

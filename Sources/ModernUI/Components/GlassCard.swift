@@ -14,12 +14,12 @@ import QuartzCore
 
 class GlassCard: NSView {
     /// Where the card's controls go (top-left origin): the page, always `naturalHeight` tall.
-    let content = FlippedView()
+    let content: FlippedView = DragSurface()
     /// The card's full height; the glass may be shorter while it opens or closes.
     var naturalHeight: CGFloat = 100 {
         didSet { needsLayout = true }
     }
-    private let clip = FlippedView()
+    private let clip: FlippedView = DragSurface()
     private let glass: NSView
     private let light = StillLayer()
     private let frost = StillLayer()

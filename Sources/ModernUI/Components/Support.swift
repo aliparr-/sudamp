@@ -10,6 +10,29 @@ class FlippedView: NSView {
     override var isFlipped: Bool { true }
 }
 
+/// Text that never takes a click: it reaches the control or card under it. (A label inside a button would otherwise
+/// be what AppKit's hit test finds, and swallow the mouse-down.)
+final class PassiveLabel: NSTextField {
+    override func hitTest(_ point: NSPoint) -> NSView? { nil }
+}
+
+/// An image that never takes a click (an NSImageView inside a button would swallow its mouse-downs).
+final class PassiveImageView: NSImageView {
+    override func hitTest(_ point: NSPoint) -> NSView? { nil }
+}
+
+/// A card's background: pressing it drags the window (WindowServer-driven, like a title bar), and the first click
+/// works even while the app is in the background.
+final class DragSurface: FlippedView {
+    override var mouseDownCanMoveWindow: Bool { true }
+    override func acceptsFirstMouse(for event: NSEvent?) -> Bool { true }
+
+    override func mouseDown(with event: NSEvent) {
+        guard let window else { return super.mouseDown(with: event) }
+        window.performDrag(with: event)
+    }
+}
+
 /// A layer whose property changes never animate implicitly: every animation here is explicit.
 nonisolated final class StillLayer: CALayer {
     override func action(forKey event: String) -> (any CAAction)? { nil }
@@ -117,7 +140,7 @@ extension NSView {
 /// A label that is just text: no bezel, no selection, one line, truncating.
 func makeLabel(_ text: String = "", size: CGFloat, weight: NSFont.Weight = .regular, color: NSColor = .labelColor,
                monospacedDigits: Bool = false) -> NSTextField {
-    let label = NSTextField(labelWithString: text)
+    let label = PassiveLabel(labelWithString: text)
     label.font = monospacedDigits ? .monospacedDigitSystemFont(ofSize: size, weight: weight)
         : .systemFont(ofSize: size, weight: weight)
     label.textColor = color

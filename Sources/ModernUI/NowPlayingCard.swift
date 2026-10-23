@@ -30,7 +30,7 @@ final class NowPlayingCard: GlassCard {
     let subtitleLabel = makeLabel(size: 13, color: .secondaryLabelColor)
     let sourceBadge = BadgeView()
     let formatLabel = makeLabel(size: 10.5, weight: .medium, color: .tertiaryLabelColor, monospacedDigits: true)
-    let noticeIcon = NSImageView()
+    let noticeIcon = PassiveImageView()
     let noticeLabel = makeLabel(size: 11.5, weight: .medium, color: .secondaryLabelColor)
     let retryButton = CapsuleButton(label: "Retry")
     let progress = ModernSlider(axis: .horizontal, label: "Position")
@@ -42,9 +42,9 @@ final class NowPlayingCard: GlassCard {
     let playButton = GlyphButton(symbol: "play.fill", pointSize: 22, weight: .bold, style: .prominent, label: "Play")
     let nextButton = GlyphButton(symbol: "forward.fill", pointSize: 19, weight: .semibold, label: "Next Stream")
     let shuffleButton = GlyphButton(symbol: "shuffle", pointSize: 14, weight: .semibold, label: "Shuffle Genres")
-    let volumeLow = NSImageView()
+    let volumeLow = PassiveImageView()
     let volume = ModernSlider(axis: .horizontal, label: "Volume")
-    let volumeHigh = NSImageView()
+    let volumeHigh = PassiveImageView()
     let equalizerButton = GlyphButton(symbol: "slider.vertical.3", pointSize: 13.5, weight: .semibold, label: "Equalizer")
     let stationsButton = GlyphButton(symbol: "list.bullet", pointSize: 13.5, weight: .semibold, label: "Stations")
     let appearanceButton = GlyphButton(symbol: "circle.lefthalf.filled", pointSize: 13.5, weight: .semibold,
@@ -372,6 +372,13 @@ final class TimeLabel: NSView {
     override var mouseDownCanMoveWindow: Bool { false }
     override func acceptsFirstMouse(for event: NSEvent?) -> Bool { true }
 
+    /// The whole control takes the click, never the image or text inside it.
+    override func hitTest(_ point: NSPoint) -> NSView? {
+        guard !isHidden, alphaValue > 0.01 else { return nil }
+        // `point` is in the superview's coordinates, like `frame`.
+        return frame.contains(point) ? self : nil
+    }
+
     func setAccent(_ color: NSColor) {
         accent = color
         updateColor()
@@ -386,6 +393,9 @@ final class TimeLabel: NSView {
         super.layout()
         label.frame = bounds
     }
+
+    /// Claimed, so the mouse-up comes here (passed up, the card would start a window drag and take it).
+    override func mouseDown(with event: NSEvent) {}
 
     override func mouseUp(with event: NSEvent) { onClick?() }
 

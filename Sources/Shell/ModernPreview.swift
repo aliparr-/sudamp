@@ -1,13 +1,14 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 // `sudamp --modern-preview [--appearance auto|light|dark] [--tint <name>] [--panels equalizer,stations]
 //                          [--state playing|paused|idle|live|tuning|failed|engine] [--backdrop]
-//                          [--capture <file.png>] [--capture-delay <seconds>] [--exit-after <seconds>]`
+//                          [--capture <file.png>] [--capture-delay <seconds>] [--exit-after <seconds>] [--probe-hits]`
 //
 // Opens the modern skin with an animated fake player state (ticking time, a fake visualiser), the way
 // `--skin-preview` does for the classic skins: no audio, no network, nothing persisted. Every ModernEvent is logged
 // to stderr and its obvious local effect applied. `--backdrop` puts a colourful stand-in wallpaper behind the
 // window, so the glass has something to refract; `--capture` writes what the screen shows of both windows (own
-// windows need no Screen Recording permission) and quits.
+// windows need no Screen Recording permission) and quits. `--probe-hits` prints where a click on the player would
+// go, as WindowServer routes it (which window) and as AppKit does (which view), and clicks Next through AppKit.
 
 import AppKit
 import ModernUI
@@ -28,6 +29,8 @@ enum ModernPreview {
         var popover = false
         /// Opens this panel (animated) a second after launch.
         var openLater: ModernPanel?
+        /// Prints which window WindowServer would send a click to at points on the player, then quits.
+        var probeHits = false
     }
 
     static let states = ["playing", "paused", "idle", "live", "tuning", "failed", "engine"]
@@ -63,6 +66,7 @@ enum ModernPreview {
                 options.state = v
             case "--backdrop": options.backdrop = true
             case "--popover": options.popover = true
+            case "--probe-hits": options.probeHits = true
             case "--open-later":
                 guard let v = value(), let panel = ModernPanel(rawValue: v) else { return fail("bad --open-later") }
                 options.openLater = panel
@@ -190,6 +194,8 @@ final class ModernPreviewController: NSObject, NSApplicationDelegate {
     private var state: ModernPlayerState
     private var timer: Timer?
     private var phase = 0.0
+    /// Events seen while probing.
+    private var probedEvents: [String] = []
 
     init(options: ModernPreview.Options) {
         self.options = options
@@ -224,6 +230,13 @@ final class ModernPreviewController: NSObject, NSApplicationDelegate {
         }
         timer = Timer.scheduledTimer(withTimeInterval: 1, repeats: true) { [weak self] _ in
             MainActor.assumeIsolated { self?.tick() }
+        }
+        if options.probeHits {
+            // Above every other app's windows, so only ours can answer.
+            player.window.level = .screenSaver
+            DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) { [weak self] in
+                MainActor.assumeIsolated { self?.probeHits() }
+            }
         }
         if let path = options.capture {
             DispatchQueue.main.asyncAfter(deadline: .now() + options.captureDelay) { [weak self] in
@@ -261,6 +274,7 @@ final class ModernPreviewController: NSObject, NSApplicationDelegate {
 
     private func handle(_ event: ModernEvent) {
         SkinPreview.log("modern preview: event \(event)")
+        probedEvents.append(event.description)
         switch event {
         case .playPause:
             state.playback = state.playback == .playing ? .paused : .playing
@@ -351,6 +365,64 @@ final class ModernPreviewController: NSObject, NSApplicationDelegate {
                 exit(0)
             }
         }
+    }
+
+    /// Which window a mouse-down at each point would reach (WindowServer's own hit test), skipping the login window's
+    /// shield when the screen is locked.
+    private func probeHits() {
+        guard let window = player?.window else { exit(1) }
+        // Clear of anything floating mid-screen (a notification alert sits there on a locked screen).
+        window.setFrameOrigin(NSPoint(x: 40, y: 200))
+        RunLoop.main.run(until: Date().addingTimeInterval(0.3))
+        func hit(_ p: CGPoint) -> String {
+            var below = 0
+            for _ in 0..<8 {
+                let n = NSWindow.windowNumber(at: p, belowWindowWithWindowNumber: below)
+                let info = (CGWindowListCopyWindowInfo(.optionIncludingWindow, CGWindowID(n)) as? [[String: Any]])?.first
+                let owner = info?[kCGWindowOwnerName as String] as? String ?? "?"
+                if owner == "loginwindow" { below = n; continue }
+                return n == window.windowNumber ? "OURS" : "\(owner)#\(n)"
+            }
+            return "?"
+        }
+        let f = window.frame
+        let m = 34.0
+        RunLoop.main.run(until: Date().addingTimeInterval(0.6))
+        let points: [(String, CGPoint)] = [
+            ("play button", CGPoint(x: f.minX + m + 190, y: f.maxY - m - 184)),
+            ("card background", CGPoint(x: f.minX + m + 300, y: f.maxY - m - 40)),
+            ("artwork", CGPoint(x: f.minX + m + 60, y: f.maxY - m - 60)),
+            ("clear margin", CGPoint(x: f.minX + 6, y: f.maxY - 6)),
+        ]
+        SkinPreview.log("probe: window \(window.windowNumber) frame \(f) alpha \(window.alphaValue) ignoresMouseEvents \(window.ignoresMouseEvents)")
+        // In-process: what AppKit's own routing hits (it starts at the frame view, the content view's superview).
+        if let content = window.contentView, let frameView = content.superview {
+            for (name, p) in [("play button", CGPoint(x: m + 190, y: f.height - m - 184)), ("card background", CGPoint(x: m + 300, y: f.height - m - 40))] {
+                var chain: [String] = []
+                var v = frameView.hitTest(p)
+                while let view = v, chain.count < 8 {
+                    chain.append(String(describing: type(of: view)))
+                    v = view.superview
+                }
+                SkinPreview.log("probe: frame-view hitTest at \(name) → \(chain.joined(separator: " < "))")
+            }
+            SkinPreview.log("probe: frame view \(type(of: frameView)), subviews \(frameView.subviews.map { String(describing: type(of: $0)) })")
+            // A click on Next through AppKit's routing (the mouse-up queued first, for the button's tracking loop).
+            let next = CGPoint(x: m + 190 + 72, y: f.height - m - 184)
+            func event(_ type: NSEvent.EventType) -> NSEvent? {
+                NSEvent.mouseEvent(with: type, location: next, modifierFlags: [], timestamp: ProcessInfo.processInfo.systemUptime,
+                                   windowNumber: window.windowNumber, context: nil, eventNumber: 0, clickCount: 1,
+                                   pressure: type == .leftMouseUp ? 0 : 1)
+            }
+            if let down = event(.leftMouseDown), let up = event(.leftMouseUp) {
+                probedEvents = []
+                NSApp.postEvent(up, atStart: false)
+                window.sendEvent(down)
+                SkinPreview.log("probe: click on Next delivered \(probedEvents)")
+            }
+        }
+        for (name, p) in points { SkinPreview.log("probe: \(name) → \(hit(p))") }
+        exit(0)
     }
 
     /// A stand-in wallpaper: soft colour fields and some shapes and type for the glass to bend.
