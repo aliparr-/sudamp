@@ -106,7 +106,7 @@ public struct VisualiserFrame: Sendable, Equatable {
 ///
 /// The ring is written when a callback renders, `bridge.latencySeconds` (output latency + one IO buffer, refreshed
 /// by `AudioEngine` on start and after every device change) before those samples are heard, so the window ends that
-/// many frames behind the write position to match what is audible. If the ring hasn't advanced for 150 ms (engine
+/// many frames behind the write position to match what is audible (at most as far back as the ring holds). If the ring hasn't advanced for 150 ms (engine
 /// stopped or idle-stopped), the input counts as silence and the bars fall.
 public final class VisualiserAnalyser {
     public struct Settings: Sendable, Equatable {
@@ -254,8 +254,11 @@ public final class VisualiserAnalyser {
             // A frame between two callbacks (large IO buffers) re-reads the same window; only a ring that has not
             // advanced for `stallNanos` counts as silence.
             if nowNanos < lastAdvanceNanos || nowNanos - lastAdvanceNanos < Self.stallNanos {
+                // A latency longer than the ring holds (AirPlay) is clamped: the bars run a little ahead of the sound
+                // rather than reading nothing.
+                let lag = min(bridge.latencyFrames, RenderBridge.maxLagFrames(window: Self.windowSize))
                 fresh = bridge.copyNewest(into: UnsafeMutableBufferPointer(start: samples, count: Self.windowSize),
-                                          lagFrames: bridge.latencyFrames)
+                                          lagFrames: lag)
             }
         }
         if !fresh { samples.update(repeating: 0, count: Self.windowSize) }

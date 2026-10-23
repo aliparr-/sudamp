@@ -55,6 +55,8 @@ public final class ModernPlayer: NSObject {
     public var onEvent: ((ModernEvent) -> Void)?
     /// Things worth a line in the app's log (how clicks reach the window).
     public var onNotice: ((String) -> Void)?
+    /// The visualiser started or paused (diagnostics: `visualizerDiagnostics` says why).
+    public var onVisualizerChange: ((Bool) -> Void)?
     /// How clicks reach the window: `unchecked`, `direct` (WindowServer sends clicks on the cards here, and those on
     /// the clear margins to the windows below) or `wholeWindow` (it didn't, so the whole frame takes clicks).
     public private(set) var clickRouting = "unchecked"
@@ -118,7 +120,7 @@ public final class ModernPlayer: NSObject {
     /// For logs: why the visualiser is or isn't running.
     public var visualizerDiagnostics: String {
         "animating \(state.isAnimating), mode \(state.visualizer.rawValue), scene \(visualizerScene?.rawValue ?? "none"), "
-            + "visible \(window.isVisible), "
+            + "visible \(window.isVisible), app active \(NSApp.isActive), screen locked \(WindowVisibility.screenIsLocked), "
             + "occlusion visible \(window.occlusionState.contains(.visible)), "
             + "uncovered \(uncoveredCheck.map { String($0.uncovered) } ?? "unchecked"), link paused \(displayLink?.isPaused ?? true)"
     }
@@ -284,6 +286,15 @@ public final class ModernPlayer: NSObject {
                                                      queue: .main) { [weak self] _ in
             MainActor.assumeIsolated { self?.updateDisplayLink() }
         }))
+        // Coming to the front (or leaving it) changes whether the window counts as seen.
+        for name in [NSApplication.didBecomeActiveNotification, NSApplication.didResignActiveNotification] {
+            observers.append((center, center.addObserver(forName: name, object: nil, queue: .main) { [weak self] _ in
+                MainActor.assumeIsolated {
+                    self?.uncoveredCheck = nil
+                    self?.updateDisplayLink()
+                }
+            }))
+        }
         // Moves arrive continuously while dragging: saved and reported once they settle.
         observers.append((center, center.addObserver(forName: NSWindow.didMoveNotification, object: window,
                                                      queue: .main) { [weak self] _ in
@@ -320,10 +331,12 @@ public final class ModernPlayer: NSObject {
     }
 
     /// Whether any of the window can be seen. WindowServer's occlusion state answers first; when it says hidden, the
-    /// windows above are checked by hand. A window that is nearly all clear (its glass is composited apart from its
-    /// own pixels) can be reported hidden while it shows: the likely reason the visualiser stood still on macOS 26.6.
+    /// app in front on an unlocked screen counts as seen, and otherwise the windows above are checked by hand. A window
+    /// that is nearly all clear (its glass is composited apart from its own pixels) can be reported hidden while it
+    /// shows: the likely reason the visualiser stood still on macOS 26.6.
     private func windowCanBeSeen() -> Bool {
         if window.occlusionState.contains(.visible) { return true }
+        if NSApp.isActive, window.isOnActiveSpace, !WindowVisibility.screenIsLocked { return true }
         let now = CACurrentMediaTime()
         if let check = uncoveredCheck, now - check.at < 0.5 { return check.uncovered }
         let areas = root.shownCardFrames().map { window.convertToScreen(root.convert($0, to: nil)) }
@@ -342,6 +355,7 @@ public final class ModernPlayer: NSObject {
         if displayLink.isPaused == wanted {
             displayLink.isPaused = !wanted
             if !wanted { root.nowPlaying.artwork.update(with: nil) }
+            onVisualizerChange?(wanted)
         }
         // While WindowServer says hidden, look again every second: covering or uncovering the window may not bring
         // an occlusion notification.
@@ -497,6 +511,11 @@ public final class ModernPlayer: NSObject {
 /// Whether a window shows, worked out from the windows above it (no Screen Recording permission needed for their
 /// bounds).
 enum WindowVisibility {
+    /// The login window's shield is up.
+    static var screenIsLocked: Bool {
+        (CGSessionCopyCurrentDictionary() as? [String: Any])?["CGSSessionScreenIsLocked"] as? Bool ?? false
+    }
+
     /// Whether any of `areas` (screen rects, AppKit coordinates) is clear of the on-screen windows above `window`.
     /// False when the window itself isn't on screen (another Space) or the screen is locked (the login window's
     /// shield covers everything).

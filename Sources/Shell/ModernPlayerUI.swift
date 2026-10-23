@@ -40,6 +40,11 @@ final class ModernPlayerUI: PlayerUIBase {
         player.visualizerProvider = { [weak self] in self?.visualizerFrame() }
         player.window.delegate = self
         player.onNotice = { [weak self] message in self?.log.notice("\(message, privacy: .public)") }
+        player.onVisualizerChange = { [weak self] running in
+            guard let self else { return }
+            self.log.notice("visualizer \(running ? "running" : "paused", privacy: .public): \(self.visualizerDetail, privacy: .public)")
+            self.publishDebugState()
+        }
         player.onFilesDropped = { [weak self] urls in
             guard let self, let handler = self.onSkinFilesDropped else { return false }
             handler(urls.map(\.path))
@@ -317,6 +322,12 @@ final class ModernPlayerUI: PlayerUIBase {
 
     // MARK: Debug state
 
+    /// Why the visualiser is or isn't drawing, and the output latency the analyser reads back by.
+    var visualizerDetail: String {
+        let latency = context.controller.renderBridge.map { String(format: "%.0f ms", $0.latencySeconds * 1000) } ?? "no audio yet"
+        return player.visualizerDiagnostics + ", output latency \(latency)"
+    }
+
     override func publishDebugState() {
         let f = player.window.frame
         let windows = ["main": AppUIDebugInfo.Window(open: true, shaded: false, visible: player.window.isVisible,
@@ -331,7 +342,8 @@ final class ModernPlayerUI: PlayerUIBase {
             timeDisplay: settings.timeRemaining ? "remaining" : "elapsed", visualizerMode: settings.modernVisualizer,
             lastSheet: lastSheet, sheetOpen: sheetOpen, skinClass: "modern", appearance: player.appearance.rawValue,
             tint: player.tint.rawValue, panels: ModernPanel.allCases.filter(player.openPanels.contains).map(\.rawValue),
-            visualizerInterval: settings.visualizerInterval, artworkColors: settings.artworkColors)
+            visualizerInterval: settings.visualizerInterval, artworkColors: settings.artworkColors,
+            visualizerRunning: player.isVisualizerRunning, visualizerDetail: visualizerDetail)
         let skin = AppSkinDebugInfo(id: SkinLibrary.modernID, name: SkinLibrary.modernName, origin: "modern")
         context.controller.setShellState(skin: skin, ui: ui)
     }

@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
-// The render bridge's visualiser ring (sa_render.c): an 8192-frame single-producer ring that always overwrites
+// The render bridge's visualiser ring (sa_render.c): a 65,536-frame single-producer ring that always overwrites
 // and a reader that copies the newest N frames ending `lag` before the write position. Test ideas adapted from
 // hfyeomans/MacAmp @ cb0c77f `Tests/MacAmpTests/LockFreeRingBufferTests.swift` (write-then-read integrity,
 // empty reads, overwrite keeps the newest data, wrap-around, many small writes then one large read, zero-length
@@ -83,26 +83,39 @@ final class CounterBridge {
         c.write(4096)
         #expect(c.bridge.copyNewest(0) == nil)
         #expect(c.bridge.copyNewest(16, lagFrames: -1) == nil)
-        // The reader keeps clear of a callback in progress: count + lag must leave a 4096-frame guard.
         #expect(c.bridge.copyNewest(4096) != nil)
-        #expect(c.bridge.copyNewest(4097) == nil)
-        #expect(c.bridge.copyNewest(2048, lagFrames: 2049) == nil)
+        #expect(c.bridge.copyNewest(4097) == nil, "only 4096 frames written")
+        // The reader keeps clear of a callback in progress: count + lag must leave a 4096-frame guard.
+        for _ in 0..<16 { c.write(4096) }
+        let usable = RenderBridge.ringFrames - RenderBridge.ringGuardFrames
+        #expect(c.bridge.copyNewest(usable) != nil)
+        #expect(c.bridge.copyNewest(usable + 1) == nil)
+        #expect(c.bridge.copyNewest(30_000, lagFrames: usable - 30_000 + 1) == nil)
+        #expect(RenderBridge.maxLagFrames(window: 1024) == usable - 1024)
     }
 
     @Test func overwritingKeepsTheNewestFrames() {
         let c = CounterBridge()
-        for _ in 0..<7 { c.write(4096) } // 28,672 frames: the 8192-frame ring wrapped three times
+        for _ in 0..<52 { c.write(4096) } // 212,992 frames: the 65,536-frame ring wrapped three times
         let newest = c.bridge.copyNewest(4096)
-        #expect(newest.map { CounterBridge.isRun($0, endingBefore: 28_672) } == true)
+        #expect(newest.map { CounterBridge.isRun($0, endingBefore: 212_992) } == true)
     }
 
     @Test func wrapAroundIsContiguous() {
         let c = CounterBridge()
-        c.write(4096)
-        c.write(4000) // 8096 written
-        c.write(300)  // straddles the 8192 boundary
+        for _ in 0..<15 { c.write(4096) }
+        c.write(4000) // 65,440 written
+        c.write(300)  // straddles the 65,536 boundary
         let window = c.bridge.copyNewest(1000, lagFrames: 50)
-        #expect(window.map { CounterBridge.isRun($0, endingBefore: 8396 - 50) } == true)
+        #expect(window.map { CounterBridge.isRun($0, endingBefore: 65_740 - 50) } == true)
+    }
+
+    /// Bluetooth's latency (a quarter of a second here) fits: the window ends that far back.
+    @Test func aLongLatencyStillReads() {
+        let c = CounterBridge()
+        for _ in 0..<8 { c.write(4096) }
+        let lag = 12_000
+        #expect(c.bridge.copyNewest(1024, lagFrames: lag).map { CounterBridge.isRun($0, endingBefore: 32_768 - lag) } == true)
     }
 
     @Test func manySmallWritesThenOneLargeRead() {

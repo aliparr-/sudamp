@@ -79,6 +79,11 @@ public final class RenderBridge: @unchecked Sendable {
     public static var sampleRate: Double { Double(SA_RENDER_SAMPLE_RATE) }
     public static var pauseRampFrames: Int { Int(SA_RENDER_PAUSE_RAMP_FRAMES) }
     public static var ringFrames: Int { Int(SA_RENDER_RING_FRAMES) }
+    /// Frames a read keeps clear of the write position (a callback may be mid-write).
+    public static var ringGuardFrames: Int { Int(SA_RENDER_RING_GUARD_FRAMES) }
+
+    /// The furthest back (in frames) a `window`-frame read can end: beyond it the ring no longer holds the frames.
+    public static func maxLagFrames(window: Int) -> Int { max(0, ringFrames - ringGuardFrames - window) }
     /// The pull AO compiled into this binary ("sudamp pull AO").
     public static var aoDescription: String { SARenderBridge.aoDescription() }
 

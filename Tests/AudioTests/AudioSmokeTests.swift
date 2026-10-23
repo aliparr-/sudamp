@@ -218,8 +218,8 @@ import Testing
         let source = SyntheticSource(left: 0, right: 0)
         bridge.setSyntheticSource(source)
         var l = [Float](repeating: 0, count: 1000), r = [Float](repeating: 0, count: 1000)
-        // Write 10 blocks of 1000 frames, block k carrying mono value k (wraps the 8192-frame ring).
-        for k in 0..<10 {
+        // Write 70 blocks of 1000 frames, block k carrying mono value k (wraps the 65,536-frame ring).
+        for k in 0..<70 {
             source.state.pointee.left = Float(k)
             source.state.pointee.right = Float(k)
             l.withUnsafeMutableBufferPointer { lb in
@@ -228,14 +228,14 @@ import Testing
                 }
             }
         }
-        #expect(bridge.ringFramesWritten == 10_000)
+        #expect(bridge.ringFramesWritten == 70_000)
         let newest = bridge.copyNewest(1000)
-        #expect(newest == [Float](repeating: 9, count: 1000))
+        #expect(newest == [Float](repeating: 69, count: 1000))
         let lagged = bridge.copyNewest(1000, lagFrames: 1500)
-        #expect(lagged.map { Array($0.prefix(500)) } == [Float](repeating: 7, count: 500))
-        #expect(lagged.map { Array($0.suffix(500)) } == [Float](repeating: 8, count: 500))
+        #expect(lagged.map { Array($0.prefix(500)) } == [Float](repeating: 67, count: 500))
+        #expect(lagged.map { Array($0.suffix(500)) } == [Float](repeating: 68, count: 500))
         // Too much history requested: refused rather than torn.
-        #expect(bridge.copyNewest(5000) == nil)
+        #expect(bridge.copyNewest(RenderBridge.ringFrames - RenderBridge.ringGuardFrames + 1) == nil)
         #expect(bridge.copyNewest(0) == nil)
     }
 

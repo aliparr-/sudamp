@@ -15,9 +15,7 @@
 #include "sudamp_ao.h"
 
 #define RING_MASK (SA_RENDER_RING_FRAMES - 1)
-// The writer may be mid-callback (slots written, position not yet published) when the reader validates, so the
-// reader keeps this many frames clear of the write position. AVAudioEngine renders at most 4096 frames per call.
-#define RING_GUARD_FRAMES 4096
+#define RING_GUARD_FRAMES SA_RENDER_RING_GUARD_FRAMES
 
 _Static_assert((SA_RENDER_RING_FRAMES & RING_MASK) == 0, "ring size must be a power of two");
 

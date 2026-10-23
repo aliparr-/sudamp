@@ -147,6 +147,21 @@ import Testing
         #expect(frame.scope(0) == 1) // clamped counter values: the window is non-zero, so the ring was read
     }
 
+    /// Output latency the ring can't reach back to (AirPlay, two seconds) is clamped, not read as silence; Bluetooth's
+    /// (a quarter of a second) is honoured.
+    @Test func longLatenciesStillHearTheMusic() {
+        for latency in [0.25, 2.0] {
+            let bridge = RenderBridge()
+            bridge.setTestSignal(.sine(frequency: 1000, amplitude: 0.5))
+            bridge.setLatency(seconds: latency)
+            Self.feed(bridge, frames: RenderBridge.ringFrames)
+            let analyser = VisualiserAnalyser(bridge: bridge)
+            let frame = analyser.analyse(nowNanos: Self.frameNanos)
+            let bar = VisualiserAnalyser.bar(containing: 1000)!
+            #expect(frame.bar(bar) > 0.5, "\(latency) s: bar \(frame.bar(bar))")
+        }
+    }
+
     @Test func aStalledRingCountsAsSilence() {
         let bridge = RenderBridge()
         bridge.setTestSignal(.sine(frequency: 1000, amplitude: 0.5))

@@ -17,8 +17,13 @@ extern "C" {
 #define SA_RENDER_SAMPLE_RATE 48000
 /// Host-pause ramp: 5 ms at 48 kHz.
 #define SA_RENDER_PAUSE_RAMP_FRAMES 240
-/// Visualiser ring size in mono frames (power of two).
-#define SA_RENDER_RING_FRAMES 8192
+/// Visualiser ring size in mono frames (power of two): 1.37 s at 48 kHz, so the visualiser's 1024-frame window can end
+/// as far back as the output's latency (Bluetooth adds 100-300 ms). At 8192 frames anything over 64 ms of latency
+/// made every read fail, and the visualiser saw only silence.
+#define SA_RENDER_RING_FRAMES 65536
+/// The writer may be mid-callback (slots written, position not yet published) when the reader validates, so the
+/// reader keeps this many frames clear of the write position. AVAudioEngine renders at most 4096 frames per call.
+#define SA_RENDER_RING_GUARD_FRAMES 4096
 
 typedef struct SARender SARender;
 

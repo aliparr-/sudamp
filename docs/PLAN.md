@@ -142,7 +142,7 @@ M2, M3 and M6 need only M1 and run in parallel; M4 needs only M0, so a second ag
 - **EQ:** 10 bands + preamp; MacAmp's 17 presets and `.eqf` codec with tests; the shelf A/B on bands 0 and 9 and the AUPeakLimiter evaluation (CPU, latency, transparency), decision recorded.
 - **`sudamp-dev eq-selftest`** on an AVAudioEngine in offline manual rendering, or a muted live engine if AVAudioSourceNode doesn't render offline.
 - **Render bridge:** C balance (ramps and the launch fade landed in M1).
-- **Visualiser data:** the 8192-frame SPSC ring (MacAmp's algorithm and 16 tests, in C11 atomics) and the vDSP analyser.
+- **Visualiser data:** the SPSC ring (8192 frames then, 65,536 now so Bluetooth latency fits; MacAmp's algorithm and 16 tests, in C11 atomics) and the vDSP analyser.
 - **Device changes:** MacAmp's observer (150 ms debounce), rewiring, and an engine rebuild after 3 failed starts, on E2's mechanism.
 - **Resolver:** QuickJS-NG tier 2 (`visionos,tv_samsung`) with step-up and the 24 h local adaptation; system proxy pass-through (`CFNetworkCopySystemProxySettings` → yt-dlp `--proxy`, mpv `http-proxy`).
 - **Live and radio pause:** a pause over 30 s reloads at the live edge on resume; the audio engine stops after 30 s paused or idle.
