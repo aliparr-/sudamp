@@ -230,4 +230,21 @@ import Testing
         let lenient = AppSettings.load(paths)
         #expect(lenient.volume == 100 && lenient.autoResume && !lenient.genreMenuShown)
     }
+
+    /// DESIGN §8.4: the modern skin is the default class; a saved classic choice and the modern look survive.
+    @Test func skinClassAndModernLook() throws {
+        let root = FileManager.default.temporaryDirectory.appending(path: "settings-\(UUID().uuidString)")
+        defer { try? FileManager.default.removeItem(at: root) }
+        let paths = Paths.profile(root)
+        #expect(AppSettings().skinClass == "modern" && AppSettings().modernAppearance == "auto" && AppSettings().modernTint == "teal")
+        try FileManager.default.createDirectory(at: root, withIntermediateDirectories: true)
+        try Data(#"{"version": 1, "skin": "andamp-dark"}"#.utf8).write(to: AppSettings.file(paths))
+        #expect(AppSettings.load(paths).skinClass == "modern", "older settings files get the new default")
+        try Data(#"{"version": 1, "skinClass": "classic", "modernAppearance": "dark", "modernTint": "red"}"#.utf8)
+            .write(to: AppSettings.file(paths))
+        let saved = AppSettings.load(paths)
+        #expect(saved.skinClass == "classic" && saved.modernAppearance == "dark" && saved.modernTint == "red")
+        try Data(#"{"version": 1, "skinClass": "retro"}"#.utf8).write(to: AppSettings.file(paths))
+        #expect(AppSettings.load(paths).skinClass == "modern")
+    }
 }

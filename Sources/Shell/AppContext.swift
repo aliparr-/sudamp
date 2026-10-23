@@ -57,8 +57,9 @@ final class AppContext {
 
     private let lock: InstanceLock
     private var server: InstanceServer?
-    private var snapshotObservers: [(PlayerSnapshot) -> Void] = []
-    private var availabilityObservers: [() -> Void] = []
+    private var snapshotObservers: [(token: Int, f: (PlayerSnapshot) -> Void)] = []
+    private var availabilityObservers: [(token: Int, f: () -> Void)] = []
+    private var nextObserverToken = 0
     private var availabilityTask: Task<Void, Never>?
     private var availabilityTimer: Task<Void, Never>?
     private var lastAvailabilityTrigger: String?
@@ -141,15 +142,30 @@ final class AppContext {
 
     // MARK: Observation
 
-    func observeSnapshots(_ f: @escaping (PlayerSnapshot) -> Void) {
-        snapshotObservers.append(f)
+    /// Calls `f` with every snapshot (and the current one now). The token removes it (a front end torn down when
+    /// the skin class changes).
+    @discardableResult
+    func observeSnapshots(_ f: @escaping (PlayerSnapshot) -> Void) -> Int {
+        nextObserverToken += 1
+        snapshotObservers.append((nextObserverToken, f))
         f(controller.snapshot)
+        return nextObserverToken
     }
 
-    func observeAvailability(_ f: @escaping () -> Void) { availabilityObservers.append(f) }
+    @discardableResult
+    func observeAvailability(_ f: @escaping () -> Void) -> Int {
+        nextObserverToken += 1
+        availabilityObservers.append((nextObserverToken, f))
+        return nextObserverToken
+    }
+
+    func removeObserver(_ token: Int) {
+        snapshotObservers.removeAll { $0.token == token }
+        availabilityObservers.removeAll { $0.token == token }
+    }
 
     private func snapshotChanged(_ s: PlayerSnapshot) {
-        for f in snapshotObservers { f(s) }
+        for observer in snapshotObservers { observer.f(s) }
         // Eligibility moves with the engine (radio only until it is ready) and with failures.
         let trigger = "\(s.engine.state.rawValue)/\(s.phase.rawValue)/\(s.failuresInARow)"
         if trigger != lastAvailabilityTrigger {
@@ -167,7 +183,7 @@ final class AppContext {
             self.availabilityTask = nil
             guard fresh != self.availability else { return }
             self.availability = fresh
-            for f in self.availabilityObservers { f() }
+            for observer in self.availabilityObservers { observer.f() }
         }
         if availabilityTimer == nil {
             // Backoffs and the token bucket change eligibility with time alone.

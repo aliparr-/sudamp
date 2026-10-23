@@ -7,64 +7,35 @@ import Playback
 import SkinKit
 import SkinUI
 
-/// The default front end (PLAN M5, DESIGN §3, §8): Main (+ shade), Equalizer and Playlist SkinWindows through
+/// The classic skins' front end (PLAN M5, DESIGN §3, §8, §8.4): Main (+ shade), Equalizer and Playlist SkinWindows through
 /// SkinUI's WindowManager, drawn from PlaybackController snapshots (`SkinDisplay`), with every SkinControlEvent
 /// turned into an action (`SkinActions`). The genre menu opens from the marquee, the options button and right-click
 /// `Genre ▸`, always the same `GenreMenuBuilder` menu anchored under the marquee; the first launch opens it by itself.
 /// Skins come from `SkinLibrary` (built in, bundled, the museum's, `<profile>/Skins`), by drag-and-drop, Open Skin…,
-/// a `.wsz` argument or a forwarded launch; a refused archive shows a sheet and keeps the current skin.
+/// a `.wsz` argument or a forwarded launch; a refused archive shows a sheet and keeps the current skin. Menus, sheets
+/// and the menu automation are `PlayerUIBase`'s; `PlayerStyleHost` switches between this and the modern skin.
 ///
 /// The visualiser is AudioEngine's `VisualiserAnalyser` over the render bridge's ring, pulled by SkinUI's display link
 /// at 30 Hz only while Main is visible and playing (paused when occluded).
-final class SkinnedPlayerUI: NSObject {
-    let context: AppContext
+final class SkinnedPlayerUI: PlayerUIBase {
     let manager: WindowManager
     let library: SkinLibrary
-    let isAutomation: Bool
-    /// The menu bar, status item and Dock (menus dump).
-    weak var appMenus: AppMenus?
     private(set) var skinEntry: SkinEntry
     private var analyser: VisualiserAnalyser?
     private(set) var lastState: SkinPlayerState?
     private var lastCurrentID: StreamID?
-    private var lastDebug: (skin: AppSkinDebugInfo?, ui: AppUIDebugInfo?)?
+    private var snapshotObserver: Int?
 
-    // Menus (SkinnedPlayerUI+Menus.swift)
-    /// The menu tracking right now, what it is, and where it came from.
-    var openMenu: NSMenu?
-    var openMenuKind: String?
-    var openMenuAnchor: GenreMenuAnchor?
-    var pendingPopUp: (menu: NSMenu, point: CGPoint, kind: String, anchor: GenreMenuAnchor?)?
-    /// Menus whose `popUp` hasn't returned yet (a cancelled one unwinds on the next run-loop turn).
-    var trackingDepth = 0
-    var hoverTask: Task<Void, Never>?
-    var menuWatchdog: Task<Void, Never>?
-    private(set) var menuAutoOpened = false
-    /// Menu choices made through a menu, for the automation report.
-    var menuSelections: [[String: String]] = []
-    var menuDumps: [[String: Any]] = []
-    /// Every menu automation saw open: its anchor and the genre menu it showed (the context menu's `Genre ▸`).
-    var openedMenus: [[String: Any]] = []
-    /// The file Load/Save .eqf… uses instead of a panel (automation).
-    var injectedEQFURL: URL?
-
-    // Sheets
-    private(set) var lastSheet: String?
-    private var sheetOpen = false
-
-    init(context: AppContext, arguments: ShellArguments, automation: Bool) {
-        self.context = context
-        isAutomation = automation
-        library = SkinLibrary(bundledDirectory: SkinLibrary.defaultBundledDirectory(), userDirectory: context.paths.skins)
+    /// - Parameter initialSkin: a skin already loaded and validated (a `.wsz` argument, a file opened or dropped on the
+    ///   modern skin); nil shows the saved one.
+    init(context: AppContext, library: SkinLibrary, arguments: ShellArguments, initialSkin: (SkinEntry, Skin)?,
+         automation: Bool) {
+        self.library = library
         let settings = context.settings
         var entry = SkinLibrary.builtIn
         var skin = SudampDark.skin
-        var rejected: SkinRejection?
-        if let path = arguments.skinFiles.last {
-            switch library.importSkin(at: URL(filePath: ShellArguments.absolute(path))) {
-            case .success(let (e, s)): (entry, skin) = (e, s)
-            case .failure(let r): rejected = r
-            }
+        if let initialSkin {
+            (entry, skin) = initialSkin
         } else if let saved = settings.skin, let e = library.entry(id: saved), case .success(let s) = library.load(e) {
             (entry, skin) = (e, s)
         }
@@ -74,7 +45,7 @@ final class SkinnedPlayerUI: NSObject {
         configuration.layoutURL = context.paths.appSupport.appending(path: "layout.json")
         configuration.regionEnabled = settings.regionEnabled && !arguments.noRegion
         manager = WindowManager(skin: skin, configuration: configuration)
-        super.init()
+        super.init(context: context, automation: automation)
         manager.pausesWhenOccluded = !arguments.ignoreOcclusion
         manager.onEvent = { [weak self] event, role in self?.handle(event, from: role) }
         manager.onFilesDropped = { [weak self] urls, _ in
@@ -88,15 +59,21 @@ final class SkinnedPlayerUI: NSObject {
             window.undoManagerProvider = { undo }
             window.delegate = self
         }
-        context.observeSnapshots { [weak self] s in self?.render(s) }
-        if let rejected { reject(rejected, origin: "launch") }
+        snapshotObserver = context.observeSnapshots { [weak self] s in self?.render(s) }
         log.info("skinned UI: skin \(entry.id, privacy: .public), scale \(SkinScale.label(self.manager.scale), privacy: .public)")
         publishDebugState()
     }
 
-    let log = Log.logger("ui")
 
     var mainWindow: NSWindow? { manager.windows[.main] }
+    override var sheetWindow: NSWindow? { manager.windows[.main] }
+    override func genreMenuAnchorPoint() -> CGPoint { manager.marqueeMenuAnchor() }
+    override var aboutSkin: SkinEntry? { skinEntry }
+
+    override func presetsMenuAnchorPoint() -> CGPoint {
+        let presets = manager.windows[.equalizer]?.skinView.screenRect(forSkinRect: EQLayout.presets) ?? .zero
+        return CGPoint(x: presets.minX, y: presets.minY)
+    }
 
     // MARK: Showing
 
@@ -118,7 +95,7 @@ final class SkinnedPlayerUI: NSObject {
     // MARK: Rendering
 
     /// Snapshot (+ settings, library) → what the skin draws.
-    func render(_ s: PlayerSnapshot? = nil) {
+    override func render(_ s: PlayerSnapshot? = nil) {
         let snapshot = s ?? context.controller.snapshot
         let controller = context.controller
         let playlist = SkinDisplay.playlist(genre: snapshot.genre, favouritesMode: snapshot.favouritesMode,
@@ -217,23 +194,12 @@ final class SkinnedPlayerUI: NSObject {
         case .toggleTimeDisplay:
             context.updateSettings { $0.timeRemaining.toggle() }
         case .cycleVisualizer:
-            let next: VisualizerFrame.Mode = switch SkinPrefs(context.settings).visualizer {
-            case .spectrum: .oscilloscope
-            case .oscilloscope: .off
-            case .off: .spectrum
-            }
-            setVisualizer(next)
+            cycleVisualizer()
         case .about: AppMenus.showAbout(skin: skinEntry)
         case .quit: context.onQuit?("main window closed")
         case .none: return
         }
         render()
-    }
-
-    func setVisualizer(_ mode: VisualizerFrame.Mode) {
-        context.updateSettings { $0.visualizer = SkinPrefs.name(mode) }
-        render()
-        publishDebugState()
     }
 
     /// The Playlist's stream IDs in row order (what `playRow` and double-clicks index).
@@ -243,12 +209,6 @@ final class SkinnedPlayerUI: NSObject {
         return SkinDisplay.playlist(genre: s.genre, favouritesMode: s.favouritesMode, catalog: controller.catalog,
                                     favourites: controller.favouriteStreams, banned: controller.library.bannedSet).map(\.id)
     }
-
-    func promptForStreamURL() {
-        StreamURLPrompt.run(context: context, window: manager.windows[.main], automation: isAutomation)
-    }
-
-    func syncVolume() { render() }
 
     // MARK: Skins
 
@@ -288,57 +248,6 @@ final class SkinnedPlayerUI: NSObject {
         publishDebugState()
     }
 
-    /// A refused archive (DESIGN §8.2): the current skin stays; `.lastError.kind == "skinRejected"`; a window-modal
-    /// sheet says why (dismissed by itself under `--automation`).
-    func reject(_ rejection: SkinRejection, origin: String) {
-        log.notice("skin rejected (\(origin, privacy: .public)): \(rejection.file, privacy: .public): \(rejection.reason, privacy: .public)")
-        context.controller.noteShellError(kind: "skinRejected", message: "\(rejection.file): \(rejection.reason): \(rejection.message)",
-                                          stage: "skin")
-        let alert = NSAlert()
-        alert.alertStyle = .warning
-        alert.messageText = "“\(rejection.file)” can't be used as a skin"
-        alert.informativeText = rejection.message + " The current skin stays."
-        alert.addButton(withTitle: "OK")
-        showSheet(alert, name: "skinRejected")
-    }
-
-    /// A window-modal sheet on Main (shown even while Main is off screen under automation, then dismissed).
-    func showSheet(_ alert: NSAlert, name: String) {
-        lastSheet = name
-        guard let main = manager.windows[.main] else { return }
-        if main.attachedSheet != nil { main.endSheet(main.attachedSheet!) }
-        sheetOpen = true
-        alert.beginSheetModal(for: main) { [weak self] _ in
-            MainActor.assumeIsolated {
-                self?.sheetOpen = false
-                self?.publishDebugState()
-            }
-        }
-        publishDebugState()
-        if isAutomation {
-            Task { @MainActor [weak self, weak main] in
-                try? await Task.sleep(for: .milliseconds(300))
-                guard let main, let sheet = main.attachedSheet else { return }
-                main.endSheet(sheet)
-                self?.publishDebugState()
-            }
-        }
-    }
-
-    func openSkinPanel() {
-        guard !isAutomation else { return }
-        let panel = NSOpenPanel()
-        panel.title = "Open Skin"
-        panel.message = "Choose a classic skin (.wsz)."
-        panel.allowedContentTypes = []
-        panel.allowsOtherFileTypes = true
-        panel.canChooseDirectories = false
-        panel.allowsMultipleSelection = false
-        panel.delegate = self
-        NSApp.activate()
-        if panel.runModal() == .OK, let url = panel.url { loadSkinFiles([url.path], origin: "openPanel") }
-    }
-
     // MARK: Window management (View menu)
 
     func setScale(_ scale: Double) {
@@ -364,7 +273,7 @@ final class SkinnedPlayerUI: NSObject {
 
     // MARK: Debug state
 
-    func publishDebugState() {
+    override func publishDebugState() {
         let skin = SkinLibrary.debugInfo(skinEntry, skin: manager.skin)
         var windows: [String: AppUIDebugInfo.Window] = [:]
         for (role, window) in manager.windows {
@@ -380,18 +289,16 @@ final class SkinnedPlayerUI: NSObject {
             equalizer: .init(enabled: eq.enabled, auto: settings.eqAuto, preamp: Double(eq.preamp),
                              bands: eq.bands.map(Double.init), preset: settings.eqPreset),
             timeDisplay: settings.timeRemaining ? "remaining" : "elapsed", visualizerMode: settings.visualizer,
-            lastSheet: lastSheet, sheetOpen: sheetOpen)
+            lastSheet: lastSheet, sheetOpen: sheetOpen, skinClass: "classic")
         context.controller.setShellState(skin: skin, ui: ui)
     }
 
-    func markMenuAutoOpened() {
-        menuAutoOpened = true
-        publishDebugState()
-    }
-
-    /// Quit path: stop observers and display links, save the layout.
+    /// Quit path or a switch to the modern skin: stop observers and display links, save the layout, hide.
     func close() {
         cancelMenuTracking()
+        if let snapshotObserver { context.removeObserver(snapshotObserver) }
+        snapshotObserver = nil
+        if let main = manager.windows[.main], let sheet = main.attachedSheet { main.endSheet(sheet) }
         manager.saveLayout()
         manager.close()
     }
@@ -401,9 +308,4 @@ extension SkinnedPlayerUI: NSWindowDelegate {
     func windowWillReturnUndoManager(_ window: NSWindow) -> UndoManager? { context.undoManager }
 }
 
-extension SkinnedPlayerUI: NSOpenSavePanelDelegate {
-    /// Open Skin… lists folders and skin archives only.
-    func panel(_ sender: Any, shouldEnable url: URL) -> Bool {
-        url.hasDirectoryPath || SkinView.isSkinFile(url) || ["eqf", "q1"].contains(url.pathExtension.lowercased())
-    }
-}
+

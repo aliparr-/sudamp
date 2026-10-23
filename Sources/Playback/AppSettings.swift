@@ -24,7 +24,12 @@ nonisolated public struct AppSettings: Codable, Sendable, Equatable {
     public var autoResume = true
     /// The genre menu opens by itself once, on the first launch (DESIGN §3).
     public var genreMenuShown = false
-    /// The chosen skin's id (`SkinLibrary`); nil is sudamp Dark.
+    /// The skin class (DESIGN §8.4): `modern` (the default: native glass) or `classic` (the .wsz skins).
+    public var skinClass = AppSettings.defaultSkinClass
+    /// The modern skin's appearance (`auto`, `light`, `dark`) and tint (`teal`, `red`, `blue`, …).
+    public var modernAppearance = "auto"
+    public var modernTint = "teal"
+    /// The chosen classic skin's id (`SkinLibrary`); nil is sudamp Dark.
     public var skin: String?
     /// EQ on/off, preamp and bands (restored at launch and applied before the first sound).
     public var equalizer = EQSettings()
@@ -57,6 +62,9 @@ nonisolated public struct AppSettings: Codable, Sendable, Equatable {
         autoResume = (try? c.decode(Bool.self, forKey: .autoResume)) ?? true
         genreMenuShown = (try? c.decode(Bool.self, forKey: .genreMenuShown)) ?? false
         skin = (try? c.decode(String.self, forKey: .skin)).flatMap { $0.isEmpty ? nil : $0 }
+        if let v = try? c.decode(String.self, forKey: .skinClass), Self.skinClasses.contains(v) { skinClass = v }
+        if let v = try? c.decode(String.self, forKey: .modernAppearance), !v.isEmpty { modernAppearance = v }
+        if let v = try? c.decode(String.self, forKey: .modernTint), !v.isEmpty { modernTint = v }
         equalizer = (try? c.decode(EQSettings.self, forKey: .equalizer)) ?? EQSettings()
         eqAuto = (try? c.decode(Bool.self, forKey: .eqAuto)) ?? false
         eqPreset = try? c.decode(String.self, forKey: .eqPreset)
@@ -70,6 +78,8 @@ nonisolated public struct AppSettings: Codable, Sendable, Equatable {
     }
 
     public static let visualizerModes = ["spectrum", "oscilloscope", "off"]
+    public static let skinClasses = ["modern", "classic"]
+    public static let defaultSkinClass = "modern"
 
     /// Adds (or replaces, by name) a user preset, keeping at most `maxUserPresets`.
     public mutating func addUserPreset(_ preset: EQPreset) {

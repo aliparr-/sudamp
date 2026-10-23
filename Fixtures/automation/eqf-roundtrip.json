@@ -1,6 +1,7 @@
 {
   "name": "EQ preset round trip through the presets menu (PLAN M5)",
   "description": "Rock from the presets menu, Save .eqf…, Flat, Load .eqf…: the gains come back equal. Pass the file with --automation's EQF path below.",
+  "style": "classic",
   "steps": [
     {"pressControl": "eqPresets", "window": "equalizer"},
     {"waitForMenu": "presets", "timeout": 3},

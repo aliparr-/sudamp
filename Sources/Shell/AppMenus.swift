@@ -19,8 +19,8 @@ final class AppMenus: NSObject, NSMenuDelegate, NSMenuItemValidation {
     private let favouritesMenu = NSMenu(title: "Favourite Streams")
     private let bannedMenu = NSMenu(title: "Recently Banned")
     private var statusItem: NSStatusItem?
-    /// The skinned front end (nil with `--plain`): View and Skins menus.
-    weak var skinned: SkinnedPlayerUI?
+    /// The skin classes' host (nil with `--plain`): View and Skins menus.
+    weak var styles: PlayerStyleHost?
     /// The front end, for Open Stream URL….
     weak var frontEnd: (any PlayerFrontEnd)?
     /// Called after a volume shortcut (the window's slider follows).
@@ -143,14 +143,20 @@ final class AppMenus: NSObject, NSMenuDelegate, NSMenuItemValidation {
                               action: #selector(genreChosen(_:)), shortcuts: true)
     }
 
+    /// The skin class changed: the View and Skins menus show the new front end's items.
+    func frontEndChanged() {
+        rebuildViewMenu()
+        rebuildSkinsMenu()
+    }
+
     private func rebuildViewMenu() {
         viewMenu.removeAllItems()
-        for item in skinned?.viewItems() ?? [] { viewMenu.addItem(item) }
+        for item in styles?.viewItems() ?? [] { viewMenu.addItem(item) }
     }
 
     private func rebuildSkinsMenu() {
         skinsMenu.removeAllItems()
-        guard let skins = skinned?.skinsMenu() else { return }
+        guard let skins = styles?.skinsMenu() else { return }
         let items = skins.items
         skins.removeAllItems()
         for item in items { skinsMenu.addItem(item) }
@@ -343,17 +349,17 @@ final class AppMenus: NSObject, NSMenuDelegate, NSMenuItemValidation {
     @objc private func quit(_ sender: Any?) { context.perform(.quit, origin: "menu") }
     @objc private func toggleShuffle(_ sender: Any?) {
         context.toggleShuffle()
-        skinned?.render()
+        styles?.render()
     }
     @objc private func toggleRepeat(_ sender: Any?) {
         context.toggleRepeat()
-        skinned?.render()
+        styles?.render()
     }
     @objc private func favourite(_ sender: Any?) { context.toggleFavourite() }
     @objc private func ban(_ sender: Any?) { context.banCurrent() }
     @objc private func copyLink(_ sender: Any?) { context.copyLink() }
     @objc private func openStreamURL(_ sender: Any?) { frontEnd?.promptForStreamURL() }
-    @objc private func openSkin(_ sender: Any?) { skinned?.openSkinPanel() }
+    @objc private func openSkin(_ sender: Any?) { styles?.openSkinPanel() }
 
     @objc private func volumeUp(_ sender: Any?) { nudgeVolume(+10) }
     @objc private func volumeDown(_ sender: Any?) { nudgeVolume(-10) }
@@ -363,7 +369,7 @@ final class AppMenus: NSObject, NSMenuDelegate, NSMenuItemValidation {
         onVolumeChanged?()
     }
 
-    @objc private func showAbout(_ sender: Any?) { Self.showAbout(skin: skinned?.skinEntry) }
+    @objc private func showAbout(_ sender: Any?) { Self.showAbout(skin: styles?.aboutSkin) }
 
     /// About: the native About window (AboutWindow.swift): stance, licence, credits, the current skin's credit and
     /// viewers for LICENSE, CREDITS.md and THIRD_PARTY_NOTICES.md.

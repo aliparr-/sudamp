@@ -72,9 +72,12 @@ let package = Package(
 
         // MARK: UI (main actor by default)
         .target(name: "SkinUI", dependencies: ["Core", "SkinKit"], swiftSettings: mainActorByDefault),
+        // The modern skin class (DESIGN §8.4): native AppKit, Core Animation and Liquid Glass, no .wsz.
+        .target(name: "ModernUI", swiftSettings: mainActorByDefault),
         .target(
             name: "Shell",
-            dependencies: ["Core", "Catalog", "Picker", "Feeds", "Resolver", "MPV", "Audio", "Playback", "SkinKit", "SkinUI"],
+            dependencies: ["Core", "Catalog", "Picker", "Feeds", "Resolver", "MPV", "Audio", "Playback", "SkinKit", "SkinUI",
+                           "ModernUI"],
             resources: [.process("Resources")],
             swiftSettings: mainActorByDefault
         ),
@@ -104,6 +107,7 @@ let package = Package(
         .testTarget(name: "SkinKitTests", dependencies: ["SkinKit"]),
         .testTarget(name: "PlaybackTests", dependencies: ["Playback"]),
         .testTarget(name: "SkinUITests", dependencies: ["SkinUI", "SkinKit"]),
+        .testTarget(name: "ModernUITests", dependencies: ["ModernUI"]),
         .testTarget(name: "ShellTests", dependencies: ["Shell"]),
     ]
 )

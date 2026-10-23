@@ -2,7 +2,7 @@
 
 # sudamp
 
-**The Sudden Amp** is a free macOS spiritual successor to Winamp for low-friction streaming. Open it, pick a genre such as *Deep House* from the dropdown, and a random stream from a curated list of YouTube, SoundCloud and Mixcloud mixes plays immediately, audio only. It looks like classic Winamp and loads classic `.wsz` skins. The default skin is a dark, minimal one.
+**The Sudden Amp** is a free macOS spiritual successor to Winamp for low-friction streaming. Open it, pick a genre such as *Deep House* from the dropdown, and a random stream from a curated list of YouTube, SoundCloud and Mixcloud mixes plays immediately, audio only. It comes in two skin classes: a **modern** one (the default), native Liquid Glass in light or dark with a choice of tints, and the **classic** Winamp look, which loads classic `.wsz` skins (Skins ▸ or ⇧⌘M switches).
 
 **Status:** in development. M0–M6 and M7's signed feed mechanism are done: the skinned Winamp windows (sudamp Dark, AndAmp Dark/Light/Spot and 100 Winamp Skin Museum skins bundled, any `.wsz` by drag-and-drop) play a picked genre end to end; M6 adds engine updates with a canary and rollback, failure breakers, offline handling and stream recovery (its 2-hour soak is partial: RSS drift 22.9 MB against a 20 MB limit, footprint flat). `--plain` opens the M2 plain window. Progress is tracked in [`docs/PLAN.md`](docs/PLAN.md) and the `docs/spikes/` reports.
 
@@ -15,7 +15,7 @@ make app CONFIG=release      # builds build/sudamp.app (first build downloads MP
 open build/sudamp.app        # pick a genre from the dropdown
 ```
 
-On first launch sudamp downloads the official yt-dlp release (about 54 MB) in the background and plays internet radio meanwhile. `open 'sudamp://genre/techno'`, `open sudamp://next` and `open sudamp://quit` work from Terminal. `make skin-preview` opens the skinned windows with a fake player state, and `sudamp --snapshot <dir> --states Fixtures/states/app/*.json` renders app states to PNG/RGBA/SHA-256 offscreen. To start over as a new user, quit and run `rm -rf ~/Library/Application\ Support/sudamp ~/Library/Caches/sudamp ~/Library/Logs/sudamp`.
+On first launch sudamp downloads the official yt-dlp release (about 54 MB) in the background and plays internet radio meanwhile. `open 'sudamp://genre/techno'`, `open sudamp://next` and `open sudamp://quit` work from Terminal. `make skin-preview` opens the classic windows with a fake player state (`sudamp --modern-preview --backdrop` the modern one), and `sudamp --snapshot <dir> --states Fixtures/states/app/*.json` renders app states to PNG/RGBA/SHA-256 offscreen. To start over as a new user, quit and run `rm -rf ~/Library/Application\ Support/sudamp ~/Library/Caches/sudamp ~/Library/Logs/sudamp`.
 
 ## Develop
 

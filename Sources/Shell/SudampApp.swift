@@ -23,6 +23,10 @@ public enum SudampApp {
             SkinPreview.run(arguments: args)
             return
         }
+        if args.contains("--modern-preview") {
+            ModernPreview.run(arguments: args)
+            return
+        }
         if args.contains("--selftest") {
             let report = SelfTest.run(arguments: args)
             print(report.json(pretty: !args.contains("--json")))

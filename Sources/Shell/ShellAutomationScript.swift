@@ -3,7 +3,10 @@ import Core
 import Foundation
 
 /// An `--automation` script for the app: Core's `AutomationScript` steps (PLAN M2) plus the skinned UI's (PLAN M5).
-/// The file format is Core's; a step whose key is one of these is parsed here, every other step by Core:
+/// The file format is Core's, plus an optional top-level `"style": "modern"|"classic"` naming the skin class the
+/// script drives (DESIGN §8.4; without it, the profile's). A step whose key is one of these is parsed here, every
+/// other step by Core. The modern skin takes `ModernControl` names for `pressControl` and `volume`, `position`,
+/// `preamp`, `band0`…`band9` for `dragSlider`, and ignores `window`:
 ///
 /// | Step | Meaning |
 /// |---|---|
@@ -78,6 +81,8 @@ nonisolated struct ShellAutomationScript: Equatable, Sendable {
 
     var name: String?
     var steps: [Step]
+    /// `modern` or `classic`: the skin class the script drives (top-level `"style"`; else the profile's choice).
+    var style: String?
 
     static let skinKeys: Set<String> = [
         "openGenreMenu", "waitForMenu", "selectMenuItem", "selectMenuBarItem", "cancelMenu", "pressControl",
@@ -96,14 +101,19 @@ nonisolated struct ShellAutomationScript: Equatable, Sendable {
             throw .invalidJSON("\(error.localizedDescription)")
         }
         var name: String?
+        var style: String?
         var timeout = AutomationScript.defaultTimeout
         let rawSteps: [Any]
         if let array = root as? [Any] {
             rawSteps = array
         } else if let object = root as? [String: Any] {
-            let unknown = Set(object.keys).subtracting(["name", "timeout", "steps", "description"])
+            let unknown = Set(object.keys).subtracting(["name", "timeout", "steps", "description", "style"])
             if let key = unknown.sorted().first { throw .unknownKey(key) }
             name = object["name"] as? String
+            if let s = object["style"] {
+                guard let v = s as? String, ["modern", "classic"].contains(v) else { throw .badValue(step: nil, key: "style") }
+                style = v
+            }
             if let t = object["timeout"] {
                 guard let n = number(t), n > 0 else { throw .badValue(step: nil, key: "timeout") }
                 timeout = n
@@ -122,7 +132,7 @@ nonisolated struct ShellAutomationScript: Equatable, Sendable {
                 steps.append(.core(try coreStep(raw, index: i, defaultTimeout: timeout)))
             }
         }
-        return ShellAutomationScript(name: name, steps: steps)
+        return ShellAutomationScript(name: name, steps: steps, style: style)
     }
 
     /// `--skips N` (Core's rule: play, Next, wait for playing).

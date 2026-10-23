@@ -6,16 +6,19 @@ import SkinUI
 /// first and the rest goes to `LaunchArguments.parse`.
 ///
 /// ```
-/// sudamp [<skin.wsz> …] [--scale 1|1.2|1.5|2|2.5|3] [--no-region] [--ignore-occlusion]
+/// sudamp [<skin.wsz> …] [--style modern|classic] [--scale 1|1.2|1.5|2|2.5|3] [--no-region] [--ignore-occlusion]
 /// sudamp --snapshot <dir> --states <state.json> [<state.json> …]
 /// ```
 /// - `.wsz`/`.zip` paths load that skin (a second launch forwards them to the running instance, absolute).
+/// - `--style` shows the modern or the classic skins for this launch without changing the saved choice (DESIGN §8.4).
 /// - `--scale` overrides the saved window scale; `--no-region` turns region.txt shaping off for this launch (S1 kill
 ///   switch); `--ignore-occlusion` keeps the visualiser animating while the windows are covered (CPU measurements
 ///   on a locked screen).
 /// - `--snapshot` renders app states offscreen to PNG, `.rgba` and `.sha256` and exits (PLAN M5 snapshot goldens).
 nonisolated struct ShellArguments: Equatable, Sendable {
     var skinFiles: [String] = []
+    /// `modern` or `classic` (`SkinClass`), this launch only.
+    var style: String?
     var scale: Double?
     var noRegion = false
     var ignoreOcclusion = false
@@ -59,6 +62,10 @@ nonisolated struct ShellArguments: Equatable, Sendable {
                 let v = try value()
                 guard let n = Double(v), SkinScale.allowed.contains(n) else { throw .badValue(arg, v) }
                 a.scale = n
+            case "--style":
+                let v = try value()
+                guard ["modern", "classic"].contains(v) else { throw .badValue(arg, v) }
+                a.style = v
             case "--no-region": a.noRegion = true
             case "--ignore-occlusion": a.ignoreOcclusion = true
             case "--snapshot": a.snapshotDirectory = try value()

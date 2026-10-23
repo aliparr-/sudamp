@@ -1,0 +1,29 @@
+{
+  "name": "modern skin: menus, controls, panels, presets and the switch to classic and back (DESIGN §8.4)",
+  "description": "Runs muted, offline-safe (nothing plays). The genre button and the ⋯ button open their menus; the Equalizer and Stations panels open; a band and the volume move; Save .eqf…, reset, Load .eqf… go through the presets menu; the Skins menu switches to the classic windows and back.",
+  "style": "modern",
+  "steps": [
+    {"showWindows": true},
+    {"dumpMenus": "modern"},
+    {"pressControl": "genre"},
+    {"waitForMenu": "genre", "timeout": 3},
+    "cancelMenu",
+    {"pressControl": "more"},
+    {"waitForMenu": "context", "timeout": 3},
+    "cancelMenu",
+    {"pressControl": "equalizerButton"},
+    {"pressControl": "stationsButton"},
+    {"dragSlider": "band3", "value": 6},
+    {"dragSlider": "volume", "value": 0.4},
+    {"saveEQF": "/tmp/sudamp-modern-roundtrip.eqf"},
+    {"pressControl": "eqReset"},
+    {"loadEQF": "/tmp/sudamp-modern-roundtrip.eqf"},
+    {"dumpState": "modern"},
+    {"selectMenuBarItem": "Skins/Use Classic Skins"},
+    {"sleep": 0.5},
+    {"dumpState": "classic"},
+    {"selectMenuBarItem": "Skins/Use Modern Skin"},
+    {"sleep": 0.5},
+    {"dumpState": "modern again"}
+  ]
+}

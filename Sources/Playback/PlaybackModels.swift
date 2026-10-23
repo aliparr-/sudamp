@@ -341,7 +341,7 @@ nonisolated public struct AppUIDebugInfo: Sendable, Equatable, Codable {
         }
     }
 
-    /// `skinned` or `plain`.
+    /// `skinned` (a classic skin), `modern` or `plain`.
     public var mode: String
     public var scale: Double?
     public var windows: [String: Window]?
@@ -358,11 +358,18 @@ nonisolated public struct AppUIDebugInfo: Sendable, Equatable, Codable {
     /// The last alert sheet shown (e.g. a rejected skin), with whether it is still up.
     public var lastSheet: String?
     public var sheetOpen: Bool
+    /// `modern` or `classic` (nil with `--plain`).
+    public var skinClass: String?
+    /// The modern skin's appearance, tint and open panels (`equalizer`, `stations`).
+    public var appearance: String?
+    public var tint: String?
+    public var panels: [String]?
 
     public init(mode: String, scale: Double? = nil, windows: [String: Window]? = nil, alwaysOnTop: Bool? = nil,
                 regionEnabled: Bool? = nil, menuAutoOpened: Bool = false, openMenu: String? = nil,
                 equalizer: Equalizer? = nil, timeDisplay: String? = nil, visualizerMode: String? = nil,
-                lastSheet: String? = nil, sheetOpen: Bool = false) {
+                lastSheet: String? = nil, sheetOpen: Bool = false, skinClass: String? = nil, appearance: String? = nil,
+                tint: String? = nil, panels: [String]? = nil) {
         self.mode = mode
         self.scale = scale
         self.windows = windows
@@ -375,6 +382,10 @@ nonisolated public struct AppUIDebugInfo: Sendable, Equatable, Codable {
         self.visualizerMode = visualizerMode
         self.lastSheet = lastSheet
         self.sheetOpen = sheetOpen
+        self.skinClass = skinClass
+        self.appearance = appearance
+        self.tint = tint
+        self.panels = panels
     }
 }
 

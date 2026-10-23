@@ -5,8 +5,8 @@ import Darwin
 import Playback
 import os
 
-/// The app's lifecycle (DESIGN §4): builds the AppContext, the front end (the skinned windows by default, M2's plain
-/// window with `--plain`), menus, status item and Now Playing; routes `sudamp://` URLs and skin files; runs the first
+/// The app's lifecycle (DESIGN §4): builds the AppContext, the front end (the modern or classic skin through
+/// `PlayerStyleHost` by default, M2's plain window with `--plain`), menus, status item and Now Playing; routes `sudamp://` URLs and skin files; runs the first
 /// and returning launch (DESIGN §3); and owns the one quit path that ⌘Q, `sudamp://quit`, closing Main and
 /// SIGTERM/SIGINT all take.
 final class AppDelegate: NSObject, NSApplicationDelegate {
@@ -21,7 +21,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     private let script: ShellAutomationScript?
     private var context: AppContext?
     private var frontEnd: (any PlayerFrontEnd)?
-    private var skinned: SkinnedPlayerUI?
+    /// The modern or classic skin (nil with `--plain`).
+    private var styles: PlayerStyleHost?
     private var menus: AppMenus?
     private var nowPlaying: NowPlayingController?
     private var signals: SignalWatcher?
@@ -82,15 +83,17 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             frontEnd = window
             menus?.onVolumeChanged = { [weak window] in window?.syncVolume() }
         } else {
-            let ui = SkinnedPlayerUI(context: context, arguments: shellArguments, automation: isAutomation)
-            ui.appMenus = menus
-            skinned = ui
-            frontEnd = ui
-            menus?.skinned = ui
+            let override = (shellArguments.style ?? script?.style).flatMap(SkinClass.init(rawValue:))
+            let host = PlayerStyleHost(context: context, arguments: shellArguments, automation: isAutomation,
+                                       styleOverride: override)
+            host.appMenus = menus
+            styles = host
+            frontEnd = host
+            menus?.styles = host
         }
         self.frontEnd = frontEnd
         menus?.frontEnd = frontEnd
-        menus?.installMainMenu(skinned: skinned != nil)
+        menus?.installMainMenu(skinned: styles != nil)
         frontEnd.publishDebugState()
         if let script {
             ready = true
@@ -219,7 +222,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         armQuitWatchdog()
         Task { [weak self] in
             self?.nowPlaying?.shutdown()
-            self?.skinned?.close()
+            self?.styles?.close()
             await self?.context?.shutdown()
             self?.log.info("quit path: done")
             self?.mayTerminate = true

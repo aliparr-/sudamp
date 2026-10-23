@@ -1,5 +1,6 @@
 {
   "name": "menus: every DESIGN §3 entry point opens the same genre menu (PLAN M5)",
+  "style": "classic",
   "steps": [
     {"dumpMenus": "entry points"},
     {"pressControl": "marquee"},

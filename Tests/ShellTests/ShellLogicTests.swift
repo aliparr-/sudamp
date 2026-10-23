@@ -284,6 +284,9 @@ import Testing
         #expect(throws: ShellArguments.ParseError.self) { _ = try ShellArguments.parse(["--scale", "4"]) }
         #expect(throws: ShellArguments.ParseError.self) { _ = try ShellArguments.parse(["--scale", "1.3"]) }
         #expect(try ShellArguments.parse(["--scale", "1.5"]).scale == 1.5)
+        #expect(try ShellArguments.parse(["--style", "classic"]).style == "classic")
+        #expect(try ShellArguments.parse(["--style", "modern", "--mute"]).remaining == ["--mute"])
+        #expect(throws: ShellArguments.ParseError.self) { _ = try ShellArguments.parse(["--style", "retro"]) }
     }
 
     @Test func snapshotStatesTakeEveryFollowingPath() throws {
@@ -346,8 +349,21 @@ import Testing
     }
 
     @Test func theRepositoryScriptsParse() throws {
-        for name in ["northstar", "menus", "eqf-roundtrip", "northstar-plain"] {
+        for name in ["northstar", "menus", "eqf-roundtrip", "northstar-plain", "modern"] {
             _ = try ShellAutomationScript.load(from: ShellRepo.url("Fixtures/automation/\(name).json"))
+        }
+        // The scripts that press classic hotspots say so; the north star runs in whichever skin the profile has.
+        #expect(try ShellAutomationScript.load(from: ShellRepo.url("Fixtures/automation/menus.json")).style == "classic")
+        #expect(try ShellAutomationScript.load(from: ShellRepo.url("Fixtures/automation/eqf-roundtrip.json")).style == "classic")
+        #expect(try ShellAutomationScript.load(from: ShellRepo.url("Fixtures/automation/modern.json")).style == "modern")
+        #expect(try ShellAutomationScript.load(from: ShellRepo.url("Fixtures/automation/northstar.json")).style == nil)
+    }
+
+    @Test func aScriptNamesItsSkinClass() throws {
+        let script = try ShellAutomationScript.parse(Data(#"{"style": "modern", "steps": ["pressNext"]}"#.utf8))
+        #expect(script.style == "modern")
+        #expect(throws: AutomationScriptError.badValue(step: nil, key: "style")) {
+            _ = try ShellAutomationScript.parse(Data(#"{"style": "retro", "steps": ["pressNext"]}"#.utf8))
         }
     }
 }

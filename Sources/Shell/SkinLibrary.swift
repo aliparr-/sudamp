@@ -42,6 +42,9 @@ nonisolated struct SkinRejection: Error, Equatable, Sendable {
 final class SkinLibrary {
     static let builtInID = "sudamp-dark"
     static let builtInName = "sudamp Dark"
+    /// The modern skin class (DESIGN §8.4): not a .wsz, but listed in the Skins menu and named in state.json.
+    static let modernID = "modern"
+    static let modernName = "sudamp Modern"
     static let andAmpCredit = "AndAmp skin by Mattix (mattix.nl), CC BY 4.0"
     static let userPrefix = "user:"
     static let museumPrefix = "museum:"
