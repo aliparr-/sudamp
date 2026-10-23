@@ -159,6 +159,17 @@ public final class ModernWindow: NSWindow {
 
     /// ⌘M: likewise no minimise button to press.
     override public func performMiniaturize(_ sender: Any?) { miniaturize(sender) }
+
+    /// Called with the first mouse-down the window receives (diagnostics: clicks are reaching it).
+    var onFirstMouseDown: (() -> Void)?
+
+    override public func sendEvent(_ event: NSEvent) {
+        if event.type == .leftMouseDown, let first = onFirstMouseDown {
+            onFirstMouseDown = nil
+            first()
+        }
+        super.sendEvent(event)
+    }
     /// Clear margins mean the frame is bigger than what shows: let it reach the menu bar's edge.
     override public func constrainFrameRect(_ frameRect: NSRect, to screen: NSScreen?) -> NSRect { frameRect }
 }
@@ -178,6 +189,11 @@ final class ModernRootView: FlippedView {
     var onResize: ((CGSize) -> Void)?
     /// Light or dark changed (the system's, or the window's own).
     var onAppearanceChange: (() -> Void)?
+    /// The pointer is over a card (screen point): the window checks once that clicks there reach it.
+    var onHoverOverCard: ((CGPoint) -> Void)? {
+        didSet { updateTrackingAreas() }
+    }
+    private var hoverArea: NSTrackingArea?
 
     /// Files dropped on the window (classic skins: the app switches to them). Returns whether they were taken.
     var onFilesDropped: (([URL]) -> Bool)?
@@ -405,6 +421,48 @@ final class ModernRootView: FlippedView {
     override func viewDidChangeEffectiveAppearance() {
         super.viewDidChangeEffectiveAppearance()
         onAppearanceChange?()
+    }
+
+    // MARK: Hit-testing
+
+    /// Clicks go to the cards' controls through each card's page (topmost card first), never through the glass
+    /// container's or glass views' own hit-testing; the clear margins and gaps belong to no view.
+    override func hitTest(_ point: NSPoint) -> NSView? {
+        let local = superview.map { convert(point, from: $0) } ?? point
+        guard bounds.contains(local) else { return nil }
+        for card in [nowPlaying, equalizer, stations] as [GlassCard] {
+            guard let parent = card.superview else { continue }
+            if let hit = card.routedHit(parent.convert(local, from: self)) { return hit }
+        }
+        return nil
+    }
+
+    /// The visible card under a point in this view, if any.
+    func card(at local: CGPoint) -> GlassCard? {
+        for card in [nowPlaying, equalizer, stations] as [GlassCard] where !card.isHidden {
+            guard let parent = card.superview, card.frame.contains(parent.convert(local, from: self)) else { continue }
+            return card
+        }
+        return nil
+    }
+
+    override func updateTrackingAreas() {
+        super.updateTrackingAreas()
+        if let hoverArea { removeTrackingArea(hoverArea) }
+        hoverArea = nil
+        guard onHoverOverCard != nil else { return }
+        let area = NSTrackingArea(rect: bounds, options: [.mouseMoved, .mouseEnteredAndExited, .activeAlways, .inVisibleRect],
+                                  owner: self, userInfo: nil)
+        addTrackingArea(area)
+        hoverArea = area
+    }
+
+    override func mouseMoved(with event: NSEvent) { hovered(event) }
+    override func mouseEntered(with event: NSEvent) { hovered(event) }
+
+    private func hovered(_ event: NSEvent) {
+        guard let onHoverOverCard, let window, card(at: convert(event.locationInWindow, from: nil)) != nil else { return }
+        onHoverOverCard(window.convertPoint(toScreen: event.locationInWindow))
     }
 
     override func rightMouseDown(with event: NSEvent) {

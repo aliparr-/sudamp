@@ -422,6 +422,8 @@ final class ModernPreviewController: NSObject, NSApplicationDelegate {
             }
         }
         for (name, p) in points { SkinPreview.log("probe: \(name) → \(hit(p))") }
+        player?.checkClickRoutingForProbe(at: points[1].1)
+        SkinPreview.log("probe: click routing \(player?.clickRouting ?? "-")")
         exit(0)
     }
 

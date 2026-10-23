@@ -39,6 +39,7 @@ final class ModernPlayerUI: PlayerUIBase {
         player.onEvent = { [weak self] event in self?.handle(event) }
         player.visualizerProvider = { [weak self] in self?.visualizerFrame() }
         player.window.delegate = self
+        player.onNotice = { [weak self] message in self?.log.notice("\(message, privacy: .public)") }
         player.onFilesDropped = { [weak self] urls in
             guard let self, let handler = self.onSkinFilesDropped else { return false }
             handler(urls.map(\.path))

@@ -49,6 +49,11 @@ public final class ModernPlayer: NSObject {
     public var visualizerProvider: ModernVisualizerProvider?
     /// Every user action.
     public var onEvent: ((ModernEvent) -> Void)?
+    /// Things worth a line in the app's log (how clicks reach the window).
+    public var onNotice: ((String) -> Void)?
+    /// How clicks reach the window: `unchecked`, `direct` (WindowServer sends clicks on the cards here, and those on
+    /// the clear margins to the windows below) or `wholeWindow` (it didn't, so the whole frame takes clicks).
+    public private(set) var clickRouting = "unchecked"
     /// Skin files (`.wsz`, `.zip`) dropped on the window. Returns whether they were taken.
     public var onFilesDropped: (([URL]) -> Bool)? {
         didSet { root.onFilesDropped = onFilesDropped }
@@ -75,6 +80,8 @@ public final class ModernPlayer: NSObject {
         window.level = layout?.alwaysOnTop == true ? .floating : .normal
         root.onEvent = { [weak self] event in self?.handle(event) }
         window.onClose = { [weak self] in self?.handle(.close) }
+        window.onFirstMouseDown = { [weak self] in self?.onNotice?("modern window: first click received") }
+        root.onHoverOverCard = { [weak self] point in self?.checkClickRouting(at: point) }
         root.onResize = { [weak self] size in self?.resizeWindow(to: size) }
         root.nowPlaying.onEvent = { [weak self] event in self?.handle(event) }
         root.nowPlaying.onPanelButton = { [weak self] panel in self?.togglePanel(panel) }
@@ -308,6 +315,36 @@ public final class ModernPlayer: NSObject {
     @objc private func displayLinkFired(_ link: CADisplayLink) {
         visualizerTicks += 1
         root.nowPlaying.artwork.update(with: visualizerProvider?())
+    }
+
+    // MARK: Click routing
+
+    /// The first time the pointer is over a card, asks WindowServer whether a click right there would reach this
+    /// window. A clear window takes clicks only where its pixels aren't transparent, and how Liquid Glass counts
+    /// differs between systems: if the click would go to a window underneath, the whole frame takes clicks instead
+    /// (the margins then stop being click-through, which beats a player that can't be clicked).
+    func checkClickRouting(at screenPoint: CGPoint) {
+        guard clickRouting == "unchecked", window.isVisible else { return }
+        let hit = NSWindow.windowNumber(at: screenPoint, belowWindowWithWindowNumber: 0)
+        if hit == window.windowNumber {
+            settleClickRouting("direct", "clicks on the cards reach the window")
+            return
+        }
+        // A window above this one at that point (it shouldn't send hover here, but be sure): try again next time.
+        let above = (CGWindowListCopyWindowInfo(.optionOnScreenAboveWindow, CGWindowID(window.windowNumber)) as? [[String: Any]] ?? [])
+            .compactMap { $0[kCGWindowNumber as String] as? Int }
+        guard !above.contains(hit) else { return }
+        window.ignoresMouseEvents = false
+        settleClickRouting("wholeWindow", "a click on a card would have gone to window \(hit) underneath; the whole window takes clicks")
+    }
+
+    /// The preview's probe: the same check at a chosen point.
+    public func checkClickRoutingForProbe(at screenPoint: CGPoint) { checkClickRouting(at: screenPoint) }
+
+    private func settleClickRouting(_ mode: String, _ message: String) {
+        clickRouting = mode
+        root.onHoverOverCard = nil
+        onNotice?("modern window: \(message)")
     }
 
     // MARK: Anchors, automation, capture

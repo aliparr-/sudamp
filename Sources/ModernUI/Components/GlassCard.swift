@@ -133,6 +133,17 @@ class GlassCard: NSView {
         }
     }
 
+    /// The control (or the page) under `point`, in the superview's coordinates, found through the page alone: the
+    /// glass view's own hit-testing is never asked.
+    func routedHit(_ point: NSPoint) -> NSView? {
+        guard !isHidden, frame.contains(point), let pageParent = content.superview else { return nil }
+        let inParent = pageParent.convert(point, from: superview)
+        guard content.frame.contains(inParent), bounds.contains(convert(point, from: superview)) else { return nil }
+        return content.hitTest(inParent) ?? content
+    }
+
+    override func hitTest(_ point: NSPoint) -> NSView? { routedHit(point) }
+
     /// The page's bounds: what subclasses lay their controls out in.
     var page: CGRect { CGRect(x: 0, y: 0, width: bounds.width, height: naturalHeight) }
 
@@ -165,6 +176,12 @@ class GlassCard: NSView {
 final class CardShadowView: FlippedView {
     private var shadows: [ObjectIdentifier: (ambient: StillShapeLayer, contact: StillShapeLayer, mask: StillShapeLayer,
                                              holder: StillLayer)] = [:]
+    /// A nearly clear footprint under each card, outside the glass. WindowServer sends a click in a clear window to
+    /// whatever is underneath wherever the window's own pixels are transparent, and Liquid Glass (with everything
+    /// inside it) may be composited apart from them; these make the cards' areas the window's own, so clicks on a
+    /// card come here while the margins between and around the cards stay click-through.
+    private var plates: [ObjectIdentifier: StillLayer] = [:]
+    static let plateColor = CGColor(gray: 0.5, alpha: 0.02)
     private var palette: ModernPalette?
 
     override init(frame frameRect: NSRect) {
@@ -215,6 +232,19 @@ final class CardShadowView: FlippedView {
             shadows[key] = entry
             style(ambient, contact: contact)
         }
+        let plate: StillLayer
+        if let existing = plates[key] {
+            plate = existing
+        } else {
+            plate = StillLayer()
+            plate.backgroundColor = Self.plateColor
+            plate.cornerRadius = Metrics.cardRadius
+            plate.cornerCurve = .continuous
+            layer?.insertSublayer(plate, at: 0)
+            plates[key] = plate
+        }
+        plate.frame = frame
+        plate.opacity = opacity > 0.001 ? 1 : 0
         let cardPath = roundedPath(CGRect(origin: .zero, size: frame.size), radius: Metrics.cardRadius)
         let outside = CGMutablePath()
         outside.addRect(bounds.insetBy(dx: -200, dy: -200).offsetBy(dx: -frame.minX, dy: -frame.minY))
