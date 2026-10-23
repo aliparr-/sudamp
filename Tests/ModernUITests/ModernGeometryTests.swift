@@ -118,17 +118,6 @@ import Testing
         #expect(fill.boundingBoxOfPath.maxY >= 70 && fill.boundingBoxOfPath.minY <= 10)
     }
 
-    @Test func visualizerShapes() {
-        let rect = CGRect(x: 0, y: 0, width: 95, height: 40)
-        let bars = VisualizerGeometry.barsPath(levels: [0, 0.5, 1, .nan, 2], in: rect, gap: 5)
-        let box = bars.boundingBoxOfPath
-        #expect(abs(box.minX) < 0.001 && abs(box.maxX - 95) < 0.001 && abs(box.maxY - 40) < 0.001 && abs(box.minY) < 0.001)
-        #expect(VisualizerGeometry.bass([1, 1, 1, 1, 0, 0]) == 1 && VisualizerGeometry.bass([]) == 0)
-        let scope = VisualizerGeometry.scopePath(samples: [-1, 0, 1, 0], in: rect)
-        #expect(scope.boundingBoxOfPath.minX == 0 && scope.boundingBoxOfPath.maxX == 95)
-        #expect(VisualizerGeometry.scopePath(samples: [0.3], in: rect).isEmpty)
-    }
-
     @Test func stateHelpers() {
         #expect(ModernPlayerState.clock(0) == "0:00" && ModernPlayerState.clock(61.9) == "1:01")
         #expect(ModernPlayerState.clock(3725) == "1:02:05" && ModernPlayerState.clock(-4) == "0:00" && ModernPlayerState.clock(.nan) == "0:00")

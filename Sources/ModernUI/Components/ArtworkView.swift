@@ -3,63 +3,28 @@
 // gradient in the genre's colours (the tint's when no genre is picked), three soft blobs of light that drift slowly
 // and swell with the bass, a little film grain, a gloss across the top and a hairline rim, with a coloured glow
 // underneath.
-// The visualiser is drawn into it: 19 rounded bars (the spectrum) or a smooth trace (the oscilloscope), in white
-// with a soft glow. Frames arrive at 30 Hz; each one animates over 1/30 s, so the render server interpolates the
-// motion at the display's own refresh rate. Nothing animates while paused or stopped.
+// The visualiser is drawn into it: one of the scenes (`Visualizer/`), each frame a bitmap from `SceneRenderer`, with
+// the palette's glow around it. Frames come 30 times a second while playing. With Rotate, the
+// scenes take turns, cross-fading; with the Cycle colours, the artwork's hue turns as the music plays. Stopped or
+// paused, the scene settles to a still frame and nothing animates.
 
 import AppKit
 import QuartzCore
 
-/// The visualiser's shapes, pure and unit-tested.
-nonisolated enum VisualizerGeometry {
-    /// Rounded bars along the bottom of `rect`, one per level (0...1), never shorter than a dot.
-    static func barsPath(levels: [Float], in rect: CGRect, gap: CGFloat) -> CGPath {
-        let path = CGMutablePath()
-        let n = max(levels.count, 1)
-        let width = max(1, (rect.width - gap * CGFloat(n - 1)) / CGFloat(n))
-        for (i, level) in levels.enumerated() {
-            let l = CGFloat(min(max(level.isFinite ? level : 0, 0), 1))
-            let h = max(width, rect.height * l)
-            let x = rect.minX + CGFloat(i) * (width + gap)
-            // Flipped: bars stand on the bottom edge.
-            let bar = CGRect(x: x, y: rect.maxY - h, width: width, height: h)
-            path.addRoundedRect(in: bar, cornerWidth: width / 2, cornerHeight: width / 2)
-        }
-        return path
-    }
-
-    /// A smooth trace through the samples (-1...1), Catmull-Rom through the points, across `rect`.
-    static func scopePath(samples: [Float], in rect: CGRect) -> CGPath {
-        let path = CGMutablePath()
-        guard samples.count > 1 else { return path }
-        let points = samples.enumerated().map { i, s -> CGPoint in
-            let v = CGFloat(min(max(s.isFinite ? s : 0, -1), 1))
-            return CGPoint(x: rect.minX + rect.width * CGFloat(i) / CGFloat(samples.count - 1), y: rect.midY - v * rect.height / 2)
-        }
-        path.move(to: points[0])
-        for i in 0..<(points.count - 1) {
-            let p0 = points[max(i - 1, 0)], p1 = points[i], p2 = points[i + 1], p3 = points[min(i + 2, points.count - 1)]
-            let c1 = CGPoint(x: p1.x + (p2.x - p0.x) / 6, y: p1.y + (p2.y - p0.y) / 6)
-            let c2 = CGPoint(x: p2.x - (p3.x - p1.x) / 6, y: p2.y - (p3.y - p1.y) / 6)
-            path.addCurve(to: p2, control1: c1, control2: c2)
-        }
-        return path
-    }
-
-    /// The low end's energy (the first bars), 0...1, which makes the light swell.
-    static func bass(_ levels: [Float]) -> Float {
-        let low = levels.prefix(4)
-        guard !low.isEmpty else { return 0 }
-        return min(max(low.reduce(0, +) / Float(low.count), 0), 1)
-    }
-}
-
 final class ArtworkView: NSView {
-    var palette = ArtworkPalette.make(genreKey: nil, tint: .default, dark: true) {
-        didSet { if palette != oldValue { applyPalette() } }
+    typealias Mode = ModernPlayerState.Visualizer
+
+    /// What the artwork's colours are made from (with `.cycle`, the hue also turns while playing).
+    var paletteKey = ArtworkPalette.Key() {
+        didSet { if paletteKey != oldValue { paletteChanged() } }
     }
-    var mode: ModernPlayerState.Visualizer = .spectrum {
+    private(set) var palette = ArtworkPalette.make(ArtworkPalette.Key())
+    var mode: Mode = .default {
         didSet { if mode != oldValue { modeChanged() } }
+    }
+    /// Seconds per scene while rotating.
+    var rotationInterval = ModernPlayerState.defaultVisualizerInterval {
+        didSet { rotation.interval = rotationInterval }
     }
     /// Playing: the light drifts and the visualiser moves.
     var isAnimating = false {
@@ -75,16 +40,27 @@ final class ArtworkView: NSView {
     private let blobHolder = StillLayer()
     private let grain = StillLayer()
     private let shade = StillGradientLayer()
-    private let barsHost = StillLayer()
-    private let barsShape = StillShapeLayer()
-    private let barsFill = StillGradientLayer()
-    private let scope = StillShapeLayer()
+    /// The visualiser's frames.
+    let sceneLayer = StillLayer()
     private let gloss = StillGradientLayer()
     private let rim = StillLayer()
-    private var levels = [Float](repeating: 0, count: ModernVisualizerFrame.barCount)
-    private var samples = [Float](repeating: 0, count: ModernVisualizerFrame.scopeCount)
+    private let renderer = SceneRenderer()
+    private var features = AudioFeatures()
+    private var rotation = VisualizerRotation(interval: ModernPlayerState.defaultVisualizerInterval)
+    private var lastTick: CFTimeInterval?
+    /// How far the Cycle colours have turned (0...1, wrapping), and where the palette last changed.
+    private var cycle: Double = 0
+    private var appliedCycle: Double = 0
     private var bassLevel: Float = 0
-    private var isDark = true
+    /// A still frame is due (stopped or paused, after a change).
+    private var needsStill = true
+    /// The scene the last still frame settled (a new one gets a moment of silence first).
+    private var settledScene: Mode?
+
+    /// The scene showing (while rotating, the current one).
+    var currentScene: Mode? { mode == .off ? nil : renderer.mode }
+    /// Frames drawn since the view was made (tests).
+    private(set) var framesDrawn = 0
 
     override init(frame frameRect: NSRect) {
         super.init(frame: frameRect)
@@ -117,29 +93,12 @@ final class ArtworkView: NSView {
         clip.addSublayer(grain)
         shade.startPoint = CGPoint(x: 0.5, y: 0)
         shade.endPoint = CGPoint(x: 0.5, y: 1)
-        shade.colors = [CGColor(gray: 0, alpha: 0), CGColor(gray: 0, alpha: 0.32)]
         shade.locations = [0.45, 1]
         clip.addSublayer(shade)
-        barsFill.startPoint = CGPoint(x: 0.5, y: 1)
-        barsFill.endPoint = CGPoint(x: 0.5, y: 0)
-        barsFill.colors = [CGColor(gray: 1, alpha: 0.95), CGColor(gray: 1, alpha: 0.78)]
-        barsFill.mask = barsShape
-        barsHost.addSublayer(barsFill)
-        barsHost.shadowColor = CGColor(gray: 1, alpha: 1)
-        barsHost.shadowOpacity = 0.55
-        barsHost.shadowRadius = 4
-        barsHost.shadowOffset = .zero
-        clip.addSublayer(barsHost)
-        scope.fillColor = nil
-        scope.strokeColor = CGColor(gray: 1, alpha: 0.95)
-        scope.lineWidth = 1.6
-        scope.lineCap = .round
-        scope.lineJoin = .round
-        scope.shadowColor = CGColor(gray: 1, alpha: 1)
-        scope.shadowOpacity = 0.6
-        scope.shadowRadius = 3.5
-        scope.shadowOffset = .zero
-        clip.addSublayer(scope)
+        sceneLayer.contentsGravity = .resize
+        sceneLayer.shadowOffset = .zero
+        sceneLayer.shadowRadius = 3.5
+        clip.addSublayer(sceneLayer)
         gloss.startPoint = CGPoint(x: 0.5, y: 0)
         gloss.endPoint = CGPoint(x: 0.5, y: 0.55)
         gloss.colors = [CGColor(gray: 1, alpha: 0.26), CGColor(gray: 1, alpha: 0)]
@@ -150,8 +109,7 @@ final class ArtworkView: NSView {
         layer?.addSublayer(rim)
         setAccessibilityElement(true)
         setAccessibilityRole(.button)
-        setAccessibilityLabel("Artwork and visualizer")
-        setAccessibilityHelp("Changes the visualizer: spectrum, oscilloscope or off")
+        setAccessibilityHelp("Shows the next visualizer scene")
         applyPalette()
         modeChanged()
     }
@@ -175,11 +133,6 @@ final class ArtworkView: NSView {
         return onClick != nil
     }
 
-    func setDark(_ dark: Bool) {
-        isDark = dark
-        glowLayer.shadowOpacity = dark ? 0.55 : 0.4
-    }
-
     override func layout() {
         super.layout()
         let r = bounds
@@ -199,43 +152,95 @@ final class ArtworkView: NSView {
         }
         grain.frame = r
         shade.frame = r
-        let inset = r.width * 0.12
-        let barsRect = CGRect(x: inset, y: r.height * 0.42, width: r.width - inset * 2, height: r.height * 0.58 - inset * 0.85)
-        barsHost.frame = r
-        barsFill.frame = r
-        barsShape.frame = r
-        barsShape.path = VisualizerGeometry.barsPath(levels: levels, in: barsRect, gap: barsGap(barsRect))
-        scope.frame = r
-        scope.path = VisualizerGeometry.scopePath(samples: samples, in: r.insetBy(dx: inset * 0.8, dy: r.height * 0.3))
         gloss.frame = r
-        if isAnimating { startDrift() }
+        if sceneLayer.frame != r {
+            sceneLayer.frame = r
+            needsStill = true
+        }
+        if isAnimating { startDrift() } else { drawStillIfNeeded() }
     }
 
-    private func barsGap(_ rect: CGRect) -> CGFloat { rect.width / CGFloat(ModernVisualizerFrame.barCount) * 0.34 }
+    override func viewDidChangeBackingProperties() {
+        super.viewDidChangeBackingProperties()
+        sceneLayer.contentsScale = backingScale
+        needsStill = true
+        if !isAnimating { drawStillIfNeeded() }
+    }
+
+    // MARK: Colours
+
+    private func paletteChanged() {
+        // A new genre, source, tint or light/dark: the cycle starts again from the tint's hue.
+        if paletteKey.colors != .cycle { cycle = 0 }
+        applyPalette()
+    }
 
     private func applyPalette() {
+        palette = ArtworkPalette.make(paletteKey, cycle: cycle)
+        appliedCycle = cycle
         base.colors = [palette.base.0.cgColor, palette.base.1.cgColor]
         for (i, (blob, color)) in zip(blobs, palette.blobs).enumerated() {
             let alpha = i == 0 ? 0.7 : 0.62
             blob.colors = [color.cgColor(alpha: alpha), color.cgColor(alpha: alpha * 0.45), color.cgColor(alpha: 0)]
             blob.locations = [0, 0.4, 1]
         }
+        shade.colors = [CGColor(gray: 0, alpha: 0), CGColor(gray: 0, alpha: palette.isLight ? 0.06 : 0.32)]
+        rim.borderColor = CGColor(gray: palette.isLight ? 0 : 1, alpha: palette.isLight ? 0.08 : 0.18)
         glowLayer.shadowColor = palette.blobs.first?.mixed(with: palette.base.1, 0.3).cgColor
         glowLayer.shadowRadius = 14
         glowLayer.shadowOffset = CGSize(width: 0, height: 8)
-        glowLayer.shadowOpacity = isDark ? 0.55 : 0.4
+        glowLayer.shadowOpacity = restingGlow
+        sceneLayer.shadowColor = palette.glow.cgColor
+        renderer.style = SceneStyle(palette)
+        needsStill = true
+        if !isAnimating { drawStillIfNeeded() }
     }
 
+    private var restingGlow: Float { paletteKey.dark ? 0.55 : 0.4 }
+
+    // MARK: Mode
+
     private func modeChanged() {
-        barsHost.isHidden = mode != .spectrum
-        scope.isHidden = mode != .oscilloscope
-        setAccessibilityLabel(mode == .off ? "Artwork" : "Artwork and visualizer")
+        switch mode {
+        case .off:
+            break
+        case .rotate:
+            rotation.restart()
+            if renderer.mode == nil { renderer.show(Mode.scenes[0], animated: false) }
+        default:
+            renderer.show(mode, animated: isAnimating && framesDrawn > 0 && !Motion.reduced)
+        }
+        let showing = mode != .off
+        if showing == sceneLayer.isHidden {
+            sceneLayer.isHidden = !showing
+            if showing, !Motion.reduced {
+                let fadeIn = CABasicAnimation(keyPath: "opacity")
+                fadeIn.fromValue = 0
+                fadeIn.toValue = 1
+                fadeIn.duration = 0.25
+                sceneLayer.add(fadeIn, forKey: "opacity")
+            }
+        }
+        setAccessibilityLabel(mode == .off ? "Artwork" : "Artwork and visualizer: \(currentScene?.title ?? mode.title)")
+        needsStill = true
+        if !isAnimating { drawStillIfNeeded() }
+    }
+
+    /// While rotating: the next scene now (a click on the artwork), and its full turn.
+    func skipScene() {
+        guard mode == .rotate else { return }
+        rotation.restart()
+        renderer.show(VisualizerRotation.next(after: renderer.mode), animated: !Motion.reduced)
+        setAccessibilityLabel("Artwork and visualizer: \(currentScene?.title ?? mode.title)")
+        needsStill = true
+        if !isAnimating { drawStillIfNeeded() }
     }
 
     // MARK: Motion
 
     private func animatingChanged() {
         if isAnimating {
+            lastTick = nil
             startDrift()
         } else {
             stopDrift()
@@ -280,81 +285,82 @@ final class ArtworkView: NSView {
         }
     }
 
-    /// One visualiser frame (nil: silence, when it stops: the bars settle to rest at once, no frames follow). Called at
-    /// 30 Hz while animating.
+    /// One visualiser frame, called 30 times a second while animating. nil is silence after playing: the scene
+    /// settles to a still frame and no frames follow.
     func update(with frame: ModernVisualizerFrame?) {
         guard let frame else { return settle() }
-        // A touch of smoothing on top of the analyser's own falloff: quick to rise, gentle to fall.
-        for i in 0..<levels.count {
-            let target = i < frame.bars.count ? frame.bars[i] : 0
-            levels[i] = target > levels[i] ? levels[i] + (target - levels[i]) * 0.7 : levels[i] + (target - levels[i]) * 0.35
+        let now = CACurrentMediaTime()
+        let dt = lastTick.map { min(max(now - $0, 1.0 / 240), 0.1) } ?? 1.0 / 60
+        lastTick = now
+        step(frame, dt: dt)
+    }
+
+    /// Moves everything on by `dt` seconds of music and draws (tests drive this directly).
+    func step(_ frame: ModernVisualizerFrame?, dt: Double) {
+        let input = features.next(frame, dt: dt)
+        if mode == .rotate, rotation.advance(dt) {
+            renderer.show(VisualizerRotation.next(after: renderer.mode), animated: !Motion.reduced)
+            setAccessibilityLabel("Artwork and visualizer: \(currentScene?.title ?? mode.title)")
         }
-        for i in 0..<samples.count {
-            samples[i] = i < frame.scope.count ? frame.scope[i] : 0
+        if paletteKey.colors == .cycle {
+            cycle = (cycle + dt / ArtworkColors.cyclePeriod).truncatingRemainder(dividingBy: 1)
+            if abs(cycle - appliedCycle) >= 1.0 / 720 { applyPalette() }
         }
-        let r = bounds
-        guard r.width > 0 else { return }
-        let inset = r.width * 0.12
-        let barsRect = CGRect(x: inset, y: r.height * 0.42, width: r.width - inset * 2, height: r.height * 0.58 - inset * 0.85)
-        let interval = 1.0 / 30
-        if mode == .spectrum {
-            let path = VisualizerGeometry.barsPath(levels: levels, in: barsRect, gap: barsGap(barsRect))
-            animatePath(barsShape, to: path, duration: interval)
-        } else if mode == .oscilloscope {
-            let path = VisualizerGeometry.scopePath(samples: samples, in: r.insetBy(dx: inset * 0.8, dy: r.height * 0.3))
-            animatePath(scope, to: path, duration: interval)
+        if mode != .off {
+            renderer.update(input, dt: dt)
+            drawScene()
         }
-        // The light swells with the bass: one animation for the three blobs, scaled about the artwork's centre.
-        let bass = VisualizerGeometry.bass(levels)
-        bassLevel += (bass - bassLevel) * 0.4
-        let swell = 1 + CGFloat(bassLevel) * 0.16
-        let transform = Motion.scale(swell, around: blobHolder.bounds)
-        if !Motion.reduced {
-            let a = CABasicAnimation(keyPath: "sublayerTransform")
-            a.fromValue = blobHolder.presentation()?.value(forKeyPath: "sublayerTransform")
-                ?? NSValue(caTransform3D: blobHolder.sublayerTransform)
-            a.toValue = NSValue(caTransform3D: transform)
-            a.duration = interval
-            blobHolder.add(a, forKey: "swell")
-        }
-        blobHolder.sublayerTransform = transform
+        // The light swells with the bass, scaled about the artwork's centre.
+        bassLevel += (input.bass - bassLevel) * Float(1 - pow(0.6, dt * 30))
+        blobHolder.sublayerTransform = Motion.reduced ? CATransform3DIdentity
+            : Motion.scale(1 + CGFloat(bassLevel) * 0.16, around: blobHolder.bounds)
         // Shadows are costly to redraw: follow the bass only in visible steps.
-        let glow = (isDark ? 0.5 : 0.36) + bassLevel * 0.3
+        let glow = (paletteKey.dark ? 0.5 : 0.36) + bassLevel * 0.3
         if abs(glow - glowLayer.shadowOpacity) > 0.04 { glowLayer.shadowOpacity = glow }
     }
 
-    /// Bars down, trace flat, light at rest, in a quarter of a second.
+    private func drawScene() {
+        guard bounds.width > 0 else { return }
+        sceneLayer.contentsScale = backingScale
+        sceneLayer.contents = renderer.image(size: bounds.size, scale: backingScale)
+        let glow = Float(renderer.glow) * (palette.isLight ? 0.35 : 0.55)
+        if abs(glow - sceneLayer.shadowOpacity) > 0.01 { sceneLayer.shadowOpacity = glow }
+        framesDrawn += 1
+        needsStill = false
+    }
+
+    /// Stopped: the scene calms down (a moment of silence), then holds still; the light comes to rest.
     private func settle() {
-        levels = [Float](repeating: 0, count: levels.count)
-        samples = [Float](repeating: 0, count: samples.count)
+        lastTick = nil
         bassLevel = 0
-        let r = bounds
-        guard r.width > 0 else { return }
-        let inset = r.width * 0.12
-        let barsRect = CGRect(x: inset, y: r.height * 0.42, width: r.width - inset * 2, height: r.height * 0.58 - inset * 0.85)
-        animatePath(barsShape, to: VisualizerGeometry.barsPath(levels: levels, in: barsRect, gap: barsGap(barsRect)), duration: 0.25)
-        animatePath(scope, to: VisualizerGeometry.scopePath(samples: samples, in: r.insetBy(dx: inset * 0.8, dy: r.height * 0.3)),
-                    duration: 0.25)
-        blobHolder.removeAnimation(forKey: "swell")
         blobHolder.sublayerTransform = CATransform3DIdentity
-        glowLayer.shadowOpacity = isDark ? 0.55 : 0.4
+        glowLayer.shadowOpacity = restingGlow
+        guard mode != .off else { return }
+        for _ in 0..<40 { renderer.update(features.next(nil, dt: 1.0 / 60), dt: 1.0 / 60) }
+        settledScene = renderer.mode
+        if !Motion.reduced, framesDrawn > 0 {
+            let fade = CATransition()
+            fade.type = .fade
+            fade.duration = 0.3
+            sceneLayer.add(fade, forKey: "settle")
+        }
+        drawScene()
+    }
+
+    /// A still frame of the scene (stopped or paused, after a change of scene, palette or size).
+    private func drawStillIfNeeded() {
+        guard needsStill, !isAnimating, mode != .off, bounds.width > 0 else { return }
+        // A scene new since the last still frame (or still fading in) settles in a second of silence first.
+        if renderer.isFading || renderer.mode != settledScene {
+            for _ in 0..<60 { renderer.update(features.next(nil, dt: 1.0 / 60), dt: 1.0 / 60) }
+            settledScene = renderer.mode
+        }
+        drawScene()
     }
 
     /// Reduce Motion changed: drift starts or stops to match.
     func refreshMotion() {
         stopDrift()
         if isAnimating { startDrift() }
-    }
-
-    private func animatePath(_ layer: CAShapeLayer, to path: CGPath, duration: Double) {
-        let from = layer.presentation()?.path ?? layer.path
-        layer.path = path
-        guard let from, !Motion.reduced else { return }
-        let a = CABasicAnimation(keyPath: "path")
-        a.fromValue = from
-        a.toValue = path
-        a.duration = duration
-        a.timingFunction = CAMediaTimingFunction(name: .linear)
-        layer.add(a, forKey: "path")
     }
 }

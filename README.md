@@ -2,7 +2,7 @@
 
 # sudamp
 
-**The Sudden Amp** is a free macOS spiritual successor to Winamp for low-friction streaming. Open it, pick a genre such as *Deep House* from the dropdown, and a random stream from a curated list of YouTube, SoundCloud and Mixcloud mixes plays immediately, audio only. It comes in two skin classes: a **modern** one (the default), native Liquid Glass in light or dark with a choice of tints, and the **classic** Winamp look, which loads classic `.wsz` skins (Skins ▸ or ⇧⌘M switches).
+**The Sudden Amp** is a free macOS spiritual successor to Winamp for low-friction streaming. Open it, pick a genre such as *Deep House* from the dropdown, and a random stream from a curated list of YouTube, SoundCloud and Mixcloud mixes plays immediately, audio only. It comes in two skin classes: a **modern** one (the default), native Liquid Glass in light or dark with a choice of tints and eleven visualiser scenes (Spectrum, Starfield, Pixel DJ, Dancing Toast, Fireworks, …, or all of them in turn), and the **classic** Winamp look, which loads classic `.wsz` skins (Skins ▸ or ⇧⌘M switches).
 
 **Status:** in development. M0–M6 and M7's signed feed mechanism are done: the skinned Winamp windows (sudamp Dark, AndAmp Dark/Light/Spot and 100 Winamp Skin Museum skins bundled, any `.wsz` by drag-and-drop) play a picked genre end to end; M6 adds engine updates with a canary and rollback, failure breakers, offline handling and stream recovery (its 2-hour soak is partial: RSS drift 22.9 MB against a 20 MB limit, footprint flat). `--plain` opens the M2 plain window. Progress is tracked in [`docs/PLAN.md`](docs/PLAN.md) and the `docs/spikes/` reports.
 

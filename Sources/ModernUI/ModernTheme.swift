@@ -155,15 +155,115 @@ nonisolated public enum ModernTint: String, CaseIterable, Sendable {
     public var hue: Double { accent.light.hsb.hue }
 }
 
-/// The colours of one generated artwork: a base gradient and three light blobs.
+/// What colours the generated artwork (and so the visualiser's backdrop): the genre's own colours, the window's
+/// light or dark with the tint, a slow turn through every hue, or the source's colour (YouTube red, SoundCloud
+/// orange, Mixcloud blue, radio amber).
+nonisolated public enum ArtworkColors: String, CaseIterable, Sendable {
+    case genre, window, cycle, source
+
+    public static let `default` = ArtworkColors.genre
+
+    public var title: String {
+        switch self {
+        case .genre: "Genre"
+        case .window: "Window"
+        case .cycle: "Cycle"
+        case .source: "Source"
+        }
+    }
+
+    public var help: String {
+        switch self {
+        case .genre: "Each genre's own colours"
+        case .window: "The window's light or dark, in the tint"
+        case .cycle: "Slowly turns through every colour while playing"
+        case .source: "YouTube red, SoundCloud orange, Mixcloud blue, radio amber"
+        }
+    }
+
+    /// Seconds for one full turn of the hue circle (`cycle`).
+    public static let cyclePeriod: Double = 90
+}
+
+nonisolated extension ModernPlayerState.SourceTag {
+    /// The colour the artwork takes for this source (`ArtworkColors.source`).
+    public var color: RGB {
+        switch self {
+        case .youtube: RGB(hex: 0xFF0033)
+        case .soundcloud: RGB(hex: 0xFF5500)
+        case .mixcloud: RGB(hex: 0x5000FF)
+        case .radio: RGB(hex: 0xFFA21A)
+        }
+    }
+}
+
+/// The colours of one generated artwork: a base gradient and three light blobs, and the colours the visualiser draws
+/// with over them.
 nonisolated public struct ArtworkPalette: Equatable, Sendable {
     /// Top-left and bottom-right of the base gradient.
     public var base: (RGB, RGB)
     /// The light blobs drifting over it.
     public var blobs: [RGB]
+    /// The visualiser's main colour: near-white over dark artwork, a deep tint over light.
+    public var ink: RGB
+    /// The halo around what the visualiser draws.
+    public var glow: RGB
+    /// A second colour for highlights (peak caps, sparks).
+    public var accent: RGB
+    /// Bright colours that belong with the artwork, for colourful scenes (fireworks, lights).
+    public var sparks: [RGB]
+    /// Light artwork (the light window scheme): scenes draw dark on it, without additive light.
+    public var isLight: Bool
+
+    public init(base: (RGB, RGB), blobs: [RGB], ink: RGB = .white, glow: RGB = .white, accent: RGB? = nil,
+                sparks: [RGB]? = nil, isLight: Bool = false) {
+        self.base = base
+        self.blobs = blobs
+        self.ink = ink
+        self.glow = glow
+        self.accent = accent ?? blobs.first ?? .white
+        self.sparks = sparks ?? blobs
+        self.isLight = isLight
+    }
 
     public static func == (a: ArtworkPalette, b: ArtworkPalette) -> Bool {
-        a.base.0 == b.base.0 && a.base.1 == b.base.1 && a.blobs == b.blobs
+        a.base.0 == b.base.0 && a.base.1 == b.base.1 && a.blobs == b.blobs && a.ink == b.ink && a.glow == b.glow
+            && a.accent == b.accent && a.sparks == b.sparks && a.isLight == b.isLight
+    }
+
+    /// Everything a palette is made from.
+    public struct Key: Equatable, Sendable {
+        public var colors: ArtworkColors
+        public var genreKey: String?
+        public var source: ModernPlayerState.SourceTag?
+        public var tint: ModernTint
+        public var dark: Bool
+
+        public init(colors: ArtworkColors = .default, genreKey: String? = nil, source: ModernPlayerState.SourceTag? = nil,
+                    tint: ModernTint = .default, dark: Bool = true) {
+            self.colors = colors
+            self.genreKey = genreKey
+            self.source = source
+            self.tint = tint
+            self.dark = dark
+        }
+    }
+
+    /// The palette for `key`; `cycle` (0...1, wrapping) is how far the hue has turned (`ArtworkColors.cycle`).
+    public static func make(_ key: Key, cycle: Double = 0) -> ArtworkPalette {
+        switch key.colors {
+        case .genre:
+            return make(genreKey: key.genreKey, tint: key.tint, dark: key.dark)
+        case .window:
+            return window(tint: key.tint, dark: key.dark)
+        case .cycle:
+            let start = key.tint == .graphite ? 0.6 : key.tint.hue
+            let turn = cycle.isFinite ? cycle - cycle.rounded(.down) : 0
+            return vivid(hue: start + turn, dark: key.dark)
+        case .source:
+            guard let source = key.source else { return make(genreKey: nil, tint: key.tint, dark: key.dark) }
+            return branded(source.color, dark: key.dark)
+        }
     }
 
     /// Every genre gets its own colours, stable across launches: a deep-to-mid gradient of neighbouring hues with
@@ -173,7 +273,13 @@ nonisolated public struct ArtworkPalette: Equatable, Sendable {
         let tintColor = dark ? tint.accent.dark : tint.accent.light
         let hue = genreKey.map(hue(for:)) ?? tint.hue
         let neutral = genreKey == nil && tint == .graphite
-        let saturation = neutral ? 0.06 : 1.0
+        let second = genreKey == nil && !neutral ? tintColor.adjusted(saturation: 0.95, brightness: 1.1) : nil
+        return vivid(hue: hue, saturation: neutral ? 0.06 : 1, dark: dark, second: second)
+    }
+
+    /// The album-art palette around one hue: deep to mid, a soft highlight, a second colour and a warm one.
+    static func vivid(hue rawHue: Double, saturation: Double = 1, dark: Bool, second: RGB? = nil) -> ArtworkPalette {
+        let hue = rawHue - rawHue.rounded(.down)
         func tone(_ delta: Double, _ s: Double, _ b: Double) -> RGB {
             let h = neighbour(of: hue, by: delta)
             // Yellows need light to stay golden rather than olive.
@@ -183,9 +289,49 @@ nonisolated public struct ArtworkPalette: Equatable, Sendable {
         let deep = tone(0, 0.9, dark ? 0.28 : 0.36)
         let mid = tone(0.08, 0.78, dark ? 0.56 : 0.66)
         let highlight = tone(-0.05, 0.42, 1)
-        let second = genreKey == nil && !neutral ? tintColor.adjusted(saturation: 0.95, brightness: 1.1) : tone(-0.12, 0.8, 0.95)
+        let other = second ?? tone(-0.12, 0.8, 0.95)
         let warm = tone(0.15, 0.85, 0.92)
-        return ArtworkPalette(base: (deep, mid), blobs: [highlight, second, warm])
+        let sparks = [tone(0, 0.55, 1), tone(0.12, 0.6, 1), tone(-0.15, 0.5, 1), tone(0.45, 0.45, 1)]
+        return ArtworkPalette(base: (deep, mid), blobs: [highlight, other, warm], ink: RGB(hex: 0xFCFCFF),
+                              glow: .white, accent: tone(0.06, 0.35, 1), sparks: saturation < 0.5 ? [.white] : sparks)
+    }
+
+    /// A source's colour as the gradient's middle, with deeper and lighter shades of it around.
+    static func branded(_ color: RGB, dark: Bool) -> ArtworkPalette {
+        let c = color.hsb
+        func tone(_ delta: Double, _ s: Double, _ b: Double) -> RGB {
+            RGB(hue: c.hue + delta, saturation: c.saturation * s, brightness: b)
+        }
+        let deep = tone(-0.015, 1, dark ? 0.26 : 0.34)
+        let mid = color.adjusted(brightness: dark ? 0.78 : 0.9)
+        let highlight = tone(0.02, 0.4, 1)
+        let second = tone(-0.04, 0.9, 1)
+        let warm = tone(0.05, 0.8, 0.95)
+        return ArtworkPalette(base: (deep, mid), blobs: [highlight, second, warm], ink: RGB(hex: 0xFCFCFF), glow: .white,
+                              accent: tone(0.03, 0.35, 1),
+                              sparks: [tone(0, 0.6, 1), tone(0.06, 0.5, 1), tone(-0.06, 0.55, 1), .white])
+    }
+
+    /// The window's own look: a near-black gradient in the tint's hue under dark glass, a pale one under light glass,
+    /// with the visualiser in the tint's light (dark) or deep (light) colour.
+    static func window(tint: ModernTint, dark: Bool) -> ArtworkPalette {
+        let accent = dark ? tint.accent.dark : tint.accent.light
+        let neutral = tint == .graphite
+        let a = accent.hsb
+        func tone(_ s: Double, _ b: Double) -> RGB {
+            RGB(hue: a.hue, saturation: neutral ? 0.04 : min(a.saturation, 1) * s, brightness: b)
+        }
+        if dark {
+            return ArtworkPalette(base: (tone(0.55, 0.1), tone(0.6, 0.2)),
+                                  blobs: [tone(0.3, 0.55), accent.adjusted(brightness: 0.62), tint.deep(dark: true).adjusted(brightness: 0.7)],
+                                  ink: accent.mixed(with: .white, 0.5), glow: accent, accent: accent.mixed(with: .white, 0.2),
+                                  sparks: [accent, accent.mixed(with: .white, 0.45), accent.adjusted(hue: 0.08), .white])
+        }
+        let ink = tint.deep(dark: false).adjusted(brightness: 0.85)
+        return ArtworkPalette(base: (accent.mixed(with: .white, 0.9), accent.mixed(with: .white, 0.76)),
+                              blobs: [.white, accent.mixed(with: .white, 0.62), accent.mixed(with: .white, 0.45)],
+                              ink: ink, glow: .white, accent: accent,
+                              sparks: [accent, ink, accent.adjusted(hue: 0.08), accent.adjusted(hue: -0.08)], isLight: true)
     }
 
     /// `hue` turned by `delta`, turned the other way instead when that would land in the yellow-green band (where
@@ -225,7 +371,7 @@ nonisolated public struct ArtworkPalette: Equatable, Sendable {
 
 // MARK: - AppKit
 
-extension RGB {
+nonisolated extension RGB {
     public var nsColor: NSColor { NSColor(srgbRed: r, green: g, blue: b, alpha: 1) }
     public func nsColor(alpha: Double) -> NSColor { NSColor(srgbRed: r, green: g, blue: b, alpha: alpha) }
     public var cgColor: CGColor { CGColor(srgbRed: r, green: g, blue: b, alpha: 1) }

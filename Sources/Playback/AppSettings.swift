@@ -44,8 +44,15 @@ nonisolated public struct AppSettings: Codable, Sendable, Equatable {
     public var `repeat` = false
     /// The time display counts down (Winamp's click on the time).
     public var timeRemaining = false
-    /// `spectrum`, `oscilloscope` or `off`.
+    /// The classic skins' visualiser: `spectrum`, `oscilloscope` or `off`.
     public var visualizer = "spectrum"
+    /// The modern skin's visualiser: a scene (`spectrum`, `starfield`, `pixel-dj`, …), `rotate` (each scene in turn)
+    /// or `off`. Settings from before it existed carry the classic choice over.
+    public var modernVisualizer = "spectrum"
+    /// Seconds each scene shows while the modern visualiser rotates.
+    public var visualizerInterval: Double = 20
+    /// What colours the modern skin's artwork: `genre`, `window`, `cycle` or `source`.
+    public var artworkColors = "genre"
     /// region.txt shaping (spike S1's kill switch; on by default).
     public var regionEnabled = true
     /// Transliterate titles the skin font lacks instead of drawing them with the system font (DESIGN §8.3).
@@ -73,6 +80,13 @@ nonisolated public struct AppSettings: Codable, Sendable, Equatable {
         `repeat` = (try? c.decode(Bool.self, forKey: .repeat)) ?? false
         timeRemaining = (try? c.decode(Bool.self, forKey: .timeRemaining)) ?? false
         if let v = try? c.decode(String.self, forKey: .visualizer), Self.visualizerModes.contains(v) { visualizer = v }
+        if let v = try? c.decode(String.self, forKey: .modernVisualizer), !v.isEmpty {
+            modernVisualizer = v
+        } else {
+            modernVisualizer = visualizer
+        }
+        if let v = try? c.decode(Double.self, forKey: .visualizerInterval), v.isFinite { visualizerInterval = min(max(v, 5), 600) }
+        if let v = try? c.decode(String.self, forKey: .artworkColors), !v.isEmpty { artworkColors = v }
         regionEnabled = (try? c.decode(Bool.self, forKey: .regionEnabled)) ?? true
         alwaysSkinFont = (try? c.decode(Bool.self, forKey: .alwaysSkinFont)) ?? false
     }

@@ -19,9 +19,12 @@ import Playback
 nonisolated enum ModernDisplay {
     struct Prefs: Equatable {
         var timeRemaining = false
+        /// The modern visualiser (`AppSettings.modernVisualizer`).
         var visualizer = "spectrum"
         var eqPreset: String?
         var muted = false
+        var visualizerInterval: Double = ModernPlayerState.defaultVisualizerInterval
+        var artworkColors = "genre"
     }
 
     static let idleTitle = "Pick a genre to start listening"
@@ -71,7 +74,10 @@ nonisolated enum ModernDisplay {
         m.stationsTitle = s.favouritesMode ? "Favourites" : (s.genreName ?? "Stations")
         m.stations = stations(playlist)
         m.currentStation = s.stream.flatMap { current in playlist.firstIndex { $0.id == current.id } }
-        m.visualizer = ModernPlayerState.Visualizer(rawValue: prefs.visualizer) ?? .spectrum
+        m.visualizer = ModernPlayerState.Visualizer(rawValue: prefs.visualizer) ?? .default
+        m.visualizerInterval = prefs.visualizerInterval.isFinite ? min(max(prefs.visualizerInterval, 5), 600)
+            : ModernPlayerState.defaultVisualizerInterval
+        m.artworkColors = ArtworkColors(rawValue: prefs.artworkColors) ?? .default
         return m
     }
 

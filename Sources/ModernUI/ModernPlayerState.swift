@@ -35,7 +35,66 @@ nonisolated public struct ModernPlayerState: Equatable, Sendable {
         public var isProblem: Bool { if case .problem = self { true } else { false } }
     }
 
-    public enum Visualizer: String, Sendable, CaseIterable { case spectrum, oscilloscope, off }
+    /// What the artwork shows: one of the scenes, every scene in turn (`rotate`), or just the artwork (`off`).
+    public enum Visualizer: String, Sendable, CaseIterable {
+        case spectrum, oscilloscope, leds, halo, waterfall, starfield, pixelDJ = "pixel-dj", toast, tunnel, fireworks, lava
+        case rotate, off
+
+        public static let `default` = Visualizer.spectrum
+
+        /// The scenes, in the order the menus list them and `rotate` plays them.
+        public static let scenes: [Visualizer] = allCases.filter(\.isScene)
+
+        public var isScene: Bool { self != .rotate && self != .off }
+
+        public var title: String {
+            switch self {
+            case .spectrum: "Spectrum"
+            case .oscilloscope: "Oscilloscope"
+            case .leds: "Retro LEDs"
+            case .halo: "Halo"
+            case .waterfall: "Waterfall"
+            case .starfield: "Starfield"
+            case .pixelDJ: "Pixel DJ"
+            case .toast: "Dancing Toast"
+            case .tunnel: "Tunnel"
+            case .fireworks: "Fireworks"
+            case .lava: "Lava"
+            case .rotate: "Rotate"
+            case .off: "Off"
+            }
+        }
+
+        /// The SF Symbol that stands for it in the appearance popover (the toast's tile draws a slice of its own; there
+        /// is no toast symbol).
+        public var symbol: String {
+            switch self {
+            case .spectrum: "chart.bar.fill"
+            case .oscilloscope: "waveform.path"
+            case .leds: "square.grid.3x3.fill"
+            case .halo: "sun.max.fill"
+            case .waterfall: "water.waves"
+            case .starfield: "sparkles"
+            case .pixelDJ: "figure.dance"
+            case .toast: "face.smiling.inverse"
+            case .tunnel: "circle.circle"
+            case .fireworks: "fireworks"
+            case .lava: "drop.fill"
+            case .rotate: "arrow.triangle.2.circlepath"
+            case .off: "eye.slash"
+            }
+        }
+
+        /// The next scene after this one (clicking the artwork): `off` and `rotate` start at the first.
+        public var nextScene: Visualizer {
+            guard let i = Self.scenes.firstIndex(of: self) else { return Self.scenes[0] }
+            return Self.scenes[(i + 1) % Self.scenes.count]
+        }
+    }
+
+    /// Seconds between scenes while the visualiser rotates.
+    public static let visualizerIntervals: [Double] = [10, 20, 30, 60]
+    public static let defaultVisualizerInterval: Double = 20
 
     /// One row of the station list.
     public struct Station: Equatable, Sendable {
@@ -114,7 +173,11 @@ nonisolated public struct ModernPlayerState: Equatable, Sendable {
     public var stations: [Station] = []
     /// The playing row.
     public var currentStation: Int?
-    public var visualizer: Visualizer = .spectrum
+    public var visualizer: Visualizer = .default
+    /// Seconds each scene shows while the visualiser rotates.
+    public var visualizerInterval: Double = ModernPlayerState.defaultVisualizerInterval
+    /// What colours the artwork behind the visualiser.
+    public var artworkColors: ArtworkColors = .default
 
     public init() {}
 
@@ -143,18 +206,21 @@ nonisolated public struct ModernPlayerState: Equatable, Sendable {
     private static func pad(_ n: Int) -> String { n < 10 ? "0\(n)" : "\(n)" }
 }
 
-/// One visualiser frame from the app's analyser: pulled at 30 Hz while the artwork animates.
+/// One visualiser frame from the app's analyser: pulled 30 times a second while the artwork animates.
 nonisolated public struct ModernVisualizerFrame: Equatable, Sendable {
     public static let barCount = 19
     public static let scopeCount = 76
 
     /// Bar levels 0...1, low to high frequency.
     public var bars: [Float]
+    /// Peak markers 0...1 over the bars (they hold, then fall).
+    public var peaks: [Float]
     /// Oscilloscope samples -1...1, oldest first.
     public var scope: [Float]
 
-    public init(bars: [Float], scope: [Float]) {
+    public init(bars: [Float], peaks: [Float]? = nil, scope: [Float]) {
         self.bars = bars
+        self.peaks = peaks ?? bars
         self.scope = scope
     }
 
@@ -187,7 +253,12 @@ nonisolated public enum ModernEvent: Equatable, Sendable, CustomStringConvertibl
     case favourite
     case retry
     case toggleTimeDisplay
+    /// A click on the artwork: the next scene (while rotating, the rotation skips ahead by itself).
     case cycleVisualizer
+    case setVisualizer(ModernPlayerState.Visualizer)
+    /// Seconds per scene while rotating.
+    case setVisualizerInterval(Double)
+    case setArtworkColors(ArtworkColors)
     case toggleShuffle
     case toggleRepeat
     case genreMenu(CGPoint)
@@ -224,6 +295,9 @@ nonisolated public enum ModernEvent: Equatable, Sendable, CustomStringConvertibl
         case .retry: return "retry"
         case .toggleTimeDisplay: return "toggleTimeDisplay"
         case .cycleVisualizer: return "cycleVisualizer"
+        case .setVisualizer(let v): return "setVisualizer(\(v.rawValue))"
+        case .setVisualizerInterval(let s): return "setVisualizerInterval(\(Int(s)) s)"
+        case .setArtworkColors(let c): return "setArtworkColors(\(c.rawValue))"
         case .toggleShuffle: return "toggleShuffle"
         case .toggleRepeat: return "toggleRepeat"
         case .genreMenu(let pt): return "genreMenu\(p(pt))"

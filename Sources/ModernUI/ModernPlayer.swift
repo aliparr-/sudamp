@@ -117,7 +117,8 @@ public final class ModernPlayer: NSObject {
 
     /// For logs: why the visualiser is or isn't running.
     public var visualizerDiagnostics: String {
-        "animating \(state.isAnimating), mode \(state.visualizer.rawValue), visible \(window.isVisible), "
+        "animating \(state.isAnimating), mode \(state.visualizer.rawValue), scene \(visualizerScene?.rawValue ?? "none"), "
+            + "visible \(window.isVisible), "
             + "occlusion visible \(window.occlusionState.contains(.visible)), "
             + "uncovered \(uncoveredCheck.map { String($0.uncovered) } ?? "unchecked"), link paused \(displayLink?.isPaused ?? true)"
     }
@@ -199,7 +200,8 @@ public final class ModernPlayer: NSObject {
             popover.close()
             return
         }
-        let controller = AppearancePopover(appearance: appearance, tint: tint)
+        let controller = AppearancePopover(appearance: appearance, tint: tint, visualizer: state.visualizer,
+                                           interval: state.visualizerInterval, colors: state.artworkColors)
         controller.onEvent = { [weak self] event in
             if case .switchToClassic = event { self?.popover?.close() }
             self?.handle(event)
@@ -298,15 +300,19 @@ public final class ModernPlayer: NSObject {
             }
         }))
         let link = root.displayLink(target: self, selector: #selector(displayLinkFired(_:)))
-        link.preferredFrameRateRange = CAFrameRateRange(minimum: 30, maximum: 30, preferred: 30)
+        // Scenes draw a frame each tick (`SUDAMP_VISUALIZER_FPS` overrides, for measurements).
+        let fps = Float(ProcessInfo.processInfo.environment["SUDAMP_VISUALIZER_FPS"].flatMap(Int.init) ?? Self.visualizerFPS)
+        link.preferredFrameRateRange = CAFrameRateRange(minimum: min(fps, 30), maximum: fps, preferred: fps)
         link.add(to: .main, forMode: .common)
         link.isPaused = true
         displayLink = link
     }
 
-    /// Playing, with a visualiser, in a window that is up (whether it can be seen is checked apart).
+    /// Playing, with a visualiser (or colours that turn), in a window that is up (whether it can be seen is checked
+    /// apart).
     private var visualizerMayRun: Bool {
-        state.isAnimating && state.visualizer != .off && window.isVisible && !window.isMiniaturized
+        state.isAnimating && (state.visualizer != .off || state.artworkColors == .cycle) && window.isVisible
+            && !window.isMiniaturized
     }
 
     private var visualizerWanted: Bool {
@@ -350,7 +356,13 @@ public final class ModernPlayer: NSObject {
         }
     }
 
+    /// Frames a second the visualiser draws: the classic skins' rate. A scene's frame costs 0.1–0.3 ms of main-thread
+    /// drawing, so 60 would double the visualiser's share of the 3% CPU budget for little a 92-point square can show.
+    static let visualizerFPS = 30
+
     public var isVisualizerRunning: Bool { displayLink.map { !$0.isPaused } ?? false }
+    /// The scene the artwork shows (while rotating, the current one); nil when off.
+    public var visualizerScene: ModernPlayerState.Visualizer? { root.nowPlaying.artwork.currentScene }
     public private(set) var visualizerTicks = 0
     /// The loudest bar seen so far (0...1): frames are arriving with sound in them.
     public private(set) var visualizerPeak: Float = 0
@@ -541,6 +553,27 @@ enum WindowCapture {
 
 /// Development views (the preview's contact sheets).
 public enum ModernDebug {
+    /// A contact sheet of one visualiser scene played through `frames` (60 per second, as JSON written by
+    /// `--dump-frames`), over the artwork for `style` (`dark`, `light`, `genre:<key>`, `source:<name>`, `cycle:<0…1>`).
+    /// Returns the PNG and the mean and worst milliseconds per frame.
+    public static func sceneSheet(_ mode: ModernPlayerState.Visualizer, framesJSON: Data?, style: String, tint: ModernTint,
+                                  start: Double = 2, snapshots: Int = 16, every: Int = 6, scale: CGFloat = 2,
+                                  seed: UInt64 = 1) throws -> (png: Data?, mean: Double, worst: Double) {
+        let frames = try framesJSON.map(SceneSheet.frames(json:)) ?? []
+        guard let palette = SceneSheet.palette(named: style, tint: tint) else {
+            throw NSError(domain: "sudamp", code: 1, userInfo: [NSLocalizedDescriptionKey: "unknown style \(style)"])
+        }
+        var options = SceneSheet.Options()
+        options.start = start
+        options.snapshots = snapshots
+        options.every = every
+        options.scale = scale
+        options.seed = seed
+        let result = SceneSheet.render(mode, frames: frames, palette: palette, options: options)
+        let png = result.image.flatMap { NSBitmapImageRep(cgImage: $0).representation(using: .png, properties: [:]) }
+        return (png, result.meanMilliseconds, result.worstMilliseconds)
+    }
+
     /// A grid of artworks: one row per genre key, light and dark, playing (the light drifting).
     public static func artworkSheet(genreKeys: [String?], tint: ModernTint, size: CGFloat = 92) -> NSView {
         let gap: CGFloat = 24
@@ -554,11 +587,12 @@ public enum ModernDebug {
                 let art = ArtworkView(frame: CGRect(x: gap + CGFloat(column) * (size + gap), y: gap + CGFloat(row) * (size + gap),
                                                     width: size, height: size))
                 art.cornerRadius = 16
-                art.setDark(dark)
-                art.palette = ArtworkPalette.make(genreKey: key, tint: tint, dark: dark)
+                art.paletteKey = ArtworkPalette.Key(colors: .genre, genreKey: key, tint: tint, dark: dark)
                 view.addSubview(art)
-                art.update(with: ModernVisualizerFrame(bars: (0..<19).map { Float(0.25 + 0.6 * abs(sin(Double($0) * 0.55))) },
-                                                       scope: (0..<76).map { Float(sin(Double($0) / 6)) }))
+                art.layoutSubtreeIfNeeded()
+                let frame = ModernVisualizerFrame(bars: (0..<19).map { Float(0.25 + 0.6 * abs(sin(Double($0) * 0.55))) },
+                                                  scope: (0..<76).map { Float(sin(Double($0) / 6)) })
+                for _ in 0..<15 { art.step(frame, dt: 1.0 / 30) }
             }
         }
         return view

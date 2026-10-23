@@ -112,6 +112,19 @@ import Testing
         #expect(!m.equalizer.enabled && m.equalizer.preamp == 3 && m.equalizer.bands[0] == -6 && m.equalizer.preset == "Rock")
         #expect(m.visualizer == .oscilloscope)
         #expect(state(snapshot(.idle), prefs: .init(visualizer: "bogus")).visualizer == .spectrum)
+        let rotating = state(snapshot(.idle), prefs: .init(visualizer: "rotate", visualizerInterval: 30, artworkColors: "source"))
+        #expect(rotating.visualizer == .rotate && rotating.visualizerInterval == 30 && rotating.artworkColors == .source)
+        #expect(state(snapshot(.idle), prefs: .init(visualizer: "pixel-dj")).visualizer == .pixelDJ)
+        let odd = state(snapshot(.idle), prefs: .init(visualizerInterval: .nan, artworkColors: "plaid"))
+        #expect(odd.visualizerInterval == ModernPlayerState.defaultVisualizerInterval && odd.artworkColors == .genre)
+        #expect(state(snapshot(.idle), prefs: .init(visualizerInterval: 1)).visualizerInterval == 5, "at least 5 s a scene")
+    }
+
+    /// The source colours need the source: it is known while a stream plays, not before.
+    @Test func theSourceTagFollowsThePlayingStream() {
+        #expect(state(snapshot(.playing, stream: mix(5, source: .mixcloud))).source == .mixcloud)
+        #expect(state(snapshot(.playing, stream: streams[2])).source == .radio)
+        #expect(state(snapshot(.idle, genre: nil)).source == nil)
     }
 
     @Test func formatText() {
@@ -140,5 +153,22 @@ import Testing
         #expect(tints.items.count == ModernTint.allCases.count)
         #expect(tints.items.filter { $0.state == .on }.compactMap { $0.representedObject as? String } == ["blue"])
         #expect(tints.items.allSatisfy { $0.image != nil }, "every tint shows its swatch")
+    }
+
+    @Test func theVisualizerMenuListsEveryChoiceTicked() {
+        let target = NSObject()
+        let action = #selector(NSObject.description)
+        let menu = ModernPlayerUI.visualizerMenu(current: .pixelDJ, interval: 30, colors: .source, target: target, choose: action,
+                                                 every: action, background: action)
+        let titles = menu.items.filter { !$0.isSeparatorItem }.map(\.title)
+        #expect(titles == ModernPlayerState.Visualizer.scenes.map(\.title) + ["Rotate", "Rotate Every", "Off", "Background"])
+        #expect(menu.items.filter { $0.state == .on }.compactMap { $0.representedObject as? String } == ["pixel-dj"])
+        let every = menu.items.first { $0.title == "Rotate Every" }?.submenu
+        #expect(every?.items.map(\.title) == ["10 Seconds", "20 Seconds", "30 Seconds", "1 Minute"])
+        #expect(every?.items.filter { $0.state == .on }.compactMap { $0.representedObject as? Double } == [30])
+        let background = menu.items.first { $0.title == "Background" }?.submenu
+        #expect(background?.items.map(\.title) == ["Genre", "Window", "Cycle", "Source"])
+        #expect(background?.items.filter { $0.state == .on }.compactMap { $0.representedObject as? String } == ["source"])
+        #expect(ModernPlayerUI.intervalTitle(120) == "2 Minutes")
     }
 }

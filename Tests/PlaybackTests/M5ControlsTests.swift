@@ -219,6 +219,22 @@ import Testing
         #expect(s.balance == 1)
     }
 
+    @Test func theModernVisualizerCarriesTheClassicChoiceOver() throws {
+        // Settings from before the modern visualiser had its own choice.
+        let old = try JSONDecoder().decode(AppSettings.self, from: Data(#"{"visualizer": "off"}"#.utf8))
+        #expect(old.visualizer == "off" && old.modernVisualizer == "off")
+        #expect(old.visualizerInterval == 20 && old.artworkColors == "genre")
+        let json = #"{"visualizer": "oscilloscope", "modernVisualizer": "starfield", "visualizerInterval": 9999, "artworkColors": "cycle"}"#
+        let s = try JSONDecoder().decode(AppSettings.self, from: Data(json.utf8))
+        #expect(s.visualizer == "oscilloscope" && s.modernVisualizer == "starfield" && s.artworkColors == "cycle")
+        #expect(s.visualizerInterval == 600, "clamped")
+        var round = AppSettings()
+        round.modernVisualizer = "rotate"
+        round.visualizerInterval = 30
+        round.artworkColors = "source"
+        #expect(try JSONDecoder().decode(AppSettings.self, from: JSONEncoder().encode(round)) == round)
+    }
+
     @Test func userPresetsReplaceByNameAndStayBounded() {
         var s = AppSettings()
         for n in 0..<(AppSettings.maxUserPresets + 5) { s.addUserPreset(EQPreset(name: "P\(n)", preamp: 0, bands: [])) }

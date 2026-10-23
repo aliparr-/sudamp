@@ -1,6 +1,6 @@
 {
   "name": "modern skin: menus, controls, panels, presets and the switch to classic and back (DESIGN §8.4)",
-  "description": "Runs muted, offline-safe (nothing plays). The genre button and the ⋯ button open their menus; the Equalizer and Stations panels open; a band and the volume move; Save .eqf…, reset, Load .eqf… go through the presets menu; the Skins menu switches to the classic windows and back.",
+  "description": "Runs muted, offline-safe (nothing plays). The genre button and the ⋯ button open their menus; the Equalizer and Stations panels open; a band and the volume move; Save .eqf…, reset, Load .eqf… go through the presets menu; View ▸ Visualizer picks Pixel DJ, the source colours and a 10 s rotation; the Skins menu switches to the classic windows and back.",
   "style": "modern",
   "steps": [
     {"showWindows": true},
@@ -18,6 +18,10 @@
     {"saveEQF": "/tmp/sudamp-modern-roundtrip.eqf"},
     {"pressControl": "eqReset"},
     {"loadEQF": "/tmp/sudamp-modern-roundtrip.eqf"},
+    {"selectMenuBarItem": "View/Visualizer/Pixel DJ"},
+    {"selectMenuBarItem": "View/Visualizer/Background/Source"},
+    {"selectMenuBarItem": "View/Visualizer/Rotate Every/10 Seconds"},
+    {"selectMenuBarItem": "View/Visualizer/Rotate"},
     {"dumpState": "modern"},
     {"selectMenuBarItem": "Skins/Use Classic Skins"},
     {"sleep": 0.5},

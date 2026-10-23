@@ -60,7 +60,12 @@ final class NowPlayingCard: GlassCard {
         super.init(frame: frameRect)
         naturalHeight = Metrics.nowPlayingHeight
         artwork.cornerRadius = Metrics.concentric(inset: Metrics.padding)
-        artwork.onClick = { [weak self] in self?.onEvent?(.cycleVisualizer) }
+        artwork.onClick = { [weak self] in
+            guard let self else { return }
+            // Rotating: the artwork skips to its next scene itself; otherwise the app picks the next one.
+            if self.state.visualizer == .rotate { self.artwork.skipScene() }
+            self.onEvent?(.cycleVisualizer)
+        }
         lights.onClose = { [weak self] in self?.onEvent?(.close) }
         lights.onMinimize = { [weak self] in self?.onEvent?(.minimize) }
         genreButton.toolTip = "Pick a genre: a random stream from it plays"
@@ -144,9 +149,13 @@ final class NowPlayingCard: GlassCard {
         progress.apply(palette)
         volume.apply(palette)
         liveBar.apply(palette)
-        artwork.setDark(palette.isDark)
-        artwork.palette = ArtworkPalette.make(genreKey: state.genreKey, tint: palette.tint, dark: palette.isDark)
+        artwork.paletteKey = artworkKey(state, palette)
         updateNotice()
+    }
+
+    /// What colours the artwork: the chosen scheme with the genre, source, tint and light or dark.
+    private func artworkKey(_ s: ModernPlayerState, _ palette: ModernPalette) -> ArtworkPalette.Key {
+        ArtworkPalette.Key(colors: s.artworkColors, genreKey: s.genreKey, source: s.source, tint: palette.tint, dark: palette.isDark)
     }
 
     /// Reduce Motion changed: the moving parts start or stop to match.
@@ -180,9 +189,8 @@ final class NowPlayingCard: GlassCard {
             }
             needsLayout = true
         }
-        if force || new.genreKey != old.genreKey, let palette {
-            artwork.palette = ArtworkPalette.make(genreKey: new.genreKey, tint: palette.tint, dark: palette.isDark)
-        }
+        if let palette { artwork.paletteKey = artworkKey(new, palette) }
+        artwork.rotationInterval = new.visualizerInterval
         artwork.mode = new.visualizer
         artwork.isAnimating = new.isAnimating
         if let tag = new.source { sourceBadge.kind = .source(tag) }

@@ -1,17 +1,24 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 // `sudamp --modern-preview [--appearance auto|light|dark] [--tint <name>] [--panels equalizer,stations]
-//                          [--state playing|paused|idle|live|tuning|failed|engine] [--backdrop]
-//                          [--capture <file.png>] [--capture-delay <seconds>] [--exit-after <seconds>] [--probe-hits]
+//                          [--state playing|paused|idle|live|tuning|failed|engine] [--visualizer <mode>]
+//                          [--interval <s>] [--colors genre|window|cycle|source] [--backdrop]
+//                          [--capture <file.png>] [--capture-delay <seconds>] [--capture-burst <dir> [--burst-count n]]
+//                          [--ignore-occlusion] [--exit-after <seconds>] [--probe-hits]
 //                          [--open-later|--close-later equalizer|stations]`
+// `sudamp --modern-preview --dump-frames <file.json>`
+// `sudamp --modern-preview --scene-sheet <file.png> --visualizer <scene> [--frames <file.json>] [--style <name>]`
 //
-// Opens the modern skin with an animated fake player state (ticking time, a fake visualiser), the way
-// `--skin-preview` does for the classic skins: no audio, no network, nothing persisted. Every ModernEvent is logged
-// to stderr and its obvious local effect applied. `--backdrop` puts a colourful stand-in wallpaper behind the
-// window, so the glass has something to refract; `--capture` writes what the screen shows of both windows (own
-// windows need no Screen Recording permission) and quits. `--probe-hits` prints where a click on the player would
-// go, as WindowServer routes it (which window) and as AppKit does (which view), and clicks Next through AppKit.
+// Opens the modern skin with an animated fake player state (ticking time, a visualiser fed synthesised music through
+// the real analyser), the way `--skin-preview` does for the classic skins: no audio, no network, nothing persisted.
+// Every ModernEvent is logged to stderr and its obvious local effect applied. `--backdrop` puts a colourful stand-in
+// wallpaper behind the window, so the glass has something to refract; `--capture` writes what the screen shows of
+// both windows (own windows need no Screen Recording permission) and quits; `--capture-burst` writes a run of frames.
+// `--probe-hits` prints where a click on the player would go, as WindowServer routes it (which window) and as AppKit
+// does (which view), and clicks Next through AppKit. `--dump-frames` writes 32 s of analyser frames of the synthesised
+// music; `--scene-sheet` plays one scene through them offscreen and writes a contact sheet with its cost per frame.
 
 import AppKit
+import Audio
 import ModernUI
 
 enum ModernPreview {
@@ -34,12 +41,32 @@ enum ModernPreview {
         var closeLater: ModernPanel?
         /// Prints which window WindowServer would send a click to at points on the player, then quits.
         var probeHits = false
+        /// Captures a run of frames into this directory (motion checks), then quits.
+        var captureBurst: String?
+        var burstCount = 90
+        var visualizer: ModernPlayerState.Visualizer?
+        var colors: ArtworkColors?
+        var interval: Double?
+        /// Writes this many seconds of analyser frames (synthesised music) as JSON, then quits.
+        var dumpFrames: String?
+        /// Renders a contact sheet of `--visualizer` offscreen, then quits.
+        var sceneSheet: String?
+        var sheetFrames: String?
+        var sheetStyle = "genre:deep-house"
+        /// Keep animating while covered (CPU measurements).
+        var ignoreOcclusion = false
     }
 
     static let states = ["playing", "paused", "idle", "live", "tuning", "failed", "engine"]
     static let usage = "usage: sudamp --modern-preview [--appearance auto|light|dark] [--tint "
         + ModernTint.allCases.map(\.rawValue).joined(separator: "|") + "] [--panels equalizer,stations] [--state "
-        + states.joined(separator: "|") + "] [--backdrop] [--capture <file.png>] [--capture-delay <s>] [--exit-after <s>]"
+        + states.joined(separator: "|") + "] [--visualizer "
+        + ModernPlayerState.Visualizer.allCases.map(\.rawValue).joined(separator: "|") + "] [--interval <s>] [--colors "
+        + ArtworkColors.allCases.map(\.rawValue).joined(separator: "|") + "] [--backdrop] [--capture <file.png>] "
+        + "[--capture-delay <s>] [--capture-burst <dir> [--burst-count n]] [--ignore-occlusion] [--exit-after <s>]\n"
+        + "       sudamp --modern-preview --dump-frames <file.json>\n"
+        + "       sudamp --modern-preview --scene-sheet <file.png> --visualizer <scene> [--frames <file.json>] "
+        + "[--style dark|light|genre:<key>|source:<name>|cycle:<0…1>] [--tint <name>]"
 
     static func parse(_ arguments: [String]) -> Result<Options, SkinPreview.UsageError> {
         var options = Options()
@@ -68,6 +95,7 @@ enum ModernPreview {
                 guard let v = value(), states.contains(v) else { return fail("bad --state") }
                 options.state = v
             case "--backdrop": options.backdrop = true
+            case "--ignore-occlusion": options.ignoreOcclusion = true
             case "--popover": options.popover = true
             case "--probe-hits": options.probeHits = true
             case "--open-later":
@@ -82,6 +110,33 @@ enum ModernPreview {
             case "--capture":
                 guard let v = value() else { return fail("--capture needs a file") }
                 options.capture = v
+            case "--capture-burst":
+                guard let v = value() else { return fail("--capture-burst needs a directory") }
+                options.captureBurst = v
+            case "--burst-count":
+                guard let v = value(), let n = Int(v), n > 0 else { return fail("bad --burst-count") }
+                options.burstCount = n
+            case "--visualizer":
+                guard let v = value(), let mode = ModernPlayerState.Visualizer(rawValue: v) else { return fail("bad --visualizer") }
+                options.visualizer = mode
+            case "--colors":
+                guard let v = value(), let c = ArtworkColors(rawValue: v) else { return fail("bad --colors") }
+                options.colors = c
+            case "--interval":
+                guard let v = value(), let d = Double(v), d > 0 else { return fail("bad --interval") }
+                options.interval = d
+            case "--dump-frames":
+                guard let v = value() else { return fail("--dump-frames needs a file") }
+                options.dumpFrames = v
+            case "--scene-sheet":
+                guard let v = value() else { return fail("--scene-sheet needs a file") }
+                options.sceneSheet = v
+            case "--frames":
+                guard let v = value() else { return fail("--frames needs a file") }
+                options.sheetFrames = v
+            case "--style":
+                guard let v = value() else { return fail("--style needs a name") }
+                options.sheetStyle = v
             case "--capture-delay":
                 guard let v = value(), let d = Double(v), d >= 0 else { return fail("bad --capture-delay") }
                 options.captureDelay = d
@@ -199,7 +254,6 @@ final class ModernPreviewController: NSObject, NSApplicationDelegate {
     private var backdrop: NSWindow?
     private var state: ModernPlayerState
     private var timer: Timer?
-    private var phase = 0.0
     /// Events seen while probing.
     private var probedEvents: [String] = []
 
@@ -210,6 +264,11 @@ final class ModernPreviewController: NSObject, NSApplicationDelegate {
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         if let path = options.artworkSheet { return showArtworkSheet(capture: path) }
+        if let path = options.dumpFrames { return dumpFrames(to: path) }
+        if let path = options.sceneSheet { return renderSceneSheet(to: path) }
+        if let mode = options.visualizer { state.visualizer = mode }
+        if let colors = options.colors { state.artworkColors = colors }
+        if let interval = options.interval { state.visualizerInterval = interval }
         var configuration = ModernPlayer.Configuration()
         configuration.appearance = options.appearance
         configuration.tint = options.tint
@@ -220,7 +279,7 @@ final class ModernPreviewController: NSObject, NSApplicationDelegate {
         player.visualizerProvider = { [weak self] in self?.fakeFrame() }
         player.onEvent = { [weak self] event in self?.handle(event) }
         // A capture runs unattended, often behind other windows: keep animating anyway.
-        if options.capture != nil { player.pausesWhenOccluded = false }
+        if options.capture != nil || options.captureBurst != nil || options.ignoreOcclusion { player.pausesWhenOccluded = false }
         if options.backdrop { showBackdrop(behind: player.window) }
         player.show(activate: true)
         NSApp.activate()
@@ -250,6 +309,11 @@ final class ModernPreviewController: NSObject, NSApplicationDelegate {
                 MainActor.assumeIsolated { self?.capture(to: path) }
             }
         }
+        if let dir = options.captureBurst {
+            DispatchQueue.main.asyncAfter(deadline: .now() + options.captureDelay) { [weak self] in
+                MainActor.assumeIsolated { self?.captureBurst(into: dir, remaining: self?.options.burstCount ?? 0, index: 0) }
+            }
+        }
         if let seconds = options.exitAfter {
             DispatchQueue.main.asyncAfter(deadline: .now() + seconds) { NSApp.terminate(nil) }
         }
@@ -261,22 +325,29 @@ final class ModernPreviewController: NSObject, NSApplicationDelegate {
         player?.state = state
     }
 
-    /// Bars that look like music: a kick, a bassline and hats moving at different rates.
+    private let analyser = VisualiserAnalyser(bridge: nil)
+    /// 32 s of synthesised music, made once: per frame the analyser reads its newest 1024 samples, as it reads the
+    /// ring when a stream plays (so the preview costs what the app does).
+    private lazy var track: [Float] = {
+        var music = SyntheticMusic(step: 48_000)
+        var samples: [Float] = []
+        samples.reserveCapacity(48_000 * 32)
+        for _ in 0..<32 { samples += music.next(count: 48_000) }
+        return samples
+    }()
+    private var trackStart: CFTimeInterval?
+
+    /// Synthesised music (a kick, a bassline, hats, a pad) through the real analyser, so the bars jump and fall as
+    /// they do when a stream plays.
     private func fakeFrame() -> ModernVisualizerFrame {
-        phase += 1.0 / 30
-        let t = phase
-        let kick = Float(pow(max(0, sin(t * 2 * .pi * 2.05)), 6))
-        let bars = (0..<ModernVisualizerFrame.barCount).map { i -> Float in
-            let x = Float(i) / Float(ModernVisualizerFrame.barCount - 1)
-            let body = 0.55 * (1 - x) * (0.6 + 0.4 * Float(sin(t * 1.7 + Double(i) * 0.6)))
-            let hats = x > 0.6 ? 0.35 * Float(pow(max(0, sin(t * 2 * .pi * 4.1 + Double(i))), 4)) : 0
-            return min(1, body + kick * (1 - x) * 0.55 + hats + 0.06)
+        let now = CACurrentMediaTime()
+        if trackStart == nil { trackStart = now }
+        let n = VisualiserAnalyser.windowSize
+        let end = n + Int((now - (trackStart ?? now)) * 48_000) % (track.count - n)
+        let frame = track.withUnsafeBufferPointer {
+            analyser.analyse(samples: UnsafeBufferPointer(rebasing: $0[(end - n)..<end]), nowNanos: UInt64(now * 1e9))
         }
-        let scope = (0..<ModernVisualizerFrame.scopeCount).map { i -> Float in
-            let x = Double(i) / 75
-            return Float(0.55 * sin(x * 2 * .pi * 2 + t * 6) * (0.5 + 0.5 * Double(kick)) + 0.2 * sin(x * 2 * .pi * 9 + t * 11))
-        }
-        return ModernVisualizerFrame(bars: bars, scope: scope)
+        return ModernVisualizerFrame(bars: frame.bars, peaks: frame.peaks, scope: frame.scope)
     }
 
     private func handle(_ event: ModernEvent) {
@@ -293,8 +364,10 @@ final class ModernPreviewController: NSObject, NSApplicationDelegate {
         case .toggleShuffle: state.shuffle.toggle()
         case .toggleTimeDisplay: state.showsRemaining.toggle()
         case .cycleVisualizer:
-            let all = ModernPlayerState.Visualizer.allCases
-            state.visualizer = all[((all.firstIndex(of: state.visualizer) ?? 0) + 1) % all.count]
+            if state.visualizer != .rotate { state.visualizer = state.visualizer.nextScene }
+        case .setVisualizer(let mode): state.visualizer = mode
+        case .setVisualizerInterval(let seconds): state.visualizerInterval = seconds
+        case .setArtworkColors(let colors): state.artworkColors = colors
         case .eqEnabled(let on): state.equalizer.enabled = on
         case .eqBand(let i, let db):
             state.equalizer.bands[i] = db
@@ -344,6 +417,63 @@ final class ModernPreviewController: NSObject, NSApplicationDelegate {
         } catch {
             SkinPreview.log("modern preview: \(error)")
             exit(1)
+        }
+    }
+
+    /// 32 seconds of synthesised music through the analyser at 60 frames a second, as JSON for `--scene-sheet`.
+    private func dumpFrames(to path: String) {
+        var music = SyntheticMusic(step: 48_000 / 60)
+        let analyser = VisualiserAnalyser(bridge: nil)
+        var nanos: UInt64 = 1_000_000_000
+        var frames: [[String: [Float]]] = []
+        for _ in 0..<(32 * 60) {
+            let samples = music.next(count: VisualiserAnalyser.windowSize)
+            nanos += 16_666_667
+            let f = samples.withUnsafeBufferPointer { analyser.analyse(samples: $0, nowNanos: nanos) }
+            func rounded(_ v: [Float]) -> [Float] { v.map { ($0 * 1000).rounded() / 1000 } }
+            frames.append(["bars": rounded(f.bars), "peaks": rounded(f.peaks), "scope": rounded(f.scope)])
+        }
+        do {
+            let data = try JSONSerialization.data(withJSONObject: frames)
+            try data.write(to: URL(filePath: path))
+            SkinPreview.log("modern preview: wrote \(frames.count) frames to \(path)")
+            exit(0)
+        } catch {
+            SkinPreview.log("modern preview: \(error)")
+            exit(1)
+        }
+    }
+
+    private func renderSceneSheet(to path: String) {
+        let mode = options.visualizer ?? .spectrum
+        do {
+            let json = try options.sheetFrames.map { try Data(contentsOf: URL(filePath: $0)) }
+            let result = try ModernDebug.sceneSheet(mode, framesJSON: json, style: options.sheetStyle, tint: options.tint)
+            guard let png = result.png else { throw SkinPreview.UsageError(message: "the sheet could not be drawn") }
+            try png.write(to: URL(filePath: path))
+            SkinPreview.log(String(format: "modern preview: %@ sheet to %@; %.3f ms a frame (worst %.3f)", mode.rawValue, path,
+                                   result.mean, result.worst))
+            exit(0)
+        } catch {
+            SkinPreview.log("modern preview: \(error)")
+            exit(1)
+        }
+    }
+
+    /// One frame every 20 ms or so (as fast as captures go), numbered, then quits.
+    private func captureBurst(into dir: String, remaining: Int, index: Int) {
+        guard let player else { return }
+        guard remaining > 0 else {
+            SkinPreview.log("modern preview: captured \(index) frames to \(dir)")
+            exit(0)
+        }
+        try? FileManager.default.createDirectory(atPath: dir, withIntermediateDirectories: true)
+        if let image = player.capture(below: backdrop != nil),
+           let png = NSBitmapImageRep(cgImage: image).representation(using: .png, properties: [:]) {
+            try? png.write(to: URL(filePath: dir).appending(path: String(format: "frame-%03d.png", index)))
+        }
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.02) { [weak self] in
+            MainActor.assumeIsolated { self?.captureBurst(into: dir, remaining: remaining - 1, index: index + 1) }
         }
     }
 
@@ -471,5 +601,56 @@ final class ModernPreviewController: NSObject, NSApplicationDelegate {
         backdrop.contentView = view
         backdrop.order(.below, relativeTo: window.windowNumber)
         self.backdrop = backdrop
+    }
+}
+
+/// A few seconds of dance music, synthesised a frame at a time: 124 bpm four-to-the-floor kick, an off-beat bassline,
+/// open hats and a slow pad. Deterministic.
+struct SyntheticMusic {
+    private var t = 0
+    private let rate = 48_000.0
+    private var noise: UInt64 = 0x2545_F491_4F6C_DD1D
+    private var window: [Float] = []
+    /// Samples per frame.
+    private let step: Int
+
+    init(step: Int = 48_000 / 30) { self.step = step }
+
+    /// The newest `count` samples after advancing one frame.
+    mutating func next(count: Int) -> [Float] {
+        for _ in 0..<step {
+            window.append(sample(t))
+            t += 1
+        }
+        if window.count > count { window.removeFirst(window.count - count) }
+        return window
+    }
+
+    private mutating func sample(_ i: Int) -> Float {
+        let time = Double(i) / rate
+        let beat = 60.0 / 124
+        let inBeat = time.truncatingRemainder(dividingBy: beat)
+        // Sixteen bars: eight with the kick, four of breakdown (no kick, the pad up), four with the kick again.
+        let bar = Int(time / (beat * 4)) % 16
+        let breakdown = (8..<12).contains(bar)
+        // Kick: a falling sine with a fast decay.
+        let kickFreq = 45 + 90 * exp(-inBeat * 30)
+        let kick = breakdown ? 0 : sin(2 * .pi * kickFreq * inBeat) * exp(-inBeat * 9)
+        // Bass on the off-beat.
+        let off = (time + beat / 2).truncatingRemainder(dividingBy: beat)
+        let notes = [55.0, 55, 65.4, 49]
+        let note = notes[Int(time / (beat * 4)) % notes.count]
+        let bass = 0.5 * sin(2 * .pi * note * time) * exp(-off * 5) * (off < beat * 0.45 ? 1 : 0.2)
+        // Hats: noise bursts on the off-beat eighths.
+        noise ^= noise << 13
+        noise ^= noise >> 7
+        noise ^= noise << 17
+        let white = Double(Int64(bitPattern: noise)) / Double(Int64.max)
+        let eighth = time.truncatingRemainder(dividingBy: beat / 2)
+        let hat = 0.18 * white * exp(-eighth * 40)
+        // Pad: a slow chord with a filter that opens and closes.
+        let swell = breakdown ? 1 : 0.5 + 0.5 * sin(2 * .pi * time / 8)
+        let pad = 0.08 * swell * (sin(2 * .pi * 220 * time) + sin(2 * .pi * 277.2 * time) + 0.6 * sin(2 * .pi * 1318 * time))
+        return Float(max(-1, min(1, 0.55 * kick + bass + hat + pad)))
     }
 }

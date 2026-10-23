@@ -364,12 +364,16 @@ nonisolated public struct AppUIDebugInfo: Sendable, Equatable, Codable {
     public var appearance: String?
     public var tint: String?
     public var panels: [String]?
+    /// The modern visualiser's rotation (seconds per scene) and what colours its artwork (`genre`, `window`, …).
+    public var visualizerInterval: Double?
+    public var artworkColors: String?
 
     public init(mode: String, scale: Double? = nil, windows: [String: Window]? = nil, alwaysOnTop: Bool? = nil,
                 regionEnabled: Bool? = nil, menuAutoOpened: Bool = false, openMenu: String? = nil,
                 equalizer: Equalizer? = nil, timeDisplay: String? = nil, visualizerMode: String? = nil,
                 lastSheet: String? = nil, sheetOpen: Bool = false, skinClass: String? = nil, appearance: String? = nil,
-                tint: String? = nil, panels: [String]? = nil) {
+                tint: String? = nil, panels: [String]? = nil, visualizerInterval: Double? = nil,
+                artworkColors: String? = nil) {
         self.mode = mode
         self.scale = scale
         self.windows = windows
@@ -386,6 +390,8 @@ nonisolated public struct AppUIDebugInfo: Sendable, Equatable, Codable {
         self.appearance = appearance
         self.tint = tint
         self.panels = panels
+        self.visualizerInterval = visualizerInterval
+        self.artworkColors = artworkColors
     }
 }
 
