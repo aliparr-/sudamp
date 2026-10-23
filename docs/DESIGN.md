@@ -297,8 +297,9 @@ New IDs from a feed change go at random positions after the cursor; ★ Favourit
 
 ### 8.3 Text, default skin, trademark
 - **Text:** Webamp's FONT_LOOKUP (`<>{}` → `[]`), diacritics stripped; the marquee (31 characters, 5 px every 220 ms, `"  ***  "`) is Webamp's pure model with its tests. Characters the skin font lacks (CJK, emoji) get a Core Text overlay in text.bmp's colours at ≥ 2 device pixels per skin pixel, else `applyingTransform(.toLatin)`. Playlist rows use Core Text in pledit.txt colours.
-- **sudamp Dark:** `skingen` ports Bitamp's Canvas, original PixelFont, DefaultSkin and WszWriter (MIT), with fixed ZIP timestamps; the output is committed and `skin-check` enforces byte identity. Near-black panels, graphite bevels, the icon's teal accent, title `SUDAMP`; no Nullsoft pixels, no Bitamp branding. AndAmp Dark and Light (CC BY 4.0, Mattix) ship with credits and double as fixtures.
-- **Trademark:** no Winamp name, llama, bolt or `WINAMP` title in branding; only nominative use ("plays classic Winamp skins"). Third-party skins arrive only by user action ("Get more skins…" opens skins.webamp.org).
+- **sudamp Dark:** `skingen` ports Bitamp's Canvas, original PixelFont, DefaultSkin and WszWriter (MIT), with fixed ZIP timestamps; the output is committed and `skin-check` enforces byte identity. Near-black panels, graphite bevels, the icon's teal accent, title `SUDAMP`; no Nullsoft pixels, no Bitamp branding. AndAmp Dark, Light and Spot (CC BY 4.0, Mattix) ship with credits; Dark and Light double as fixtures.
+- **Trademark:** no Winamp name, llama, bolt or `WINAMP` title in branding; only nominative use ("plays classic Winamp skins", "Winamp Skin Museum").
+- **Bundled museum skins (owner decision, 2026-10-23):** the 100 skins of the `make golden` corpus ship in a Skins ▸ Skin Museum submenu (ids `museum:<md5>`), each credited by its museum file name in the tooltip and About. They carry no licence statement, so this overrides the research recommendation to bundle only licensed skins (`docs/research/skins.md`); some show third-party trademarks or photographs. The public repository holds only their list, `Fixtures/skins/museum.json`; `make app` copies the files into `Contents/Resources/Skins/Museum` with `scripts/fetch-museum-skins.sh` (from the golden cache, downloading and MD5-checking any that are missing; `MUSEUM_SKINS=0` skips them). Other third-party skins arrive only by user action ("Get more skins…" opens skins.webamp.org).
 
 ## 9. Project structure and build
 
@@ -334,7 +335,8 @@ docs/{DESIGN.md, PLAN.md, research/, spikes/ (reports), feedback/, measurements.
 | hfyeomans/MacAmp @cb0c77f | ring buffer + 16 tests, config observer, rewiring, 17 presets + EQF, visualiser DSP, screen guard/clamp + tests | MIT © 2025–2026 Hank Yeomans (+ Webamp notice) |
 | `spikes/engine-pull-ao/` | `sudamp_ao.c`, ramp-WAV generator, transport bench, `iso6` repro, analysis scripts | own (AO: LGPL-2.1+) |
 | `spikes/skins-tools/` | `extract_sprites.py` → `gen-sprites.py`, `compare_sprites.py`, `webamp_ref.py` | own; tables keep Webamp's MIT notice |
-| AndAmp | Dark/Light `.wsz` | CC BY 4.0 (Mattix) |
+| AndAmp | Dark/Light/Spot `.wsz` | CC BY 4.0 (Mattix) |
+| Winamp Skin Museum | 100 `.wsz`, unmodified (list in `Fixtures/skins/museum.json`; files fetched at `make app`, not committed) | none stated; owner decision §8.3 |
 
 **Never used:** MacAmp's or wamp's bundled skins; wamp's SpriteCatalog; Butterchurn; MacWamp and the 2024 Winamp source (never read); IINA code (reference only).
 
@@ -354,7 +356,7 @@ sudamp.app/Contents/{MacOS/sudamp, Helpers/qjs, Frameworks/Sparkle.framework, Re
 
 **Profiles.** With `SUDAMP_HOME=<P>` or `--profile <P>`, Application Support/sudamp maps to `<P>/` (so `<P>/session.json`, `<P>/instance.lock`, `<P>/instance.sock`, `<P>/debug/state.json`, `<P>/engines/`), Caches/sudamp to `<P>/Caches/` and Logs/sudamp to `<P>/Logs/` (so `<P>/Logs/metrics.jsonl`). The socket stays at the profile root to keep within the 104-byte Unix socket path limit.
 
-No ATS exceptions: URLSession is HTTPS-only; mpv's sockets sit outside ATS. Sparkle 2.10 needs `-Wl,-rpath,@loader_path/../Frameworks` and preserved symlinks [source]; the app offers to move itself to /Applications. **Channels:** GitHub Releases and a Homebrew cask (`auto_updates true`) in our own tap. homebrew/cask disables casks failing Gatekeeper (since 2026-09-01) and `--no-quarantine` is deprecated [source], so public installs need a Developer ID. THIRD_PARTY_NOTICES is generated in M8 from MPVKit 1.0.0's binary targets plus QuickJS-NG, Sparkle, the ledger and AndAmp; yt-dlp is credited in About, not redistributed.
+No ATS exceptions: URLSession is HTTPS-only; mpv's sockets sit outside ATS. Sparkle 2.10 needs `-Wl,-rpath,@loader_path/../Frameworks` and preserved symlinks [source]; the app offers to move itself to /Applications. **Channels:** GitHub Releases and a Homebrew cask (`auto_updates true`) in our own tap. homebrew/cask disables casks failing Gatekeeper (since 2026-09-01) and `--no-quarantine` is deprecated [source], so public installs need a Developer ID. THIRD_PARTY_NOTICES is generated in M8 from MPVKit 1.0.0's binary targets plus QuickJS-NG, Sparkle, the ledger, AndAmp and the museum skins; yt-dlp is credited in About, not redistributed.
 
 ## 11. Risks and mitigations
 | # | Risk | Sev. | Mitigation |
@@ -383,6 +385,7 @@ Milestones M0 (spikes) to M9 (1.0) are defined in `docs/PLAN.md`.
 | GitHub remote | Create one (none exists) for CI, Pages and Releases |
 | Platform | macOS 15+, arm64 |
 | Skin art | Code-generated sudamp Dark |
+| Bundled third-party skins | AndAmp Dark, Light and Spot (CC BY 4.0), plus 100 unlicensed museum skins (owner, 2026-10-23; §8.3) |
 | First launch | Wait for a pick; menu auto-opens once |
 | Auto-resume | On |
 | Domain | Register before M8, which bakes in the bundle ID and feed URL; M7 can use `<user>.github.io` |

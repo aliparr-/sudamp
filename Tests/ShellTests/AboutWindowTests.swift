@@ -20,19 +20,22 @@ import Testing
         #expect(content.licence.contains("GPL-3.0-or-later") && content.licence.contains("LGPL-2.1-or-later"))
 
         let names = content.credits.map(\.name)
-        for required in ["Webamp", "Bitamp", "wamp", "macamp", "MacAmp", "AndAmp Dark and AndAmp Light", "mpv and FFmpeg",
-                         "QuickJS-NG", "yt-dlp"] {
+        for required in ["Webamp", "Bitamp", "wamp", "macamp", "MacAmp", "AndAmp Dark, Light and Spot",
+                         "Winamp Skin Museum", "mpv and FFmpeg", "QuickJS-NG", "yt-dlp"] {
             #expect(names.contains(required), "missing credit \(required)")
         }
         let andamp = try #require(content.credits.first { $0.name.hasPrefix("AndAmp") })
         #expect(andamp.licence == "CC BY 4.0" && andamp.by.contains("Mattix"))
+        let museum = try #require(content.credits.first { $0.name == "Winamp Skin Museum" })
+        #expect(museum.licence == "no licence statement" && museum.by.contains("authors"))
         let ytdlp = try #require(content.credits.first { $0.name == "yt-dlp" })
         #expect(ytdlp.role.contains("never bundled") && ytdlp.licence == "Unlicense")
         #expect(content.credits.first { $0.name == "QuickJS-NG" }?.licence == "MIT")
         for credit in content.credits { #expect(URL(string: credit.url)?.scheme == "https", "\(credit.name)") }
     }
 
-    /// DESIGN §8.3: no Winamp name in sudamp's branding; "Winamp" only as a nominative reference.
+    /// DESIGN §8.3: no Winamp name in sudamp's branding; "Winamp" only as a nominative reference (naming the Winamp
+    /// Skin Museum, whose skins are bundled, is one).
     @Test func winampAppearsOnlyNominatively() {
         let content = AboutContent(version: "1")
         for own in [content.appName, content.subtitle] {
@@ -42,7 +45,8 @@ import Testing
         let mentions = text.components(separatedBy: "Winamp").count - 1
         let nominative = text.components(separatedBy: "plays classic Winamp skins").count - 1
             + text.components(separatedBy: "any radio station or Winamp.").count - 1
-        #expect(mentions == 2 && mentions == nominative)
+            + text.components(separatedBy: "Winamp Skin Museum").count - 1
+        #expect(mentions == 3 && mentions == nominative)
         #expect(!text.localizedCaseInsensitiveContains("llama"))
     }
 
@@ -159,8 +163,8 @@ import Testing
         #expect(output.contains("29 MPVKit binary targets"), "\(output)")
     }
 
-    /// Each kind of entry the script requires: a linked MPVKit library, a system library, the bundled helper and
-    /// skin, and a PROVENANCE MIT notice. Removing any one must fail the check and name it.
+    /// Each kind of entry the script requires: a linked MPVKit library, a system library, the bundled helper, a
+    /// bundled skin, the museum skins and a PROVENANCE MIT notice. Removing any one must fail the check and name it.
     @Test(arguments: [
         ("| `Libmpv` |", "Libmpv"),
         ("| `Libavcodec` |", "Libavcodec"),
@@ -168,6 +172,7 @@ import Testing
         ("| `libz` |", "libz"),
         ("| `qjs` |", "qjs"),
         ("| `AndAmp-Dark.wsz` |", "AndAmp-Dark.wsz"),
+        ("| `Museum` |", "Museum"),
         ("### MIT © 2015 Jordan Eldredge", "Jordan Eldredge"),
     ])
     func removingAnEntryFails(line: String, name: String) async throws {

@@ -11,8 +11,8 @@ import SkinUI
 /// SkinUI's WindowManager, drawn from PlaybackController snapshots (`SkinDisplay`), with every SkinControlEvent
 /// turned into an action (`SkinActions`). The genre menu opens from the marquee, the options button and right-click
 /// `Genre ▸`, always the same `GenreMenuBuilder` menu anchored under the marquee; the first launch opens it by itself.
-/// Skins come from `SkinLibrary` (built in, bundled, `<profile>/Skins`), by drag-and-drop, Open Skin…, a `.wsz`
-/// argument or a forwarded launch; a refused archive shows a sheet and keeps the current skin.
+/// Skins come from `SkinLibrary` (built in, bundled, the museum's, `<profile>/Skins`), by drag-and-drop, Open Skin…,
+/// a `.wsz` argument or a forwarded launch; a refused archive shows a sheet and keeps the current skin.
 ///
 /// The visualiser is AudioEngine's `VisualiserAnalyser` over the render bridge's ring, pulled by SkinUI's display link
 /// at 30 Hz only while Main is visible and playing (paused when occluded).

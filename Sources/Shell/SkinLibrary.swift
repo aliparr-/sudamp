@@ -9,13 +9,17 @@ nonisolated struct SkinEntry: Equatable, Sendable {
     enum Origin: String, Sendable {
         /// sudamp Dark, generated in code (SkinKit's `SudampDark`): always there, the default and every fallback.
         case builtIn
-        /// Shipped in `Contents/Resources/Skins` (AndAmp Dark and Light, CC BY 4.0).
+        /// Shipped in `Contents/Resources/Skins` (AndAmp Dark, Light and Spot, CC BY 4.0).
         case bundled
+        /// Shipped in `Contents/Resources/Skins/Museum`: Winamp Skin Museum skins, each its author's work with no
+        /// licence statement (DESIGN §8.3), listed with their names in that folder's `museum.json`.
+        case museum
         /// Added by the user: `<profile>/Skins` (Open Skin…, drag-and-drop, a `.wsz` argument, or copied there).
         case user
     }
 
-    /// `sudamp-dark`, `andamp-dark`, `user:<file name>`: what settings.json and state.json `.skin.id` hold.
+    /// `sudamp-dark`, `andamp-dark`, `museum:<md5>`, `user:<file name>`: what settings.json and state.json `.skin.id`
+    /// hold.
     var id: String
     var name: String
     var origin: Origin
@@ -32,18 +36,23 @@ nonisolated struct SkinRejection: Error, Equatable, Sendable {
     var file: String
 }
 
-/// The skins sudamp can show (DESIGN §8.2 loading, PLAN M5 "Skins"): sudamp Dark built in, AndAmp Dark and Light
-/// bundled, and the user's in `<profile>/Skins`. Loading goes through SkinKit's capped loader, so a zip bomb or a
-/// stray archive is refused before anything is allocated or copied.
+/// The skins sudamp can show (DESIGN §8.2 loading, PLAN M5 "Skins"): sudamp Dark built in, AndAmp Dark, Light and
+/// Spot bundled, the bundled Winamp Skin Museum skins, and the user's in `<profile>/Skins`. Loading goes through
+/// SkinKit's capped loader, so a zip bomb or a stray archive is refused before anything is allocated or copied.
 final class SkinLibrary {
     static let builtInID = "sudamp-dark"
     static let builtInName = "sudamp Dark"
     static let andAmpCredit = "AndAmp skin by Mattix (mattix.nl), CC BY 4.0"
     static let userPrefix = "user:"
+    static let museumPrefix = "museum:"
+    /// The museum skins' folder inside the bundled one, holding `museum.json` and `<md5>.wsz` files.
+    static let museumFolder = "Museum"
 
     let bundledDirectory: URL?
     let userDirectory: URL
     private var cache: [String: Skin] = [:]
+    /// The bundle doesn't change while sudamp runs, so the museum list is read once.
+    private lazy var museumEntries: [SkinEntry] = Self.museumEntries(in: bundledDirectory)
 
     init(bundledDirectory: URL?, userDirectory: URL) {
         self.bundledDirectory = bundledDirectory
@@ -68,10 +77,11 @@ final class SkinLibrary {
         SkinEntry(id: builtInID, name: builtInName, origin: .builtIn, url: nil, credit: nil)
     }
 
-    /// Built in first, then bundled, then the user's, each sorted by name.
+    /// Built in first, then bundled, then the museum's, then the user's, each sorted by name.
     func entries() -> [SkinEntry] {
         var out = [Self.builtIn]
         out += scan(bundledDirectory, origin: .bundled)
+        out += museumEntries
         out += scan(userDirectory, origin: .user)
         return out
     }
@@ -93,6 +103,40 @@ final class SkinLibrary {
                 return SkinEntry(id: id, name: Self.displayName(stem), origin: origin, url: url, credit: credit)
             }
             .sorted { $0.name.localizedCaseInsensitiveCompare($1.name) == .orderedAscending }
+    }
+
+    /// `museum.json`: a copy of Fixtures/skins/museum.json, put there by scripts/fetch-museum-skins.sh.
+    nonisolated private struct MuseumListing: Decodable {
+        struct Skin: Decodable {
+            var md5: String
+            /// The museum's file name, e.g. `3DNow_skin.zip`.
+            var file: String
+            /// The Skins menu title.
+            var name: String
+        }
+        var skins: [Skin]
+    }
+
+    /// The museum skins whose files are present, sorted by name. No folder or an unreadable list means none.
+    static func museumEntries(in bundledDirectory: URL?) -> [SkinEntry] {
+        guard let folder = bundledDirectory?.appending(path: museumFolder, directoryHint: .isDirectory),
+              let data = try? Data(contentsOf: folder.appending(path: "museum.json")),
+              let listing = try? JSONDecoder().decode(MuseumListing.self, from: data)
+        else { return [] }
+        return listing.skins.compactMap { skin -> SkinEntry? in
+            let md5 = skin.md5.lowercased()
+            guard md5.count == 32, md5.allSatisfy({ "0123456789abcdef".contains($0) }) else { return nil }
+            let url = folder.appending(path: md5 + ".wsz")
+            guard FileManager.default.fileExists(atPath: url.path) else { return nil }
+            return SkinEntry(id: museumPrefix + md5, name: skin.name, origin: .museum, url: url,
+                             credit: museumCredit(file: skin.file))
+        }
+        .sorted { $0.name.localizedCaseInsensitiveCompare($1.name) == .orderedAscending }
+    }
+
+    /// "3DNow_skin.zip from the Winamp Skin Museum (skins.webamp.org), © its author".
+    static func museumCredit(file: String) -> String {
+        "\(file) from the Winamp Skin Museum (skins.webamp.org), © its author"
     }
 
     /// `AndAmp-Dark` → `AndAmp Dark`.
@@ -138,6 +182,11 @@ final class SkinLibrary {
             cache[same.id] = skin
             return .success((same, skin))
         }
+        // Museum skins are named by the MD5 of their bytes, so a copy is found without reading the hundred files.
+        if let md5 = Self.md5(url), let same = all.first(where: { $0.id == Self.museumPrefix + md5 }) {
+            cache[same.id] = skin
+            return .success((same, skin))
+        }
         do {
             try FileManager.default.createDirectory(at: userDirectory, withIntermediateDirectories: true)
             let stem = url.deletingPathExtension().lastPathComponent
@@ -168,6 +217,12 @@ final class SkinLibrary {
     private static func digest(_ url: URL) -> String? {
         guard let data = try? Data(contentsOf: url, options: .mappedIfSafe) else { return nil }
         return SHA256.hash(data: data).map { String(format: "%02x", $0) }.joined()
+    }
+
+    /// The museum's file key (not used for security: the file was already validated by `loadFile`).
+    private static func md5(_ url: URL) -> String? {
+        guard let data = try? Data(contentsOf: url, options: .mappedIfSafe) else { return nil }
+        return Insecure.MD5.hash(data: data).map { String(format: "%02x", $0) }.joined()
     }
 
     /// What the rejection sheet says.

@@ -218,15 +218,31 @@ extension SkinnedPlayerUI: NSMenuDelegate {
         let menu = NSMenu(title: "Skins")
         menu.autoenablesItems = false
         var origin: SkinEntry.Origin?
+        var museum: NSMenuItem?
         for entry in library.entries() {
             if let origin, origin != entry.origin { menu.addItem(.separator()) }
             origin = entry.origin
-            let item = add(menu, entry.name, #selector(skinChosen(_:)))
+            var parent = menu
+            if entry.origin == .museum {
+                // A hundred skins get a submenu, so the user's skins and Open Skin… stay on screen.
+                if museum == nil {
+                    let holder = NSMenuItem(title: Self.museumMenuTitle, action: nil, keyEquivalent: "")
+                    let submenu = NSMenu(title: Self.museumMenuTitle)
+                    submenu.autoenablesItems = false
+                    holder.submenu = submenu
+                    menu.addItem(holder)
+                    museum = holder
+                }
+                parent = museum?.submenu ?? menu
+            }
+            let item = add(parent, entry.name, #selector(skinChosen(_:)))
             item.representedObject = entry.id
             item.state = entry.id == skinEntry.id ? .on : .off
+            if item.state == .on, parent !== menu { museum?.state = .on }
             if let credit = entry.credit {
                 item.toolTip = credit
-                item.subtitle = credit
+                // Under every museum skin a subtitle would double the submenu's height; the tooltip is enough.
+                if entry.origin != .museum { item.subtitle = credit }
             }
         }
         menu.addItem(.separator())
@@ -249,7 +265,9 @@ extension SkinnedPlayerUI: NSMenuDelegate {
         NSWorkspace.shared.activateFileViewerSelecting([context.paths.skins])
     }
 
-    /// DESIGN §8.3: third-party skins arrive only by user action ("Get more skins…" opens skins.webamp.org).
+    static let museumMenuTitle = "Skin Museum"
+
+    /// "Get more skins…" opens skins.webamp.org (DESIGN §8.3).
     @objc func getMoreSkins(_ sender: Any?) {
         if let url = URL(string: "https://skins.webamp.org/") { NSWorkspace.shared.open(url) }
     }

@@ -4,6 +4,7 @@
 import AppKit
 import Catalog
 import Core
+import CryptoKit
 import Foundation
 import Playback
 import SkinKit
@@ -147,8 +148,10 @@ import Testing
     @Test func builtInFirstThenBundled() {
         let library = SkinLibrary(bundledDirectory: bundled, userDirectory: URL(filePath: "/nonexistent"))
         let entries = library.entries()
-        #expect(entries.map(\.id) == ["sudamp-dark", "andamp-dark", "andamp-light"])
+        #expect(entries.map(\.id) == ["sudamp-dark", "andamp-dark", "andamp-light", "andamp-spot"])
         #expect(entries[1].name == "AndAmp Dark" && entries[1].credit == SkinLibrary.andAmpCredit)
+        #expect(entries[3].name == "AndAmp Spot" && entries[3].credit == SkinLibrary.andAmpCredit)
+        #expect(!entries.contains { $0.origin == .museum }, "the repository holds the museum list, not the skins")
         guard case .success(let skin) = library.load(entries[1]) else {
             Issue.record("AndAmp Dark should load")
             return
@@ -182,6 +185,66 @@ import Testing
         }
         #expect(entry.id == "andamp-dark")
         #expect(!FileManager.default.fileExists(atPath: temp.url.appending(path: "Skins").path), "nothing copied")
+    }
+
+    /// `Skins/Museum/museum.json` names the bundled museum skins; each is `<md5>.wsz` beside it.
+    @Test func museumSkinsComeFromTheirList() throws {
+        let temp = try ShellTempDir()
+        let skins = temp.url.appending(path: "Skins")
+        let museum = skins.appending(path: SkinLibrary.museumFolder)
+        try FileManager.default.createDirectory(at: museum, withIntermediateDirectories: true)
+        try FileManager.default.copyItem(at: bundled.appending(path: "AndAmp-Light.wsz"),
+                                         to: skins.appending(path: "AndAmp-Light.wsz"))
+        let data = try Data(contentsOf: bundled.appending(path: "AndAmp-Spot.wsz"))
+        let md5 = Insecure.MD5.hash(data: data).map { String(format: "%02x", $0) }.joined()
+        try data.write(to: museum.appending(path: md5 + ".wsz"))
+        let list = """
+            {"about": "test", "skins": [
+              {"md5": "\(md5)", "file": "Spot_copy.wsz", "name": "Zebra Spot"},
+              {"md5": "\(String(repeating: "0", count: 32))", "file": "gone.wsz", "name": "Gone"},
+              {"md5": "../AndAmp-Light", "file": "x.wsz", "name": "Escape"}
+            ]}
+            """
+        try Data(list.utf8).write(to: museum.appending(path: "museum.json"))
+        let user = temp.url.appending(path: "User")
+        let library = SkinLibrary(bundledDirectory: skins, userDirectory: user)
+        let entries = library.entries()
+        #expect(entries.map(\.id) == ["sudamp-dark", "andamp-light", "museum:" + md5],
+                "after the bundled skins; a missing file or a key that isn't an MD5 is left out")
+        let entry = try #require(entries.last)
+        #expect(entry.name == "Zebra Spot" && entry.origin == .museum)
+        #expect(entry.credit == "Spot_copy.wsz from the Winamp Skin Museum (skins.webamp.org), © its author")
+        guard case .success(let skin) = library.load(entry) else {
+            Issue.record("a museum skin loads")
+            return
+        }
+        #expect(SkinLibrary.debugInfo(entry, skin: skin).origin == "museum")
+        // The same file opened from elsewhere is that museum skin, not a new user skin.
+        let copy = temp.url.appending(path: "spot.wsz")
+        try data.write(to: copy)
+        guard case .success(let (imported, _)) = library.importSkin(at: copy) else {
+            Issue.record("imports")
+            return
+        }
+        #expect(imported.id == "museum:" + md5)
+        #expect(!FileManager.default.fileExists(atPath: user.path), "nothing copied")
+    }
+
+    /// Fixtures/skins/museum.json, which scripts/fetch-museum-skins.sh and the app read.
+    @Test func theCommittedMuseumListIsWellFormed() throws {
+        struct Listing: Decodable {
+            struct Skin: Decodable { var md5, file, name: String }
+            var skins: [Skin]
+        }
+        let listing = try JSONDecoder().decode(Listing.self, from: Data(contentsOf: bundled.appending(path: "museum.json")))
+        #expect(listing.skins.count == 100)
+        #expect(Set(listing.skins.map(\.md5)).count == listing.skins.count, "no skin twice")
+        #expect(Set(listing.skins.map { $0.name.lowercased() }).count == listing.skins.count, "menu names are unique")
+        for skin in listing.skins {
+            #expect(skin.md5.count == 32 && skin.md5.allSatisfy { "0123456789abcdef".contains($0) }, "\(skin.md5)")
+            #expect(!skin.file.isEmpty && !skin.name.isEmpty
+                    && skin.name == skin.name.trimmingCharacters(in: .whitespacesAndNewlines), "\(skin.file)")
+        }
     }
 
     @Test func bombsAndNonSkinsAreRefusedAndNotCopied() throws {

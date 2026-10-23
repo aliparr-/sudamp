@@ -4,14 +4,14 @@
 
 **The Sudden Amp** is a free macOS spiritual successor to Winamp for low-friction streaming. Open it, pick a genre such as *Deep House* from the dropdown, and a random stream from a curated list of YouTube, SoundCloud and Mixcloud mixes plays immediately, audio only. It looks like classic Winamp and loads classic `.wsz` skins. The default skin is a dark, minimal one.
 
-**Status:** in development. M0–M6 and M7's signed feed mechanism are done: the skinned Winamp windows (sudamp Dark, AndAmp Dark/Light bundled, any `.wsz` by drag-and-drop) play a picked genre end to end; M6 adds engine updates with a canary and rollback, failure breakers, offline handling and stream recovery (its 2-hour soak is partial: RSS drift 22.9 MB against a 20 MB limit, footprint flat). `--plain` opens the M2 plain window. Progress is tracked in [`docs/PLAN.md`](docs/PLAN.md) and the `docs/spikes/` reports.
+**Status:** in development. M0–M6 and M7's signed feed mechanism are done: the skinned Winamp windows (sudamp Dark, AndAmp Dark/Light/Spot and 100 Winamp Skin Museum skins bundled, any `.wsz` by drag-and-drop) play a picked genre end to end; M6 adds engine updates with a canary and rollback, failure breakers, offline handling and stream recovery (its 2-hour soak is partial: RSS drift 22.9 MB against a 20 MB limit, footprint flat). `--plain` opens the M2 plain window. Progress is tracked in [`docs/PLAN.md`](docs/PLAN.md) and the `docs/spikes/` reports.
 
 ## Try it
 
 Needs macOS 15+ on Apple silicon and Swift 6.2 or later: Xcode 26+ or the Command Line Tools (`xcode-select --install`). No Homebrew packages are needed.
 
 ```sh
-make app CONFIG=release      # builds build/sudamp.app (first build downloads MPVKit, about 270 MB)
+make app CONFIG=release      # builds build/sudamp.app (first build downloads MPVKit, about 270 MB, and the museum skins, 19 MB)
 open build/sudamp.app        # pick a genre from the dropdown
 ```
 

@@ -28,11 +28,16 @@ plutil -lint "$C/Info.plist" >/dev/null
 printf 'APPL????' > "$C/PkgInfo"
 scripts/make-icon.sh "$C/Resources/AppIcon.icns"
 if [ -f catalog/feed.json ]; then cp catalog/feed.json "$C/Resources/feed.json"; fi
-# Skins (PLAN M5): sudamp Dark (the default, also built in) and AndAmp Dark/Light (CC BY 4.0, Mattix) with credits.
+# Skins (PLAN M5): sudamp Dark (the default, also built in) and AndAmp Dark/Light/Spot (CC BY 4.0, Mattix) with credits.
 mkdir -p "$C/Resources/Skins"
-for skin in sudamp-dark.wsz AndAmp-Dark.wsz AndAmp-Light.wsz CREDITS.md; do
+for skin in sudamp-dark.wsz AndAmp-Dark.wsz AndAmp-Light.wsz AndAmp-Spot.wsz CREDITS.md; do
     cp "Fixtures/skins/$skin" "$C/Resources/Skins/$skin"
 done
+# The 100 Winamp Skin Museum skins in Fixtures/skins/museum.json (DESIGN §8.3), from the make golden cache or
+# downloaded once; they are never committed. MUSEUM_SKINS=0 builds without them.
+if [ "${MUSEUM_SKINS:-1}" != 0 ]; then
+    scripts/fetch-museum-skins.sh "$C/Resources/Skins/Museum"
+fi
 # Licence, credits and third-party notices (About shows them; DESIGN §10, PLAN M8).
 for doc in LICENSE CREDITS.md THIRD_PARTY_NOTICES.md; do cp "$doc" "$C/Resources/$doc"; done
 scripts/fetch-qjs.sh "$C/Helpers/qjs"

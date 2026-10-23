@@ -420,6 +420,9 @@ QJS_VERSION=$(sed -nE 's/^QJS_VERSION="([^"]+)".*/\1/p' "$ROOT/scripts/fetch-qjs
 QJS_SHA256=$(sed -nE 's/^QJS_SHA256="([^"]+)".*/\1/p' "$ROOT/scripts/fetch-qjs.sh")
 MPV_HEADERS_VERSION=$(sed -nE 's/^Copied by .* from mpv (v[0-9.]+).*/\1/p' "$ROOT/Sources/SudampAO/vendor/README.md")
 SKINS=$(cd "$ROOT/Fixtures/skins" && ls AndAmp-*.wsz 2>/dev/null | sort)
+# Winamp Skin Museum skins bundle.sh copies into Contents/Resources/Skins/Museum (scripts/fetch-museum-skins.sh).
+MUSEUM_COUNT=0
+[ -f "$ROOT/Fixtures/skins/museum.json" ] && MUSEUM_COUNT=$("$JQ" '.skins | length' "$ROOT/Fixtures/skins/museum.json")
 SPARKLE=0
 grep -q -i 'sparkle' "$ROOT/Package.swift" && grep -q -E '\.package\(.*[Ss]parkle' "$ROOT/Package.swift" && SPARKLE=1
 # "MIT © <holder>" entries of PROVENANCE.md, e.g. "2015 Jordan Eldredge".
@@ -479,7 +482,7 @@ fi
 
 # Fingerprint of everything the generated file is made from; a mismatch means the file is stale.
 INPUTS_SHA=$( { cat "$0"; echo "$RESOLVED_REV"; echo "$LINK_SET"; echo "$SYSTEM_LINKED"; echo "$MIT_HOLDERS";
-                echo "$QJS_VERSION $QJS_SHA256"; echo "$MPV_HEADERS_VERSION"; echo "$SKINS"; echo "$SPARKLE"; } \
+                echo "$QJS_VERSION $QJS_SHA256"; echo "$MPV_HEADERS_VERSION"; echo "$SKINS"; echo "$MUSEUM_COUNT"; echo "$SPARKLE"; } \
               | shasum -a 256 | cut -d' ' -f1)
 
 component_for_target() {
@@ -627,6 +630,10 @@ SECTION
         printf '| `%s` | [AndAmp](#andamp) %s skin by Mattix | mattijsf/andamp @ `1458304a` | CC-BY-4.0 | `Contents/Resources/Skins` |\n' \
             "$skin" "$(echo "$skin" | sed -E 's/AndAmp-(.*)\.wsz/\1/')"
     done
+    if [ "$MUSEUM_COUNT" -gt 0 ]; then
+        printf '| `Museum` | %s classic skins from the [Winamp Skin Museum](#winamp-skin-museum), each its author'"'"'s work | listed in `Fixtures/skins/museum.json` | none stated | `Contents/Resources/Skins/Museum` |\n' \
+            "$MUSEUM_COUNT"
+    fi
     if [ "$SPARKLE" = 1 ]; then
         echo '| `Sparkle` | Sparkle update framework | see Package.resolved | MIT | `Contents/Frameworks/Sparkle.framework` |'
     fi
@@ -638,7 +645,8 @@ SECTION
 - **yt-dlp** (https://github.com/yt-dlp/yt-dlp, Unlicense) resolves streams. sudamp downloads it from yt-dlp's
   official releases on first launch, checks it against the release's SHA2-256SUMS, and never bundles,
   redistributes or hosts it. Its own build carries its third-party licences.
-- **Skins** from the Winamp Skin Museum or elsewhere are the user's own; sudamp only ships the skins above.
+- **Other skins** the user adds (Open Skin…, drag-and-drop, Get More Skins…) are the user's own; sudamp only
+  ships the skins above.
 
 ## Notices
 SECTION
@@ -677,11 +685,26 @@ SECTION
 
 ### andamp
 
-- **AndAmp Dark** and **AndAmp Light** skins by **Mattix** (https://mattix.nl), made for AndAmp
+- **AndAmp Dark**, **AndAmp Light** and **AndAmp Spot** skins by **Mattix** (https://mattix.nl), made for AndAmp
   (https://github.com/mattijsf/andamp), unmodified copies of \`skin/dist/\` at commit \`1458304a\`.
 - Licence: Creative Commons Attribution 4.0 International (CC BY 4.0), https://creativecommons.org/licenses/by/4.0/
   ("The bundled skins are artwork. AndAmp Dark, Light and Spot … are licensed under CC BY 4.0"). The AndAmp name
   and icon are not licensed; sudamp names the skins only to credit them. See \`Fixtures/skins/CREDITS.md\`.
+SECTION
+    if [ "$MUSEUM_COUNT" -gt 0 ]; then
+        cat <<SECTION
+
+### winamp-skin-museum
+
+- **$MUSEUM_COUNT classic skins** from the Winamp Skin Museum (https://skins.webamp.org, by Jordan Eldredge), listed
+  by MD5, museum file name and menu name in \`Fixtures/skins/museum.json\` and bundled unmodified.
+- Licence: none stated. Each skin is the work of its author and is credited by its museum file name in the Skins
+  menu and the About window; neither the museum nor the Internet Archive records a licence or rights statement.
+  They are bundled by the owner's decision (DESIGN §8.3) and are not covered by sudamp's GPL. Some show third-party
+  trademarks, characters or photographs, which belong to their owners.
+SECTION
+    fi
+    cat <<SECTION
 
 ## Code adapted from MIT-licensed projects
 
@@ -772,6 +795,7 @@ fi
 r=$(row mpv-headers)
 [ -n "$r" ] && [ "$(field "$r" 3)" = "$MPV_HEADERS_VERSION" ] || fail "vendored mpv headers ($MPV_HEADERS_VERSION) have no entry"
 for skin in $SKINS; do [ -n "$(row "$skin")" ] || fail "bundled skin \`$skin\` has no entry"; done
+[ "$MUSEUM_COUNT" = 0 ] || [ -n "$(row Museum)" ] || fail "the $MUSEUM_COUNT bundled museum skins (\`Museum\`) have no entry"
 [ "$SPARKLE" = 0 ] || [ -n "$(row Sparkle)" ] || fail "Sparkle is a dependency but has no entry"
 while IFS= read -r holder; do
     [ -z "$holder" ] || LC_ALL=C grep -qF "### MIT © $holder" "$NOTICES" || fail "PROVENANCE.md's MIT © $holder has no notice"
@@ -792,4 +816,4 @@ if [ "$FAILURES" -gt 0 ]; then
     echo "check-notices: $FAILURES problem(s) in $NOTICES" >&2
     exit 1
 fi
-echo "check-notices: OK ($TARGET_COUNT MPVKit binary targets, $(echo $SYSTEM_LINKED | wc -w | tr -d ' ') system libraries, qjs, mpv headers, $(echo $SKINS | wc -w | tr -d ' ') skins, $(echo "$MIT_HOLDERS" | grep -c .) MIT notices${LINK_MAP:+; linker map cross-checked})"
+echo "check-notices: OK ($TARGET_COUNT MPVKit binary targets, $(echo $SYSTEM_LINKED | wc -w | tr -d ' ') system libraries, qjs, mpv headers, $(echo $SKINS | wc -w | tr -d ' ') skins, $MUSEUM_COUNT museum skins, $(echo "$MIT_HOLDERS" | grep -c .) MIT notices${LINK_MAP:+; linker map cross-checked})"

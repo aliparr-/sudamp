@@ -284,10 +284,11 @@ nonisolated public struct PlaybackDebugState: Sendable, Equatable, Codable {
 
 /// `state.json` `.skin`.
 nonisolated public struct AppSkinDebugInfo: Sendable, Equatable, Codable {
-    /// `sudamp-dark`, `andamp-dark`, `andamp-light`, or `user:<file name>` for skins in `<profile>/Skins`.
+    /// `sudamp-dark`, `andamp-dark`, `andamp-light`, `andamp-spot`, `museum:<md5>` for the bundled Winamp Skin Museum
+    /// skins, or `user:<file name>` for skins in `<profile>/Skins`.
     public var id: String
     public var name: String
-    /// `builtIn`, `bundled` or `user`.
+    /// `builtIn`, `bundled`, `museum` or `user`.
     public var origin: String
     public var path: String?
     /// Sheets drawn from sudamp Dark because the skin lacks them.
