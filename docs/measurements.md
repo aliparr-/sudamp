@@ -168,10 +168,10 @@ End-to-end through `PlaybackController` (`sudamp-dev play | ttfa`, debug build, 
 
 Museum golden metric (`scripts/golden-fetch.sh` + `scripts/golden-compare.sh`; details and triage in `docs/spikes/golden.md`). 100 complete, non-NSFW skins from 16 pages spread over the museum's 104,352; Main and EQ rendered by SkinKit in Webamp's screenshot state and compared outside the masked visualiser, marquee (155 px) and clock; a skin passes when both windows differ in ≤ 0.5% of compared pixels.
 
-- Final: **Main ≤ 0.5%: 100/100** (93 pixel-identical); **Main and EQ ≤ 0.5%: 21/100**; with the deliberate preamp-line difference masked, **100/100** (13 pixel-identical in both windows); median differing share Main 0.00%, EQ 0.65%; largest remaining difference outside the preamp line 20 px (Main), 15 px (EQ); 0 rejected, 0 incomplete, 0 crashes
+- Final (2026-10-23, after the preamp line was made to move down as the preamp rises, as in Winamp): **Main and EQ ≤ 0.5%: 100/100** (93 pixel-identical in both windows); median differing share Main 0.00%, EQ 0.00%; largest remaining difference 20 px (Main), 15 px (EQ); 0 rejected, 0 incomplete, 0 crashes. Before that change: Main and EQ 21/100, 100/100 with the preamp line masked (13 pixel-identical)
 - Progression (both / Main / EQ): baseline 7 / 37 / 10 → screenshot toggles corrected 21 / 95 / 21 → 16-bit BMP decoder and 155-px marquee mask 21 / 100 / 21 → short-eqmain fix 21 / 100 / 21 (pixel-identical 0 → 3 → 5 → 13)
 - SkinKit fixes: 16-bit BMP channels scaled as browsers do (5 skins, 30 sheets; up to 92% of pixels before); transparent EQ-curve pixels from a 164-px `eqmain.bmp` (8 skins, 139 px each); narrow text.bmp colours (latent). Existing render and app goldens unchanged
-- Remaining systematic difference: the EQ preamp line (87 skins, 2 rows of the graph), deliberate since M4; region.txt edge anti-aliasing in 7 skins (9–20 px)
+- Remaining systematic difference: region.txt edge anti-aliasing in 7 skins (9–20 px). The EQ preamp line (87 skins, 2 rows of the graph) was fixed on 2026-10-23
 - Debug build: 100 skins scored in 33–37 s; SkinLoader p50 4.3 ms, p95 6.5 ms, max 891 ms (first load, generating sudamp Dark)
 - Network: 217 museum requests (17 GraphQL, 200 downloads), one at a time, 1 s apart, 0 failures; 28 MB cached in `~/Library/Caches/sudamp-dev/golden`
 

@@ -7,8 +7,9 @@
 // floor(51 * (1 - value/100)), i.e. 51 px of travel (Bitamp and wamp use 52). The value/decibel mapping and the
 // 0 dB snap come from Bitamp's VerticalSliderGeometry (UI/EqualizerView.swift @ 91952819). The curve is Webamp's
 // EqGraph.tsx drawEqLine with its natural cubic spline (spline.js, adapted there from morganherlocker/
-// cubic-spline), drawn in the 19 EQ_GRAPH_LINE_COLORS, one colour per row. Deliberate change: the preamp line
-// moves up as the preamp rises, like the bands (Webamp maps preamp 100 to the bottom row). Colours from outside a
+// cubic-spline), drawn in the 19 EQ_GRAPH_LINE_COLORS, one colour per row. Unlike the bands, the preamp line moves
+// *down* as the preamp rises: Winamp (its released source, draw_eq.cpp), XMMS 1.0 and Webamp all draw it so,
+// and Webamp's museum screenshots match only this way (docs/spikes/golden.md). Colours from outside a
 // short eqmain.bmp are transparent and draw nothing, as Webamp's pattern from an empty sprite does; writing them
 // punched see-through holes into the window (found by the museum golden metric, docs/spikes/golden.md).
 //
@@ -149,6 +150,12 @@ public enum EQGraph {
         Int(((100 - clamped(value, 0, 100)) / 100 * Double(height - 1)).rounded(.toNearestOrAwayFromZero))
     }
 
+    /// The preamp line's row (0 = top): Webamp's percentToRange(v/100, 0, 18), so preamp 100 (+12 dB) is the bottom
+    /// row. Winamp truncates instead of rounding, so its line is one row off this at 13 of its 64 slider positions.
+    public static func preampRow(for value: Double) -> Int {
+        Int((clamped(value, 0, 100) / 100 * Double(height - 1)).rounded(.toNearestOrAwayFromZero))
+    }
+
     /// The curve's row for every column (109 columns for 10 bands 12 px apart), clamped to the graph.
     public static func curveRows(bands: [Double]) -> [Int] {
         let values = bands.count == 10 ? bands : [Double](repeating: 50, count: 10)
@@ -161,7 +168,7 @@ public enum EQGraph {
     public static func draw(bands: [Double], preamp: Double, colors: [RGBA], preampLine: ResolvedSprite?,
                             into bitmap: inout Bitmap, origin: IntPoint) {
         if let line = preampLine {
-            bitmap.draw(line.sheet, from: line.rect, at: IntPoint(origin.x, origin.y + row(for: preamp)))
+            bitmap.draw(line.sheet, from: line.rect, at: IntPoint(origin.x, origin.y + preampRow(for: preamp)))
         }
         guard colors.count >= height else { return }
         let rows = curveRows(bands: bands)

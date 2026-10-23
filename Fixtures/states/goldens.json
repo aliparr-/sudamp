@@ -2,7 +2,7 @@
   "andamp-dark" : {
     "02-main-playing" : "a8fb596054e284e69800bdbb9854097061b4a3a5ba160580e84d987de82a67af",
     "08-shade-playing" : "4bf17bf2224da0750a9afd43007934517415ccae6a25a0521a6785f04d18e3a9",
-    "09-eq-curve" : "585b871da9304ddce7726a3f160a25b8e3b3eac5c6184e4b29fda1ece0b976b5",
+    "09-eq-curve" : "f19894b521d9221d209c732b893852720755b6a3422c3a75f4c0a28e9ca32287",
     "11-playlist-rows" : "4a39230162a40670f41b42b8d2d3a5909aeaece1d078222efcc3b0a3d111d2f6"
   },
   "sudamp-dark" : {
@@ -14,8 +14,8 @@
     "06-main-cjk-system" : "245ebd2165ce059d1f56430d7f3b15b72e22d9c5e166634752c79f6ee1124c16",
     "07-main-cjk-skin-font" : "818ca3fe3c1b79f29ee7782f756992cd2a0a868c0ca18e209df591f60688a3ba",
     "08-shade-playing" : "ae0040e2bf1919bf179a02827f7f823565e75b140ccca26dc05b83e5de30f50c",
-    "09-eq-curve" : "d6493ec0e912cd8b7f40a6a1907aea28c04c1c11a7bfd0976c06f24f6dbbd460",
-    "10-eq-off-pressed" : "0595a5ef098bbfb4aaf7a236b74c3655f6a11356189287a1c1d422e8eba18d90",
+    "09-eq-curve" : "eca62755decee1973465383d9dd33c663e993e14c5939eebcaca2d98a391c7ac",
+    "10-eq-off-pressed" : "84b008e3ca019ff624e19df1a9267e54e8abda08b3f5cdc23d089a14562ecd0c",
     "11-playlist-rows" : "f8bd3aaa16cd7513fb880e1e084c86a53609cf19c4b710e1f2f9e02a1d1403d3",
     "12-playlist-menu-unfocused" : "1e123777eb6fafbd16aed5dfebb06989070e753135df4640f99854635e4cd327",
     "13-eq-shade" : "98b20067b72fc8970979e331962d9296cbd7f234456d86c0f79a58d4d062703d"

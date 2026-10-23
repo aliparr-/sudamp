@@ -162,6 +162,15 @@ import Testing
         let rows = EQGraph.curveRows(bands: [100, 0, 100, 0, 100, 0, 100, 0, 100, 0])
         #expect(rows.allSatisfy { (0...18).contains($0) })
     }
+
+    @Test func preampLineMovesDownAsThePreampRises() {
+        // As in Winamp, XMMS and Webamp: preamp +12 dB (100) draws the line on the bottom row, -12 dB (0) on the top.
+        #expect(EQGraph.preampRow(for: 100) == 18)
+        #expect(EQGraph.preampRow(for: 50) == 9)
+        #expect(EQGraph.preampRow(for: 0) == 0)
+        #expect(EQGraph.preampRow(for: 56) == 10) // the museum screenshot state: Webamp's round(0.56 * 18)
+        #expect(EQGraph.preampRow(for: .nan) == 0 && EQGraph.preampRow(for: 1_000) == 18)
+    }
 }
 
 @Suite struct VisualizerTests {

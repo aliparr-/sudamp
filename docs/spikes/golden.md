@@ -2,13 +2,12 @@
 
 *2026-10-22 · agent: polish · scratch path `.build-polish` · macOS 27.0.1, M5 Pro, CLT only, Swift 6.4*
 
-**Result.** Over 100 complete Skin Museum skins, SkinKit's Main window is within 0.5% differing pixels of Webamp's
-museum screenshot for **100 of 100** skins (93 pixel-identical outside the masks). With the EQ window included the
-share is **21 of 100**, and every one of the 79 misses is the same single, deliberate difference: SkinKit draws the
-EQ graph's preamp line *up* as the preamp rises, Webamp draws it *down*. With that line masked, Main and EQ are both
-within 0.5% for **100 of 100** skins (13 pixel-identical in both windows). Getting there found and fixed two SkinKit
-bugs (16-bit BMP colours; holes punched by short `eqmain.bmp` sheets), one latent one of the same kind, and two
-errors in the harness's idea of the screenshot state. All existing render and app goldens are byte-identical.
+**Result.** Over 100 complete Skin Museum skins, SkinKit's Main and EQ windows are both within 0.5% differing
+pixels of Webamp's museum screenshot for **100 of 100** skins (93 pixel-identical in both windows outside the masks).
+Getting there found and fixed two SkinKit bugs (16-bit BMP colours; holes punched by short `eqmain.bmp` sheets), one
+latent one of the same kind, and two errors in the harness's idea of the screenshot state. The last gap, 79 skins,
+was the EQ graph's preamp line: SkinKit drew it *up* as the preamp rose, Webamp draws it *down*. Real Winamp draws it
+down too (row 5 below), so on 2026-10-23 the owner chose to match it, which took the share from 21 to 100 of 100.
 
 ## How it works
 
@@ -48,11 +47,11 @@ matches current Webamp and is not changed. The masks cover 2,939 of Main's 31,90
 | Baseline: state as in `screenshotInitialState.ts`, 154-px marquee mask | 7 | 37 | 10 | n/a | 0 |
 | Harness: shuffle, repeat, EQ auto as the screenshots show them | 21 | 95 | 21 | 95 | 3 |
 | + 155-px marquee mask (harness) and SkinKit's 16-bit BMP decoder | 21 | **100** | 21 | **100** | 5 |
-| + SkinKit: no transparent EQ-curve pixels from a short `eqmain.bmp` | **21** | **100** | 21 | **100** | **13** |
+| + SkinKit: no transparent EQ-curve pixels from a short `eqmain.bmp` | 21 | 100 | 21 | 100 | 13 |
+| + SkinKit: preamp line moves down as the preamp rises, as in Winamp (2026-10-23) | **100** | **100** | **100** | n/a (mask removed) | **93** |
 
-Final run: median differing share Main 0.00%, EQ 0.65% (the preamp line); allowing 2/255 per channel, 28 of 100
-pass both (the extra seven are region-edge colour rounding). Largest remaining difference outside the preamp line:
-20 pixels (Main), 15 (EQ). Run time 33–37 s for 100 skins (debug build). SkinLoader timing in that debug build:
+Final run: median differing share Main 0.00%, EQ 0.00%; allowing 2/255 per channel, 100 of 100 pass both and 93 are
+identical. Largest remaining difference: 20 pixels (Main), 15 (EQ), all region.txt edges (row 6). Run time 33–37 s for 100 skins (debug build). SkinLoader timing in that debug build:
 p50 4.3 ms, p95 6.5 ms per skin, max 891 ms (the first load, which also generates sudamp Dark).
 
 Corpus: 100 skins, 104,352 in the museum; 10 carry region.txt (9 shape Main, 8 the EQ); 5 ship 16-bit sheets (30
@@ -68,11 +67,11 @@ sheets); sheet formats 24-bit 1,256, 32-bit 52, 8-bit 51 (+31 RLE8), 16-bit 30, 
 | 3 | 139 transparent pixels along the EQ curve | 8 | `eqmain.bmp` is 164 px tall, so the 1x19 graph-colour strip at y=294 lies outside the sheet; SkinKit painted the curve with those out-of-sheet (clear) colours and punched see-through holes. Webamp's pattern from an empty sprite draws nothing | **SkinKit bug** | `EQGraph.draw` skips transparent colours (test: `GoldenTriageTests`) |
 | 3b | (latent, same class) text.bmp narrower than 153 px gives a transparent text background, so the system-font marquee field would be see-through | 0 in corpus | `Skin.textColorsOf` sampled outside the sheet | **SkinKit bug** | Falls back to the fallback skin's text colours (test) |
 | 4 | Column x=265 of the marquee rows | 53 | Webamp's marquee was 155 px wide until 2021 | screenshot era | Mask widened by 1 px; SkinKit unchanged |
-| 5 | Preamp line two rows off (rows 8 vs 10 of the graph at preamp 56) | 87 (of the other 13, 9 have no preamp-line row: `eqmain.bmp` 164 or 314 px tall; 4 draw it in the same colours as the graph rows it lands on) | SkinKit moves the line up as the preamp rises, like the bands (M4 decision, `EQGeometry.swift` header); Webamp maps preamp 100 to the bottom row | **deliberate** | Kept. Reported raw and with the line's rows masked. Changing it would rewrite goldens `sudamp-dark/09-eq-curve`, `10-eq-off-pressed` and app `10-eq-off-custom-2x` (preamp 62, 0, 3); decide against real Winamp 2.9x before M9 |
+| 5 | Preamp line two rows off (rows 8 vs 10 of the graph at preamp 56) | 87 (of the other 13, 9 have no preamp-line row: `eqmain.bmp` 164 or 314 px tall; 4 draw it in the same colours as the graph rows it lands on) | SkinKit moved the line up as the preamp rose, like the bands (an M4 choice). Winamp moves it down: its released source (`Src/Winamp/draw_eq.cpp`, `draw_eq_graphthingy`) draws it at row 18 − ⌊pos·19/64⌋ with pos 0 = +12 dB, while the bands use ⌊pos·19/64⌋. XMMS 1.0.1 (1999, `eq_graph.c`), Audacious (`eq-graph.cc`) and Webamp (`EqGraph.tsx`) do the same | **SkinKit bug** (fixed 2026-10-23) | `EQGraph.preampRow`: Webamp's round(v/100·18), so preamp 100 is the bottom row. Winamp truncates, which differs by one row at 13 of its 64 positions; Webamp's rounding is kept because it matches the screenshots and SkinKit's band curve. Goldens rewritten: `sudamp-dark/09-eq-curve`, `10-eq-off-pressed`, `andamp-dark/09-eq-curve`, app `10-eq-off-custom-2x`; the harness's preamp-line mask is gone |
 | 6 | 9–20 pixels at rounded window corners, 2 of them opacity | 7 | region.txt: SkinKit fills polygons GDI-style without anti-aliasing (DESIGN §8.2, spike S1); Webamp's SVG clip path anti-aliases diagonal edges | expected | None (Webamp is not a reference for which edge pixels are covered) |
 
 No other systematic difference remains: no control differs in more than 7 skins once 1–5 are accounted for, and the
-hot-spot list (pixels differing in at least 25% of skins) contains only the preamp-line rows.
+hot-spot list (pixels differing in at least 25% of skins) is empty.
 
 ## Goldens and tests
 
@@ -86,8 +85,6 @@ hot-spot list (pixels differing in at least 25% of skins) contains only the prea
 
 ## Open
 
-- **Preamp-line direction** (row 5): the only thing between 21% and 100%. Evidence from real Winamp is needed, not
-  Webamp; the owner decides.
 - The corpus is complete skins only, by design; incomplete skins exercise the fallback path, which no screenshot can
   judge. Magenta colour-keying (MacAmp issue #84) and `sudamp-dev skin-bench` (release load times) remain M7 items
   outside this metric; the debug-build load figures above are indicative only.

@@ -68,15 +68,6 @@ enum MuseumScreenshot {
         return s
     }
 
-    /// Rows of the EQ graph where SkinKit's and Webamp's preamp lines sit. SkinKit deliberately moves the line up
-    /// as the preamp rises (EQGeometry); Webamp draws it at preamp/100*18 from the top, with canvas smoothing over
-    /// two rows when that is fractional. Masked only for the secondary "known differences excluded" figure.
-    static func preampLineRows() -> [IntRect] {
-        let webamp = preamp / 100 * Double(EQGraph.height - 1)
-        let rows = Set([EQGraph.row(for: preamp), Int(webamp.rounded(.down)), Int(webamp.rounded(.up))])
-        return rows.sorted().map { IntRect(EQLayout.graph.x, EQLayout.graph.y + $0, EQLayout.graph.width, 1) }
-    }
-
     /// Areas left out of the comparison, in window pixels.
     static func masks(_ window: WindowKind) -> [IntRect] {
         switch window {
@@ -234,13 +225,6 @@ enum ScreenshotDecoder {
         #expect(maskedPixels < 275 * 116 / 10)
     }
 
-    @Test func preampLineRowsCoverBothConventions() {
-        // Preamp 56: SkinKit row round(44/100*18) = 8; Webamp y = 10.08, smoothed over rows 10 and 11.
-        let rows = MuseumScreenshot.preampLineRows().map { $0.y - EQLayout.graph.y }
-        #expect(rows == [8, 10, 11])
-        for rect in MuseumScreenshot.preampLineRows() { #expect(EQLayout.graph.contains(rect)) }
-    }
-
     @Test func windowsStackInTheScreenshot() {
         #expect(MuseumScreenshot.frame(.main) == IntRect(0, 0, 275, 116))
         #expect(MuseumScreenshot.frame(.eq) == IntRect(0, 116, 275, 116))
@@ -352,8 +336,6 @@ struct GoldenSkinReport: Codable {
     /// The same comparison allowing 2/255 per channel (colour management noise check).
     var mainTolerant: GoldenDiff?
     var eqTolerant: GoldenDiff?
-    /// EQ with the deliberate preamp-line difference masked (`MuseumScreenshot.preampLineRows`).
-    var eqKnownExcluded: GoldenDiff?
     var mainControls: [String: Int]?
     var eqControls: [String: Int]?
     var fallbackSheets: [String]?
@@ -505,7 +487,6 @@ enum GoldenRun {
                     report.eq = exact.diff
                     report.eqTolerant = tolerant.diff
                     report.eqControls = GoldenCompare.attribute(exact.map, window: window)
-                    report.eqKnownExcluded = GoldenCompare.compare(result.bitmap, crop, masks: masks + MuseumScreenshot.preampLineRows()).diff
                 }
             }
             if !fallback.isEmpty {
@@ -530,8 +511,6 @@ enum GoldenRun {
         let eqPass = scored.filter { ($0.eq?.share ?? 1) <= GoldenRun.threshold }
         let exactBoth = scored.filter { $0.main?.differing == 0 && $0.eq?.differing == 0 }
         let tolerantPass = scored.filter { ($0.mainTolerant?.share ?? 1) <= GoldenRun.threshold && ($0.eqTolerant?.share ?? 1) <= GoldenRun.threshold }
-        let knownPass = scored.filter { ($0.main?.share ?? 1) <= GoldenRun.threshold && ($0.eqKnownExcluded?.share ?? 1) <= GoldenRun.threshold }
-        let knownEQPass = scored.filter { ($0.eqKnownExcluded?.share ?? 1) <= GoldenRun.threshold }
         func pct(_ n: Int, _ d: Int) -> String { d == 0 ? "n/a" : String(format: "%.1f%%", Double(n) * 100 / Double(d)) }
         func percent(_ share: Double?) -> String { String(format: "%.2f%%", (share ?? 0) * 100) }
         func median(_ values: [Double]) -> Double {
@@ -568,7 +547,6 @@ enum GoldenRun {
         | Main within 0.5% | \(mainPass.count) (\(pct(mainPass.count, scored.count))) |
         | EQ within 0.5% | \(eqPass.count) (\(pct(eqPass.count, scored.count))) |
         | Both within 0.5% allowing 2/255 per channel | \(tolerantPass.count) (\(pct(tolerantPass.count, scored.count))) |
-        | Both within 0.5% with the deliberate preamp-line difference masked | \(knownPass.count) (\(pct(knownPass.count, scored.count))); EQ alone \(knownEQPass.count) |
         | Both pixel-identical outside the masks | \(exactBoth.count) |
         | Median differing share, Main / EQ | \(String(format: "%.2f%% / %.2f%%", median(scored.compactMap { $0.main?.share }) * 100, median(scored.compactMap { $0.eq?.share }) * 100)) |
         | Skin load p50 / p95 / max (debug build, SkinLoader timing) | \(loadStats) |
