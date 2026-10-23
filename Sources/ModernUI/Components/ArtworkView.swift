@@ -253,10 +253,10 @@ final class ArtworkView: NSView {
             let p = blob.position
             let a = r.width * 0.16
             let phase = Double(i) * 2.1
-            drift.values = (0...6).map { k -> NSValue in
+            drift.setKeyframes(objects: (0...6).map { k -> NSValue in
                 let t = Double(k) / 6 * 2 * .pi + phase
                 return NSValue(point: CGPoint(x: p.x + a * CGFloat(cos(t)), y: p.y + a * 0.8 * CGFloat(sin(t * 1.3))))
-            }
+            })
             drift.calculationMode = .cubic
             drift.duration = 15 + Double(i) * 4.5
             drift.repeatCount = .infinity

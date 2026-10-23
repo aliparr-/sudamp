@@ -137,6 +137,33 @@ extension NSView {
     }
 }
 
+extension CAKeyframeAnimation {
+    /// Sets the keyframe values as a plain Objective-C array, built object by object and set by key. Anything assigned
+    /// through `values` (a Swift array of numbers, even one of NSNumbers) reaches Core Animation as a lazily bridged
+    /// `__SwiftDeferredNSArray` that boxes its elements on first read, and Core Animation reading one during a commit
+    /// crashed on macOS 26.6 (EXC_BAD_ACCESS in __SwiftDeferredNSArray, from -[CAKeyframeAnimation
+    /// CA_prepareRenderValue]); set by key, it gets an immutable __NSArrayI.
+    func setKeyframes(_ numbers: [Double]) {
+        let array = NSMutableArray(capacity: numbers.count)
+        for n in numbers { array.add(NSNumber(value: n)) }
+        setValue(array.copy(), forKey: "values")
+    }
+
+    /// The same for values that are objects already (NSValue points, NSArray gradient locations).
+    func setKeyframes(objects: [AnyObject]) {
+        let array = NSMutableArray(capacity: objects.count)
+        for object in objects { array.add(object) }
+        setValue(array.copy(), forKey: "values")
+    }
+}
+
+/// An immutable Objective-C array of numbers (a keyframe that is itself a list, like gradient locations).
+func numberArray(_ numbers: [Double]) -> NSArray {
+    let array = NSMutableArray(capacity: numbers.count)
+    for n in numbers { array.add(NSNumber(value: n)) }
+    return array.copy() as! NSArray
+}
+
 /// A label that is just text: no bezel, no selection, one line, truncating.
 func makeLabel(_ text: String = "", size: CGFloat, weight: NSFont.Weight = .regular, color: NSColor = .labelColor,
                monospacedDigits: Bool = false) -> NSTextField {

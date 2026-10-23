@@ -338,6 +338,7 @@ final class PlayingBars: NSView {
     var color = RGB(hex: 0x2DD4BF) { didSet { for bar in bars { bar.backgroundColor = color.cgColor } } }
     var isAnimating = false { didSet { if isAnimating != oldValue { update() } } }
     private var bars: [StillLayer] = []
+    private var laidOutFor: CGRect = .null
 
     override init(frame frameRect: NSRect) {
         super.init(frame: frameRect)
@@ -364,8 +365,10 @@ final class PlayingBars: NSView {
             bar.bounds = CGRect(x: 0, y: 0, width: w, height: bounds.height)
             bar.position = CGPoint(x: w / 2 + CGFloat(i) * (w + gap), y: bounds.height)
             bar.cornerRadius = w / 2
-            bar.transform = CATransform3DMakeScale(1, isAnimating ? 1 : 0.35, 1)
         }
+        // Table rows lay out often: restart the bounce only when the bars actually moved.
+        guard bounds != laidOutFor else { return }
+        laidOutFor = bounds
         update()
     }
 
@@ -377,7 +380,7 @@ final class PlayingBars: NSView {
             bar.transform = CATransform3DMakeScale(1, isAnimating ? 1 : [0.45, 0.7, 0.35][i], 1)
             guard isAnimating, !Motion.reduced else { continue }
             let bounce = CAKeyframeAnimation(keyPath: "transform.scale.y")
-            bounce.values = [[0.3, 1, 0.5, 0.85, 0.3], [0.8, 0.35, 1, 0.45, 0.8], [0.5, 0.9, 0.3, 1, 0.5]][i]
+            bounce.setKeyframes([[0.3, 1, 0.5, 0.85, 0.3], [0.8, 0.35, 1, 0.45, 0.8], [0.5, 0.9, 0.3, 1, 0.5]][i])
             bounce.duration = [0.9, 1.1, 0.8][i]
             bounce.repeatCount = .infinity
             bounce.calculationMode = .cubic

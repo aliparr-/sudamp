@@ -183,7 +183,7 @@ final class MarqueeView: NSView {
         layer?.mask = fade
         guard isScrolling else { return }
         let scroll = CAKeyframeAnimation(keyPath: "position.x")
-        scroll.values = [0, 0, -loop.distance]
+        scroll.setKeyframes([0, 0, -Double(loop.distance)])
         scroll.keyTimes = [0, NSNumber(value: loop.holdFraction), 1]
         scroll.timingFunctions = [CAMediaTimingFunction(name: .linear), CAMediaTimingFunction(name: .linear)]
         scroll.duration = loop.duration
@@ -194,7 +194,9 @@ final class MarqueeView: NSView {
         // The left edge fades in as the title starts to move and out as its repeat comes to rest.
         let ramp = min(0.35 / loop.duration, (1 - loop.holdFraction) / 4)
         let edges = CAKeyframeAnimation(keyPath: "locations")
-        edges.values = [resting, resting, moving, moving, resting]
+        let restingArray = numberArray(resting.map(\.doubleValue))
+        let movingArray = numberArray(moving.map(\.doubleValue))
+        edges.setKeyframes(objects: [restingArray, restingArray, movingArray, movingArray, restingArray])
         edges.keyTimes = [0, NSNumber(value: loop.holdFraction), NSNumber(value: loop.holdFraction + ramp),
                           NSNumber(value: 1 - ramp), 1]
         edges.duration = loop.duration
