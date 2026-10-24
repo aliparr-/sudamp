@@ -1,4 +1,4 @@
-# Dormant until the repository has a GitHub remote (DESIGN §9 "CI and the macOS 15 floor").
+# DESIGN §9 "CI and the macOS 15 floor".
 name: ci
 on:
   push:
@@ -8,19 +8,25 @@ jobs:
     runs-on: macos-15
     steps:
       - uses: actions/checkout@v4
-      # The runner defaults to Xcode 16.4 (Swift 6.1); Package.swift needs Swift 6.2. Xcode 26.3 = Swift 6.2.4, the
-      # oldest supported compiler, so CI catches code that only newer compilers accept.
+      # The Swift in .swift-version, as on the dev machines (DESIGN §9): its swift.org toolchain, which the Makefile
+      # finds in /Library/Developer/Toolchains. Xcode 26.3 supplies the macOS 26 SDK (the runner defaults to Xcode 16.4).
       - name: Select Xcode 26.3
         run: sudo xcode-select -s /Applications/Xcode_26.3.app
+      - name: Install Swift
+        run: |
+          v=$(tr -d '[:space:]' < .swift-version)
+          curl -fsSL --retry 3 -o "$RUNNER_TEMP/swift.pkg" \
+            "https://download.swift.org/swift-$v-release/xcode/swift-$v-RELEASE/swift-$v-RELEASE-osx.pkg"
+          sudo installer -pkg "$RUNNER_TEMP/swift.pkg" -target /
       - name: Toolchain
-        run: swift --version && xcrun --show-sdk-version
+        run: make toolchain
       - uses: actions/cache@v4
         with:
           path: |
             .build
             ~/Library/Caches/org.swift.swiftpm
             ~/Library/Caches/sudamp-dev
-          key: spm-${{ runner.os }}-xcode26.3-${{ hashFiles('Package.resolved') }}
+          key: spm-${{ runner.os }}-swift-${{ hashFiles('.swift-version') }}-${{ hashFiles('Package.resolved') }}
       - name: Build
         run: make build
       # One test at a time: in parallel, the 3-core runner starved tests that wait on timers (a 20 s JSON decode).

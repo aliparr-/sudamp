@@ -1,4 +1,4 @@
-// swift-tools-version: 6.2
+// swift-tools-version: 6.3
 // sudamp — The Sudden Amp. GPL-3.0-or-later (SudampAO: LGPL-2.1-or-later). See docs/DESIGN.md §4 and §9.
 import PackageDescription
 

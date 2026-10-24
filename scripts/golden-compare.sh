@@ -28,8 +28,8 @@ if [ ! -s "$DIR/manifest.json" ]; then
     echo "golden-compare: no corpus in $DIR; run scripts/golden-fetch.sh first" >&2
     exit 2
 fi
-# Same plugin path rule as `make test` (works with Command Line Tools and Xcode toolchains).
-PLUGINS="$(dirname "$(xcrun -f swift)")/../lib/swift/host/plugins/testing"
+# make passes the plugin path of the Swift it builds with; run alone, the same rule as `make test` for the system Swift.
+PLUGINS="${PLUGINS:-$(dirname "$(xcrun -f swift)")/../lib/swift/host/plugins/testing}"
 cd "$ROOT"
 # Build only SkinKit's tests (the harness needs nothing else), then run the one suite from that build.
 {

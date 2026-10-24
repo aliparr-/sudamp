@@ -199,9 +199,14 @@ nonisolated final class SceneRenderer {
                 sectors[sector] += light ? max(0, alpha - brightness) : brightness
             }
         }
-        if let best = (0..<24).max(by: { sectors[$0] + sectors[($0 + 1) % 24] < sectors[$1] + sectors[($1 + 1) % 24] }),
-           sectors[best] + sectors[(best + 1) % 24] > 0 {
-            busiest = Double(best + 1) / 24 * 2 * .pi - .pi
+        var best = 0, most = 0
+        for sector in 0..<24 {
+            let pair: Int = sectors[sector] + sectors[(sector + 1) % 24]
+            if pair > most { best = sector; most = pair }
+        }
+        if most > 0 {
+            let fraction = Double(best + 1) / 24
+            busiest = fraction * 2 * Double.pi - Double.pi
         }
         Self.cosines.withUnsafeBufferPointer { cosines in
             Self.sines.withUnsafeBufferPointer { sines in

@@ -8,7 +8,7 @@
 
 ## Try it
 
-Needs macOS 15+ on Apple silicon and Swift 6.2 or later: Xcode 26+ or the Command Line Tools (`xcode-select --install`). No Homebrew packages are needed.
+Needs macOS 15+ on Apple silicon, the Command Line Tools (`xcode-select --install`) or Xcode 26+, and Swift 6.3.3: the version in `.swift-version`, from [swift.org](https://www.swift.org/install/macos/) or swiftly. `make` finds it, and also accepts Xcode's or the Command Line Tools' Swift 6.3; `make toolchain` shows which Swift a build uses. No Homebrew packages are needed.
 
 ```sh
 make app CONFIG=release      # builds build/sudamp.app (first build downloads MPVKit, about 270 MB, and the museum skins, 19 MB)
