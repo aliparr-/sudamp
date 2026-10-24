@@ -90,7 +90,8 @@ final class ModernPlayerUI: PlayerUIBase {
         let settings = context.settings
         let prefs = ModernDisplay.Prefs(timeRemaining: settings.timeRemaining, visualizer: settings.modernVisualizer,
                                         eqPreset: settings.eqPreset, muted: context.muted,
-                                        visualizerInterval: settings.visualizerInterval, artworkColors: settings.artworkColors)
+                                        visualizerInterval: settings.visualizerInterval, artworkColors: settings.artworkColors,
+                                        visualizerEffect: settings.visualizerEffect)
         let state = ModernDisplay.state(snapshot, playlist: playlist, equalizer: controller.equalizer, prefs: prefs,
                                         rememberedGenre: remembered)
         guard state != lastState else { return }
@@ -138,6 +139,9 @@ final class ModernPlayerUI: PlayerUIBase {
             publishDebugState()
         case .setArtworkColors(let colors):
             context.updateSettings { $0.artworkColors = colors.rawValue }
+            publishDebugState()
+        case .setVisualizerEffect(let effect):
+            context.updateSettings { $0.visualizerEffect = effect.rawValue }
             publishDebugState()
         case .toggleShuffle: context.toggleShuffle()
         case .toggleRepeat: context.toggleRepeat()
@@ -243,18 +247,22 @@ final class ModernPlayerUI: PlayerUIBase {
         setTint(tint)
     }
 
-    /// Every scene, Rotate (with how often) and Off, and what colours the artwork.
+    /// Every scene, Rotate (with how often) and Off, what colours the artwork, and the effect.
     func modernVisualizerMenu() -> NSMenu {
-        Self.visualizerMenu(current: modernVisualizer, interval: context.settings.visualizerInterval,
-                            colors: ArtworkColors(rawValue: context.settings.artworkColors) ?? .default, target: self,
-                            choose: #selector(modernVisualizerChosen(_:)), every: #selector(visualizerIntervalChosen(_:)),
-                            background: #selector(artworkColorsChosen(_:)))
+        let settings = context.settings
+        return Self.visualizerMenu(current: modernVisualizer, interval: settings.visualizerInterval,
+                                   colors: ArtworkColors(rawValue: settings.artworkColors) ?? .default,
+                                   effect: ModernPlayerState.VisualizerEffect(rawValue: settings.visualizerEffect) ?? .default,
+                                   target: self, choose: #selector(modernVisualizerChosen(_:)),
+                                   every: #selector(visualizerIntervalChosen(_:)), background: #selector(artworkColorsChosen(_:)),
+                                   finish: #selector(visualizerEffectChosen(_:)))
     }
 
-    /// The View ▸ Visualizer menu, ticked: scenes, Rotate, Rotate Every ▸, Off, Background ▸. Items carry the raw
-    /// value (or the seconds) as their represented object.
+    /// The View ▸ Visualizer menu, ticked: the scenes under their sections' headers, Rotate, Rotate Every ▸, Off,
+    /// Background ▸, Effect ▸. Items carry the raw value (or the seconds) as their represented object.
     static func visualizerMenu(current: ModernPlayerState.Visualizer, interval: Double, colors: ArtworkColors,
-                               target: AnyObject, choose: Selector, every: Selector, background: Selector) -> NSMenu {
+                               effect: ModernPlayerState.VisualizerEffect, target: AnyObject, choose: Selector,
+                               every: Selector, background: Selector, finish: Selector) -> NSMenu {
         let menu = NSMenu(title: "Visualizer")
         menu.autoenablesItems = false
         func item(_ menu: NSMenu, _ title: String, _ action: Selector, _ object: Any, on: Bool) -> NSMenuItem {
@@ -264,8 +272,11 @@ final class ModernPlayerUI: PlayerUIBase {
             item.state = on ? .on : .off
             return item
         }
-        for mode in ModernPlayerState.Visualizer.scenes {
-            _ = item(menu, mode.title, choose, mode.rawValue, on: mode == current)
+        for section in ModernPlayerState.Visualizer.Section.allCases {
+            menu.addItem(.sectionHeader(title: section.title))
+            for mode in section.scenes {
+                _ = item(menu, mode.title, choose, mode.rawValue, on: mode == current)
+            }
         }
         menu.addItem(.separator())
         _ = item(menu, ModernPlayerState.Visualizer.rotate.title, choose, ModernPlayerState.Visualizer.rotate.rawValue,
@@ -286,6 +297,13 @@ final class ModernPlayerUI: PlayerUIBase {
         }
         let backgroundItem = menu.addItem(withTitle: "Background", action: nil, keyEquivalent: "")
         backgroundItem.submenu = schemes
+        let effects = NSMenu(title: "Effect")
+        effects.autoenablesItems = false
+        for option in ModernPlayerState.VisualizerEffect.allCases {
+            item(effects, option.title, finish, option.rawValue, on: option == effect).toolTip = option.help
+        }
+        let effectItem = menu.addItem(withTitle: "Effect", action: nil, keyEquivalent: "")
+        effectItem.submenu = effects
         return menu
     }
 
@@ -304,6 +322,12 @@ final class ModernPlayerUI: PlayerUIBase {
     @objc func visualizerIntervalChosen(_ sender: NSMenuItem) {
         guard let seconds = sender.representedObject as? Double else { return }
         handle(.setVisualizerInterval(seconds))
+    }
+
+    @objc func visualizerEffectChosen(_ sender: NSMenuItem) {
+        guard let raw = sender.representedObject as? String,
+              let effect = ModernPlayerState.VisualizerEffect(rawValue: raw) else { return }
+        handle(.setVisualizerEffect(effect))
     }
 
     @objc func artworkColorsChosen(_ sender: NSMenuItem) {
@@ -343,7 +367,8 @@ final class ModernPlayerUI: PlayerUIBase {
             lastSheet: lastSheet, sheetOpen: sheetOpen, skinClass: "modern", appearance: player.appearance.rawValue,
             tint: player.tint.rawValue, panels: ModernPanel.allCases.filter(player.openPanels.contains).map(\.rawValue),
             visualizerInterval: settings.visualizerInterval, artworkColors: settings.artworkColors,
-            visualizerRunning: player.isVisualizerRunning, visualizerDetail: visualizerDetail)
+            visualizerEffect: settings.visualizerEffect, visualizerRunning: player.isVisualizerRunning,
+            visualizerDetail: visualizerDetail)
         let skin = AppSkinDebugInfo(id: SkinLibrary.modernID, name: SkinLibrary.modernName, origin: "modern")
         context.controller.setShellState(skin: skin, ui: ui)
     }

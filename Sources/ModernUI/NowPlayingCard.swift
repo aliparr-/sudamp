@@ -191,6 +191,9 @@ final class NowPlayingCard: GlassCard {
         }
         if let palette { artwork.paletteKey = artworkKey(new, palette) }
         artwork.rotationInterval = new.visualizerInterval
+        artwork.effect = new.visualizerEffect
+        artwork.caption = new.playback == .stopped ? ""
+            : [new.title, new.subtitle].filter { !$0.isEmpty }.joined(separator: " · ")
         artwork.mode = new.visualizer
         artwork.isAnimating = new.isAnimating
         if let tag = new.source { sourceBadge.kind = .source(tag) }

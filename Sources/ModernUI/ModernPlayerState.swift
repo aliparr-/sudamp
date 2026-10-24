@@ -37,13 +37,25 @@ nonisolated public struct ModernPlayerState: Equatable, Sendable {
 
     /// What the artwork shows: one of the scenes, every scene in turn (`rotate`), or just the artwork (`off`).
     public enum Visualizer: String, Sendable, CaseIterable {
-        case spectrum, oscilloscope, leds, halo, waterfall, starfield, pixelDJ = "pixel-dj", toast, tunnel, fireworks, lava
+        // In the menus' order, a section at a time (`section`).
+        case spectrum, oscilloscope, leds, vuMeters = "vu-meters", heartbeat, turntable, speaker
+        case halo, waterfall, tunnel, loops, pendulums, cells
+        case starfield, synthwave, skyline, fireworks, aurora, rain, campfire, lava
+        case pixelDJ = "pixel-dj", toast, breakfastBand = "breakfast-band", drummingCat = "drumming-cat", rally, demoscene
         case rotate, off
 
         public static let `default` = Visualizer.spectrum
 
-        /// The scenes, in the order the menus list them and `rotate` plays them.
+        /// The scenes, in the order the menus list them.
         public static let scenes: [Visualizer] = allCases.filter(\.isScene)
+
+        /// The order `rotate` plays the scenes in (and a click on the artwork walks): mixed up, so that neighbours
+        /// differ (the menus' order would play seven meters in a row).
+        public static let rotation: [Visualizer] = [
+            .spectrum, .starfield, .pixelDJ, .loops, .synthwave, .vuMeters, .halo, .toast, .rain, .tunnel, .speaker,
+            .skyline, .rally, .aurora, .leds, .fireworks, .drummingCat, .pendulums, .waterfall, .campfire,
+            .breakfastBand, .turntable, .heartbeat, .cells, .lava, .demoscene, .oscilloscope,
+        ]
 
         public var isScene: Bool { self != .rotate && self != .off }
 
@@ -52,14 +64,30 @@ nonisolated public struct ModernPlayerState: Equatable, Sendable {
             case .spectrum: "Spectrum"
             case .oscilloscope: "Oscilloscope"
             case .leds: "Retro LEDs"
+            case .vuMeters: "VU Meters"
+            case .heartbeat: "Heartbeat"
+            case .turntable: "Turntable"
+            case .speaker: "Speaker"
             case .halo: "Halo"
             case .waterfall: "Waterfall"
+            case .tunnel: "Tunnel"
+            case .loops: "Loops"
+            case .pendulums: "Pendulums"
+            case .cells: "Cells"
             case .starfield: "Starfield"
+            case .synthwave: "Synthwave"
+            case .skyline: "Skyline"
+            case .fireworks: "Fireworks"
+            case .aurora: "Aurora"
+            case .rain: "Rain"
+            case .campfire: "Campfire"
+            case .lava: "Lava"
             case .pixelDJ: "Pixel DJ"
             case .toast: "Dancing Toast"
-            case .tunnel: "Tunnel"
-            case .fireworks: "Fireworks"
-            case .lava: "Lava"
+            case .breakfastBand: "Breakfast Band"
+            case .drummingCat: "Drumming Cat"
+            case .rally: "Rally"
+            case .demoscene: "Demoscene"
             case .rotate: "Rotate"
             case .off: "Off"
             }
@@ -72,23 +100,121 @@ nonisolated public struct ModernPlayerState: Equatable, Sendable {
             case .spectrum: "chart.bar.fill"
             case .oscilloscope: "waveform.path"
             case .leds: "square.grid.3x3.fill"
+            case .vuMeters: "gauge.with.needle.fill"
+            case .heartbeat: "waveform.path.ecg"
+            case .turntable: "opticaldisc.fill"
+            case .speaker: "hifispeaker.fill"
             case .halo: "sun.max.fill"
             case .waterfall: "water.waves"
+            case .tunnel: "circle.circle"
+            case .loops: "infinity"
+            case .pendulums: "metronome.fill"
+            case .cells: "circle.hexagongrid.fill"
             case .starfield: "sparkles"
+            case .synthwave: "sun.horizon.fill"
+            case .skyline: "building.2.fill"
+            case .fireworks: "fireworks"
+            case .aurora: "moon.stars.fill"
+            case .rain: "cloud.rain.fill"
+            case .campfire: "flame.fill"
+            case .lava: "drop.fill"
             case .pixelDJ: "figure.dance"
             case .toast: "face.smiling.inverse"
-            case .tunnel: "circle.circle"
-            case .fireworks: "fireworks"
-            case .lava: "drop.fill"
+            case .breakfastBand: "cup.and.saucer.fill"
+            case .drummingCat: "cat.fill"
+            case .rally: "gamecontroller.fill"
+            case .demoscene: "sparkles.tv"
             case .rotate: "arrow.triangle.2.circlepath"
             case .off: "eye.slash"
             }
         }
 
-        /// The next scene after this one (clicking the artwork): `off` and `rotate` start at the first.
+        /// The menus' sections, in order, and the scenes under each.
+        public enum Section: String, CaseIterable, Sendable {
+            case meters = "Meters & Hi-Fi", shapes = "Shapes", places = "Places", characters = "Characters & Games"
+
+            public var title: String { rawValue }
+            public var scenes: [Visualizer] { Visualizer.scenes.filter { $0.section == self } }
+        }
+
+        /// The menu section a scene sits in (nil for `rotate` and `off`).
+        public var section: Section? {
+            switch self {
+            case .spectrum, .oscilloscope, .leds, .vuMeters, .heartbeat, .turntable, .speaker: .meters
+            case .halo, .waterfall, .tunnel, .loops, .pendulums, .cells: .shapes
+            case .starfield, .synthwave, .skyline, .fireworks, .aurora, .rain, .campfire, .lava: .places
+            case .pixelDJ, .toast, .breakfastBand, .drummingCat, .rally, .demoscene: .characters
+            case .rotate, .off: nil
+            }
+        }
+
+        /// A gentle scene, for a breakdown (Rotate turns to one when the music drops away, and to a lively one when it
+        /// comes back).
+        public var isCalm: Bool {
+            switch self {
+            case .oscilloscope, .turntable, .loops, .pendulums, .starfield, .aurora, .rain, .campfire, .lava: true
+            default: false
+            }
+        }
+
+        /// The next scene after this one in the rotation (clicking the artwork): `off` and `rotate` start at the first.
         public var nextScene: Visualizer {
-            guard let i = Self.scenes.firstIndex(of: self) else { return Self.scenes[0] }
-            return Self.scenes[(i + 1) % Self.scenes.count]
+            guard let i = Self.rotation.firstIndex(of: self) else { return Self.rotation[0] }
+            return Self.rotation[(i + 1) % Self.rotation.count]
+        }
+
+        /// The scenes that suit a genre, best first, matched on words in its key like the artwork's colours
+        /// (`lo-fi` brings the campfire and the rain). Empty for a genre with nothing in particular.
+        public static func suited(toGenre key: String?) -> [Visualizer] {
+            guard let lowered = key?.lowercased(), !lowered.isEmpty else { return [] }
+            return genreScenes.first { lowered.contains($0.key) }?.scenes ?? []
+        }
+
+        /// Longest keys first, so `deep-house` wins over `house`.
+        static let genreScenes: [(key: String, scenes: [Visualizer])] = [
+            ("lo-fi", [.campfire, .rain, .drummingCat, .turntable, .skyline]),
+            ("lofi", [.campfire, .rain, .drummingCat, .turntable, .skyline]),
+            ("ambient", [.aurora, .rain, .lava, .starfield, .loops, .pendulums]),
+            ("chill", [.rain, .aurora, .lava, .campfire, .turntable]),
+            ("downtempo", [.lava, .rain, .turntable, .aurora, .skyline]),
+            ("deep-house", [.skyline, .turntable, .lava, .halo, .synthwave, .pixelDJ]),
+            ("house", [.pixelDJ, .toast, .breakfastBand, .speaker, .vuMeters, .fireworks]),
+            ("disco", [.pixelDJ, .toast, .breakfastBand, .fireworks]),
+            ("techno", [.tunnel, .cells, .waterfall, .heartbeat, .leds, .oscilloscope]),
+            ("minimal", [.cells, .oscilloscope, .loops, .heartbeat]),
+            ("trance", [.tunnel, .starfield, .halo, .aurora]),
+            ("drum-and-bass", [.rally, .speaker, .tunnel, .fireworks, .starfield]),
+            ("synthwave", [.synthwave, .skyline, .demoscene, .rally]),
+            ("electro", [.demoscene, .synthwave, .rally, .cells]),
+            ("jazz", [.turntable, .vuMeters, .drummingCat, .skyline]),
+            ("soul", [.turntable, .vuMeters, .breakfastBand]),
+            ("funk", [.breakfastBand, .turntable, .speaker]),
+            ("classical", [.pendulums, .vuMeters, .aurora]),
+            ("rock", [.speaker, .vuMeters, .fireworks]),
+            ("hip-hop", [.turntable, .speaker, .skyline]),
+        ].sorted { $0.key.count > $1.key.count }
+    }
+
+    /// A finish laid over whichever scene shows.
+    public enum VisualizerEffect: String, Sendable, CaseIterable {
+        case none, vhs, kaleidoscope
+
+        public static let `default` = VisualizerEffect.none
+
+        public var title: String {
+            switch self {
+            case .none: "None"
+            case .vhs: "VHS"
+            case .kaleidoscope: "Kaleidoscope"
+            }
+        }
+
+        public var help: String {
+            switch self {
+            case .none: "The scene as it is"
+            case .vhs: "An old video tape: scan lines, colour fringes and a tracking wobble on the kicks"
+            case .kaleidoscope: "The scene mirrored six ways round the middle, turning slowly"
+            }
         }
     }
 
@@ -178,6 +304,8 @@ nonisolated public struct ModernPlayerState: Equatable, Sendable {
     public var visualizerInterval: Double = ModernPlayerState.defaultVisualizerInterval
     /// What colours the artwork behind the visualiser.
     public var artworkColors: ArtworkColors = .default
+    /// A finish over the scene.
+    public var visualizerEffect: VisualizerEffect = .default
 
     public init() {}
 
@@ -258,6 +386,7 @@ nonisolated public enum ModernEvent: Equatable, Sendable, CustomStringConvertibl
     case setVisualizer(ModernPlayerState.Visualizer)
     /// Seconds per scene while rotating.
     case setVisualizerInterval(Double)
+    case setVisualizerEffect(ModernPlayerState.VisualizerEffect)
     case setArtworkColors(ArtworkColors)
     case toggleShuffle
     case toggleRepeat
@@ -296,6 +425,7 @@ nonisolated public enum ModernEvent: Equatable, Sendable, CustomStringConvertibl
         case .toggleTimeDisplay: return "toggleTimeDisplay"
         case .cycleVisualizer: return "cycleVisualizer"
         case .setVisualizer(let v): return "setVisualizer(\(v.rawValue))"
+        case .setVisualizerEffect(let e): return "setVisualizerEffect(\(e.rawValue))"
         case .setVisualizerInterval(let s): return "setVisualizerInterval(\(Int(s)) s)"
         case .setArtworkColors(let c): return "setArtworkColors(\(c.rawValue))"
         case .toggleShuffle: return "toggleShuffle"

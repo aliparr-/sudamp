@@ -1,12 +1,14 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 // `sudamp --modern-preview [--appearance auto|light|dark] [--tint <name>] [--panels equalizer,stations]
 //                          [--state playing|paused|idle|live|tuning|failed|engine] [--visualizer <mode>]
-//                          [--interval <s>] [--colors genre|window|cycle|source] [--backdrop]
+//                          [--interval <s>] [--colors genre|window|cycle|source] [--effect none|vhs|kaleidoscope]
+//                          [--backdrop]
 //                          [--capture <file.png>] [--capture-delay <seconds>] [--capture-burst <dir> [--burst-count n]]
 //                          [--ignore-occlusion] [--exit-after <seconds>] [--probe-hits]
 //                          [--open-later|--close-later equalizer|stations]`
 // `sudamp --modern-preview --dump-frames <file.json>`
-// `sudamp --modern-preview --scene-sheet <file.png> --visualizer <scene> [--frames <file.json>] [--style <name>]`
+// `sudamp --modern-preview --scene-sheet <file.png> --visualizer <scene> [--frames <file.json>] [--style <name>]
+//                          [--effect <name>]`
 //
 // Opens the modern skin with an animated fake player state (ticking time, a visualiser fed synthesised music through
 // the real analyser), the way `--skin-preview` does for the classic skins: no audio, no network, nothing persisted.
@@ -47,6 +49,7 @@ enum ModernPreview {
         var visualizer: ModernPlayerState.Visualizer?
         var colors: ArtworkColors?
         var interval: Double?
+        var effect: ModernPlayerState.VisualizerEffect?
         /// Writes this many seconds of analyser frames (synthesised music) as JSON, then quits.
         var dumpFrames: String?
         /// Renders a contact sheet of `--visualizer` offscreen, then quits.
@@ -62,7 +65,8 @@ enum ModernPreview {
         + ModernTint.allCases.map(\.rawValue).joined(separator: "|") + "] [--panels equalizer,stations] [--state "
         + states.joined(separator: "|") + "] [--visualizer "
         + ModernPlayerState.Visualizer.allCases.map(\.rawValue).joined(separator: "|") + "] [--interval <s>] [--colors "
-        + ArtworkColors.allCases.map(\.rawValue).joined(separator: "|") + "] [--backdrop] [--capture <file.png>] "
+        + ArtworkColors.allCases.map(\.rawValue).joined(separator: "|") + "] [--effect "
+        + ModernPlayerState.VisualizerEffect.allCases.map(\.rawValue).joined(separator: "|") + "] [--backdrop] [--capture <file.png>] "
         + "[--capture-delay <s>] [--capture-burst <dir> [--burst-count n]] [--ignore-occlusion] [--exit-after <s>]\n"
         + "       sudamp --modern-preview --dump-frames <file.json>\n"
         + "       sudamp --modern-preview --scene-sheet <file.png> --visualizer <scene> [--frames <file.json>] "
@@ -122,6 +126,9 @@ enum ModernPreview {
             case "--colors":
                 guard let v = value(), let c = ArtworkColors(rawValue: v) else { return fail("bad --colors") }
                 options.colors = c
+            case "--effect":
+                guard let v = value(), let e = ModernPlayerState.VisualizerEffect(rawValue: v) else { return fail("bad --effect") }
+                options.effect = e
             case "--interval":
                 guard let v = value(), let d = Double(v), d > 0 else { return fail("bad --interval") }
                 options.interval = d
@@ -269,6 +276,7 @@ final class ModernPreviewController: NSObject, NSApplicationDelegate {
         if let mode = options.visualizer { state.visualizer = mode }
         if let colors = options.colors { state.artworkColors = colors }
         if let interval = options.interval { state.visualizerInterval = interval }
+        if let effect = options.effect { state.visualizerEffect = effect }
         var configuration = ModernPlayer.Configuration()
         configuration.appearance = options.appearance
         configuration.tint = options.tint
@@ -368,6 +376,7 @@ final class ModernPreviewController: NSObject, NSApplicationDelegate {
         case .setVisualizer(let mode): state.visualizer = mode
         case .setVisualizerInterval(let seconds): state.visualizerInterval = seconds
         case .setArtworkColors(let colors): state.artworkColors = colors
+        case .setVisualizerEffect(let effect): state.visualizerEffect = effect
         case .eqEnabled(let on): state.equalizer.enabled = on
         case .eqBand(let i, let db):
             state.equalizer.bands[i] = db
@@ -448,7 +457,8 @@ final class ModernPreviewController: NSObject, NSApplicationDelegate {
         let mode = options.visualizer ?? .spectrum
         do {
             let json = try options.sheetFrames.map { try Data(contentsOf: URL(filePath: $0)) }
-            let result = try ModernDebug.sceneSheet(mode, framesJSON: json, style: options.sheetStyle, tint: options.tint)
+            let result = try ModernDebug.sceneSheet(mode, framesJSON: json, style: options.sheetStyle, tint: options.tint,
+                                                    effect: options.effect ?? .none)
             guard let png = result.png else { throw SkinPreview.UsageError(message: "the sheet could not be drawn") }
             try png.write(to: URL(filePath: path))
             SkinPreview.log(String(format: "modern preview: %@ sheet to %@; %.3f ms a frame (worst %.3f)", mode.rawValue, path,

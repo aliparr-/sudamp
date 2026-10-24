@@ -115,6 +115,9 @@ import Testing
         let rotating = state(snapshot(.idle), prefs: .init(visualizer: "rotate", visualizerInterval: 30, artworkColors: "source"))
         #expect(rotating.visualizer == .rotate && rotating.visualizerInterval == 30 && rotating.artworkColors == .source)
         #expect(state(snapshot(.idle), prefs: .init(visualizer: "pixel-dj")).visualizer == .pixelDJ)
+        #expect(state(snapshot(.idle), prefs: .init(visualizer: "breakfast-band")).visualizer == .breakfastBand)
+        #expect(state(snapshot(.idle), prefs: .init(visualizerEffect: "kaleidoscope")).visualizerEffect == .kaleidoscope)
+        #expect(state(snapshot(.idle), prefs: .init(visualizerEffect: "sepia")).visualizerEffect == .none)
         let odd = state(snapshot(.idle), prefs: .init(visualizerInterval: .nan, artworkColors: "plaid"))
         #expect(odd.visualizerInterval == ModernPlayerState.defaultVisualizerInterval && odd.artworkColors == .genre)
         #expect(state(snapshot(.idle), prefs: .init(visualizerInterval: 1)).visualizerInterval == 5, "at least 5 s a scene")
@@ -158,10 +161,19 @@ import Testing
     @Test func theVisualizerMenuListsEveryChoiceTicked() {
         let target = NSObject()
         let action = #selector(NSObject.description)
-        let menu = ModernPlayerUI.visualizerMenu(current: .pixelDJ, interval: 30, colors: .source, target: target, choose: action,
-                                                 every: action, background: action)
-        let titles = menu.items.filter { !$0.isSeparatorItem }.map(\.title)
-        #expect(titles == ModernPlayerState.Visualizer.scenes.map(\.title) + ["Rotate", "Rotate Every", "Off", "Background"])
+        let menu = ModernPlayerUI.visualizerMenu(current: .pixelDJ, interval: 30, colors: .source, effect: .vhs, target: target,
+                                                 choose: action, every: action, background: action, finish: action)
+        let titles = menu.items.filter { !$0.isSeparatorItem && !$0.isSectionHeader }.map(\.title)
+        #expect(titles == ModernPlayerState.Visualizer.scenes.map(\.title) + ["Rotate", "Rotate Every", "Off", "Background", "Effect"])
+        // The scenes sit under their sections' headers.
+        var section: String?
+        for item in menu.items {
+            if item.isSectionHeader { section = item.title }
+            if let raw = item.representedObject as? String, let mode = ModernPlayerState.Visualizer(rawValue: raw), mode.isScene {
+                #expect(section == mode.section?.title, "\(mode)")
+            }
+        }
+        #expect(menu.items.filter(\.isSectionHeader).map(\.title) == ModernPlayerState.Visualizer.Section.allCases.map(\.title))
         #expect(menu.items.filter { $0.state == .on }.compactMap { $0.representedObject as? String } == ["pixel-dj"])
         let every = menu.items.first { $0.title == "Rotate Every" }?.submenu
         #expect(every?.items.map(\.title) == ["10 Seconds", "20 Seconds", "30 Seconds", "1 Minute"])
@@ -169,6 +181,9 @@ import Testing
         let background = menu.items.first { $0.title == "Background" }?.submenu
         #expect(background?.items.map(\.title) == ["Genre", "Window", "Cycle", "Source"])
         #expect(background?.items.filter { $0.state == .on }.compactMap { $0.representedObject as? String } == ["source"])
+        let effect = menu.items.first { $0.title == "Effect" }?.submenu
+        #expect(effect?.items.map(\.title) == ["None", "VHS", "Kaleidoscope"])
+        #expect(effect?.items.filter { $0.state == .on }.compactMap { $0.representedObject as? String } == ["vhs"])
         #expect(ModernPlayerUI.intervalTitle(120) == "2 Minutes")
     }
 }

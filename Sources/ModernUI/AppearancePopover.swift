@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 // The appearance popover, opened from the player's half-circle button: Automatic, Light or Dark; the tint, as a
 // grid of swatches like System Settings' accent colours; the visualiser (a grid of its scenes, Rotate and Off, how
-// often it rotates, and what colours the artwork behind it); and the way back to the classic skins. Changes apply
-// live.
+// often it rotates, what colours the artwork behind it, and the effect over it); and the way back to the classic
+// skins. Changes apply live.
 
 import AppKit
 import QuartzCore
@@ -16,6 +16,7 @@ final class AppearancePopover: NSViewController {
     private var visualizerChoice: Visualizer
     private var intervalChoice: Double
     private var colorsChoice: ArtworkColors
+    private var effectChoice: ModernPlayerState.VisualizerEffect
     private let segmented = NSSegmentedControl(labels: ModernAppearance.allCases.map(\.title), trackingMode: .selectOne,
                                                target: nil, action: nil)
     private var swatches: [TintSwatch] = []
@@ -26,14 +27,18 @@ final class AppearancePopover: NSViewController {
                                        trackingMode: .selectOne, target: nil, action: nil)
     let backgrounds = NSSegmentedControl(labels: ArtworkColors.allCases.map(\.title), trackingMode: .selectOne, target: nil,
                                          action: nil)
+    let effects = NSSegmentedControl(labels: ModernPlayerState.VisualizerEffect.allCases.map(\.title), trackingMode: .selectOne,
+                                     target: nil, action: nil)
 
     init(appearance: ModernAppearance, tint: ModernTint, visualizer: Visualizer = .default,
-         interval: Double = ModernPlayerState.defaultVisualizerInterval, colors: ArtworkColors = .default) {
+         interval: Double = ModernPlayerState.defaultVisualizerInterval, colors: ArtworkColors = .default,
+         effect: ModernPlayerState.VisualizerEffect = .default) {
         appearanceChoice = appearance
         tintChoice = tint
         visualizerChoice = visualizer
         intervalChoice = interval
         colorsChoice = colors
+        effectChoice = effect
         super.init(nibName: nil, bundle: nil)
     }
 
@@ -110,7 +115,8 @@ final class AppearancePopover: NSViewController {
         updateSelection()
     }
 
-    /// The scenes as a grid of tiles, how often Rotate moves on, and the artwork's colours. Returns the next y.
+    /// The scenes as a grid of tiles (the menus' order, then Rotate and Off), how often Rotate moves on, the artwork's
+    /// colours and the effect. Returns the next y.
     private func addVisualizerSection(to root: NSView, y start: CGFloat, width: CGFloat, padding p: CGFloat) -> CGFloat {
         var y = start
         let title = makeLabel("Visualizer", size: 11, weight: .semibold, color: .secondaryLabelColor)
@@ -120,8 +126,8 @@ final class AppearancePopover: NSViewController {
         visualizerName.frame = CGRect(x: width - p - 140, y: y, width: 140, height: 15)
         root.addSubview(visualizerName)
         y += 22
-        let columns = 7
-        let tileHeight: CGFloat = 30, spacing: CGFloat = 5
+        let columns = 8
+        let tileHeight: CGFloat = 30, spacing: CGFloat = 4
         let tileWidth = (width - p * 2 - spacing * CGFloat(columns - 1)) / CGFloat(columns)
         for (i, mode) in Visualizer.allCases.enumerated() {
             let tile = VisualizerTile(mode: mode)
@@ -152,6 +158,10 @@ final class AppearancePopover: NSViewController {
         intervals.toolTip = "How long each scene shows while the visualizer rotates"
         row("Background", backgrounds, action: #selector(colorsChanged(_:)), below: true)
         for (i, colors) in ArtworkColors.allCases.enumerated() { backgrounds.setToolTip(colors.help, forSegment: i) }
+        row("Effect", effects, action: #selector(effectChanged(_:)), below: true)
+        for (i, effect) in ModernPlayerState.VisualizerEffect.allCases.enumerated() {
+            effects.setToolTip(effect.help, forSegment: i)
+        }
         return y + 2
     }
 
@@ -165,6 +175,7 @@ final class AppearancePopover: NSViewController {
         visualizerName.stringValue = visualizerChoice.title
         intervals.selectedSegment = Self.nearestInterval(intervalChoice)
         backgrounds.selectedSegment = ArtworkColors.allCases.firstIndex(of: colorsChoice) ?? 0
+        effects.selectedSegment = ModernPlayerState.VisualizerEffect.allCases.firstIndex(of: effectChoice) ?? 0
     }
 
     /// The offered interval nearest `seconds`.
@@ -198,6 +209,13 @@ final class AppearancePopover: NSViewController {
         let colors = all[min(max(sender.selectedSegment, 0), all.count - 1)]
         colorsChoice = colors
         onEvent?(.setArtworkColors(colors))
+    }
+
+    @objc private func effectChanged(_ sender: NSSegmentedControl) {
+        let all = ModernPlayerState.VisualizerEffect.allCases
+        let effect = all[min(max(sender.selectedSegment, 0), all.count - 1)]
+        effectChoice = effect
+        onEvent?(.setVisualizerEffect(effect))
     }
 
     @objc private func appearanceChanged(_ sender: NSSegmentedControl) {

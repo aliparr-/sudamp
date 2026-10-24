@@ -223,15 +223,17 @@ import Testing
         // Settings from before the modern visualiser had its own choice.
         let old = try JSONDecoder().decode(AppSettings.self, from: Data(#"{"visualizer": "off"}"#.utf8))
         #expect(old.visualizer == "off" && old.modernVisualizer == "off")
-        #expect(old.visualizerInterval == 20 && old.artworkColors == "genre")
-        let json = #"{"visualizer": "oscilloscope", "modernVisualizer": "starfield", "visualizerInterval": 9999, "artworkColors": "cycle"}"#
+        #expect(old.visualizerInterval == 20 && old.artworkColors == "genre" && old.visualizerEffect == "none")
+        let json = #"{"visualizer": "oscilloscope", "modernVisualizer": "starfield", "visualizerInterval": 9999, "artworkColors": "cycle", "visualizerEffect": "vhs"}"#
         let s = try JSONDecoder().decode(AppSettings.self, from: Data(json.utf8))
         #expect(s.visualizer == "oscilloscope" && s.modernVisualizer == "starfield" && s.artworkColors == "cycle")
+        #expect(s.visualizerEffect == "vhs")
         #expect(s.visualizerInterval == 600, "clamped")
         var round = AppSettings()
         round.modernVisualizer = "rotate"
         round.visualizerInterval = 30
         round.artworkColors = "source"
+        round.visualizerEffect = "kaleidoscope"
         #expect(try JSONDecoder().decode(AppSettings.self, from: JSONEncoder().encode(round)) == round)
     }
 

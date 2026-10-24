@@ -2,7 +2,8 @@
 // What the scenes dance to, picked out of the analyser's bars once per frame: the bass, mids and treble, the overall
 // level, the kicks (a sharp rise in the bass, well above its recent average) and a beat clock that follows them.
 // Kicks land on the clock's downbeat and pull its tempo towards theirs; through a breakdown with no kicks the clock
-// keeps the last tempo, so a dancer keeps dancing. Pure and deterministic: tested with synthetic kicks.
+// keeps the last tempo, so a dancer keeps dancing. It also hears a breakdown (the bass's low points sinking for a
+// while) and the drop that ends one. Pure and deterministic: tested with synthetic kicks.
 
 import Foundation
 
@@ -17,6 +18,17 @@ nonisolated struct AudioFeatures {
     /// The clock's position in beats; its fraction is `groove`.
     private var clock: Double = 0
     private var interval: Double = 0.5
+    /// The breakdown: the bass's low points between hits (recovering slowly), what they usually are, and how long they
+    /// have sat well below that. Eased into `breakdown`.
+    private var trough: Float = 1
+    private var usualTrough: Float = 0.6
+    private var lowFor: Double = 0
+    private var sinceDrop: Double = 10
+    private var calm: Float = 0
+    /// Seconds of sound since the last silence: the first two learn what the bass's low points usually are.
+    private var soundFor: Double = 0
+    /// What is playing (`VisualizerInput.caption`).
+    var caption = ""
 
     /// Kicks closer together than this are one kick (200 bpm).
     static let minInterval = 0.3
@@ -73,6 +85,30 @@ nonisolated struct AudioFeatures {
             sinceKick = 0
         }
 
+        // A breakdown: the bass's low points sink well below their usual level for a while. The drop: the first kick
+        // on the downbeat after one (a breakdown's bassline hits as hard as a kick, but between the beats).
+        let sounding = level >= 0.02
+        soundFor = sounding ? soundFor + dt : 0
+        trough = min(bass, trough + Float(dt) * 0.5)
+        if sounding, soundFor < 2 {
+            usualTrough += (trough - usualTrough) * Float(min(1, dt * 3))
+            lowFor = 0
+        } else if sounding, trough < usualTrough - 0.12 {
+            lowFor += dt
+        } else {
+            if sounding, lowFor < 0.5 { usualTrough += (trough - usualTrough) * Float(min(1, dt * 0.4)) }
+            lowFor = 0
+        }
+        sinceDrop += dt
+        var drop = false
+        if kick, sounding, onDownbeat, lowFor > 1.5, bass > usualTrough, sinceDrop > 8 {
+            drop = true
+            sinceDrop = 0
+            lowFor = 0
+            trough = bass
+        }
+        calm += ((lowFor > 1 ? 1 : 0) - calm) * Float(min(1, dt * (sounding ? 2.5 : 9)))
+
         func smooth(_ old: Float, _ new: Float) -> Float {
             let rate = new > old ? 0.6 : 0.18
             return old + (new - old) * Float(1 - pow(1 - rate, dt * 60))
@@ -81,12 +117,17 @@ nonisolated struct AudioFeatures {
             bars: bars, peaks: peaks, scope: scope, bass: smooth(input.bass, bass), mid: smooth(input.mid, mid),
             treble: smooth(input.treble, treble), level: smooth(input.level, level), beat: kick,
             pulse: kick ? 1 : input.pulse * Float(exp(-dt * 5.5)), groove: clock - clock.rounded(.down),
-            beatInterval: interval, beats: input.beats + (kick ? 1 : 0), time: input.time + dt)
+            beatInterval: interval, beats: input.beats + (kick ? 1 : 0), time: input.time + dt,
+            breakdown: calm < 0.001 ? 0 : calm, drop: drop, caption: caption)
         return input
     }
 
-    /// Forgets everything (a new stream, a long pause).
-    mutating func reset() { self = AudioFeatures() }
+    /// Forgets everything (a new stream, a long pause) but the caption.
+    mutating func reset() {
+        let caption = caption
+        self = AudioFeatures()
+        self.caption = caption
+    }
 
     static func mean(_ values: [Float], _ range: Range<Int>) -> Float {
         let r = range.clamped(to: 0..<values.count)

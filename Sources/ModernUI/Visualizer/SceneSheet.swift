@@ -18,6 +18,9 @@ nonisolated enum SceneSheet {
         var size: CGFloat = 92
         var scale: CGFloat = 2
         var seed: UInt64 = 1
+        /// The finish over the scene, and what is playing (for a scene that writes it out).
+        var effect = ModernPlayerState.VisualizerEffect.none
+        var caption = ""
     }
 
     struct Result {
@@ -32,8 +35,10 @@ nonisolated enum SceneSheet {
                        options: Options = Options()) -> Result {
         let renderer = SceneRenderer(seed: options.seed)
         renderer.style = SceneStyle(palette)
+        renderer.effect = options.effect
         renderer.show(mode, animated: false)
         var features = AudioFeatures()
+        features.caption = options.caption
         let size = CGSize(width: options.size, height: options.size)
         let cell = Int((options.size * options.scale).rounded())
         let gap = 6

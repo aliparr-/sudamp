@@ -53,6 +53,8 @@ nonisolated public struct AppSettings: Codable, Sendable, Equatable {
     public var visualizerInterval: Double = 20
     /// What colours the modern skin's artwork: `genre`, `window`, `cycle` or `source`.
     public var artworkColors = "genre"
+    /// The finish over the modern visualiser: `none`, `vhs` or `kaleidoscope`.
+    public var visualizerEffect = "none"
     /// region.txt shaping (spike S1's kill switch; on by default).
     public var regionEnabled = true
     /// Transliterate titles the skin font lacks instead of drawing them with the system font (DESIGN §8.3).
@@ -87,6 +89,7 @@ nonisolated public struct AppSettings: Codable, Sendable, Equatable {
         }
         if let v = try? c.decode(Double.self, forKey: .visualizerInterval), v.isFinite { visualizerInterval = min(max(v, 5), 600) }
         if let v = try? c.decode(String.self, forKey: .artworkColors), !v.isEmpty { artworkColors = v }
+        if let v = try? c.decode(String.self, forKey: .visualizerEffect), !v.isEmpty { visualizerEffect = v }
         regionEnabled = (try? c.decode(Bool.self, forKey: .regionEnabled)) ?? true
         alwaysSkinFont = (try? c.decode(Bool.self, forKey: .alwaysSkinFont)) ?? false
     }

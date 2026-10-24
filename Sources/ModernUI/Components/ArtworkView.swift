@@ -4,9 +4,10 @@
 // and swell with the bass, a little film grain, a gloss across the top and a hairline rim, with a coloured glow
 // underneath.
 // The visualiser is drawn into it: one of the scenes (`Visualizer/`), each frame a bitmap from `SceneRenderer`, with
-// the palette's glow around it. Frames come 30 times a second while playing. With Rotate, the
-// scenes take turns, cross-fading; with the Cycle colours, the artwork's hue turns as the music plays. Stopped or
-// paused, the scene settles to a still frame and nothing animates.
+// the palette's glow around it, and the effect (VHS, Kaleidoscope) over it. Frames come 30 times a second while
+// playing. With Rotate, the scenes take turns, cross-fading: a breakdown brings a calm scene and the drop a lively
+// one, and a new genre opens on a scene that suits it. With the Cycle colours, the artwork's hue turns as the music
+// plays. Stopped or paused, the scene settles to a still frame and nothing animates.
 
 import AppKit
 import QuartzCore
@@ -16,7 +17,10 @@ final class ArtworkView: NSView {
 
     /// What the artwork's colours are made from (with `.cycle`, the hue also turns while playing).
     var paletteKey = ArtworkPalette.Key() {
-        didSet { if paletteKey != oldValue { paletteChanged() } }
+        didSet {
+            if paletteKey.genreKey != oldValue.genreKey { genreChanged() }
+            if paletteKey != oldValue { paletteChanged() }
+        }
     }
     private(set) var palette = ArtworkPalette.make(ArtworkPalette.Key())
     var mode: Mode = .default {
@@ -25,6 +29,19 @@ final class ArtworkView: NSView {
     /// Seconds per scene while rotating.
     var rotationInterval = ModernPlayerState.defaultVisualizerInterval {
         didSet { rotation.interval = rotationInterval }
+    }
+    /// The finish over the scene.
+    var effect = ModernPlayerState.VisualizerEffect.none {
+        didSet {
+            guard effect != oldValue else { return }
+            renderer.effect = effect
+            needsStill = true
+            if !isAnimating { drawStillIfNeeded() }
+        }
+    }
+    /// What is playing, for a scene that writes it out (`Title · Creator`).
+    var caption = "" {
+        didSet { features.caption = caption }
     }
     /// Playing: the light drifts and the visualiser moves.
     var isAnimating = false {
@@ -169,6 +186,17 @@ final class ArtworkView: NSView {
 
     // MARK: Colours
 
+    /// A new genre: Rotate opens on a scene that suits it (unless one showing does already).
+    private func genreChanged() {
+        rotation.genre = paletteKey.genreKey
+        guard mode == .rotate, renderer.mode != nil,
+              let opening = VisualizerRotation.opening(forGenre: paletteKey.genreKey, showing: renderer.mode) else { return }
+        rotation.restart()
+        renderer.show(opening, animated: isAnimating && framesDrawn > 0 && !Motion.reduced)
+        setAccessibilityLabel("Artwork and visualizer: \(currentScene?.title ?? mode.title)")
+        needsStill = true
+    }
+
     private func paletteChanged() {
         // A new genre, source, tint or light/dark: the cycle starts again from the tint's hue.
         if paletteKey.colors != .cycle { cycle = 0 }
@@ -206,7 +234,10 @@ final class ArtworkView: NSView {
             break
         case .rotate:
             rotation.restart()
-            if renderer.mode == nil { renderer.show(Mode.scenes[0], animated: false) }
+            // Open on a scene that suits the genre, unless the one showing does.
+            if let opening = VisualizerRotation.opening(forGenre: paletteKey.genreKey, showing: renderer.mode) {
+                renderer.show(opening, animated: isAnimating && framesDrawn > 0 && !Motion.reduced)
+            }
         default:
             renderer.show(mode, animated: isAnimating && framesDrawn > 0 && !Motion.reduced)
         }
@@ -298,8 +329,8 @@ final class ArtworkView: NSView {
     /// Moves everything on by `dt` seconds of music and draws (tests drive this directly).
     func step(_ frame: ModernVisualizerFrame?, dt: Double) {
         let input = features.next(frame, dt: dt)
-        if mode == .rotate, rotation.advance(dt) {
-            renderer.show(VisualizerRotation.next(after: renderer.mode), animated: !Motion.reduced)
+        if mode == .rotate, let next = rotation.advance(dt, input: input, showing: renderer.mode) {
+            renderer.show(next, animated: !Motion.reduced)
             setAccessibilityLabel("Artwork and visualizer: \(currentScene?.title ?? mode.title)")
         }
         if paletteKey.colors == .cycle {

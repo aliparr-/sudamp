@@ -203,7 +203,8 @@ public final class ModernPlayer: NSObject {
             return
         }
         let controller = AppearancePopover(appearance: appearance, tint: tint, visualizer: state.visualizer,
-                                           interval: state.visualizerInterval, colors: state.artworkColors)
+                                           interval: state.visualizerInterval, colors: state.artworkColors,
+                                           effect: state.visualizerEffect)
         controller.onEvent = { [weak self] event in
             if case .switchToClassic = event { self?.popover?.close() }
             self?.handle(event)
@@ -577,7 +578,8 @@ public enum ModernDebug {
     /// Returns the PNG and the mean and worst milliseconds per frame.
     public static func sceneSheet(_ mode: ModernPlayerState.Visualizer, framesJSON: Data?, style: String, tint: ModernTint,
                                   start: Double = 2, snapshots: Int = 16, every: Int = 6, scale: CGFloat = 2,
-                                  seed: UInt64 = 1) throws -> (png: Data?, mean: Double, worst: Double) {
+                                  seed: UInt64 = 1, effect: ModernPlayerState.VisualizerEffect = .none,
+                                  caption: String = "") throws -> (png: Data?, mean: Double, worst: Double) {
         let frames = try framesJSON.map(SceneSheet.frames(json:)) ?? []
         guard let palette = SceneSheet.palette(named: style, tint: tint) else {
             throw NSError(domain: "sudamp", code: 1, userInfo: [NSLocalizedDescriptionKey: "unknown style \(style)"])
@@ -588,6 +590,8 @@ public enum ModernDebug {
         options.every = every
         options.scale = scale
         options.seed = seed
+        options.effect = effect
+        options.caption = caption
         let result = SceneSheet.render(mode, frames: frames, palette: palette, options: options)
         let png = result.image.flatMap { NSBitmapImageRep(cgImage: $0).representation(using: .png, properties: [:]) }
         return (png, result.meanMilliseconds, result.worstMilliseconds)

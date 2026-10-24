@@ -364,9 +364,11 @@ nonisolated public struct AppUIDebugInfo: Sendable, Equatable, Codable {
     public var appearance: String?
     public var tint: String?
     public var panels: [String]?
-    /// The modern visualiser's rotation (seconds per scene) and what colours its artwork (`genre`, `window`, …).
+    /// The modern visualiser's rotation (seconds per scene), what colours its artwork (`genre`, `window`, …) and the
+    /// effect over it (`none`, `vhs`, `kaleidoscope`).
     public var visualizerInterval: Double?
     public var artworkColors: String?
+    public var visualizerEffect: String?
     /// Whether the modern visualiser is drawing, and why it is or isn't (the window's visibility, the output latency).
     public var visualizerRunning: Bool?
     public var visualizerDetail: String?
@@ -376,7 +378,8 @@ nonisolated public struct AppUIDebugInfo: Sendable, Equatable, Codable {
                 equalizer: Equalizer? = nil, timeDisplay: String? = nil, visualizerMode: String? = nil,
                 lastSheet: String? = nil, sheetOpen: Bool = false, skinClass: String? = nil, appearance: String? = nil,
                 tint: String? = nil, panels: [String]? = nil, visualizerInterval: Double? = nil,
-                artworkColors: String? = nil, visualizerRunning: Bool? = nil, visualizerDetail: String? = nil) {
+                artworkColors: String? = nil, visualizerEffect: String? = nil, visualizerRunning: Bool? = nil,
+                visualizerDetail: String? = nil) {
         self.mode = mode
         self.scale = scale
         self.windows = windows
@@ -395,6 +398,7 @@ nonisolated public struct AppUIDebugInfo: Sendable, Equatable, Codable {
         self.panels = panels
         self.visualizerInterval = visualizerInterval
         self.artworkColors = artworkColors
+        self.visualizerEffect = visualizerEffect
         self.visualizerRunning = visualizerRunning
         self.visualizerDetail = visualizerDetail
     }

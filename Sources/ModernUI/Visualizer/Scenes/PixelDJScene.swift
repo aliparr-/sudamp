@@ -3,7 +3,9 @@
 // hand on the decks or the mixer while the other pumps the air or holds a headphone to one ear. Lights sweep down
 // from the rig, a mirror ball scatters specks through the breakdown, and a row of heads bobs in front. When the bass
 // comes back after a breakdown the hands go up, the lights flash and confetti falls. In silence the DJ stands still
-// and blinks under dim lights. Each seed brings a different DJ (hair, skin, shirt, shades) and crowd.
+// and blinks under dim lights. Each seed brings a different DJ (hair, skin, shirt, shades) and crowd. Now and then a
+// tiny toast (the Dancing Toast's) wanders along the front of the stage, about once a minute of steady music, or
+// crowd-surfs over the heads after a drop, then leaves; never in silence.
 
 import CoreGraphics
 
@@ -19,6 +21,7 @@ nonisolated final class PixelDJScene: VisualizerScene {
     private var confetti: [Confetto] = []
     private var colors: [RGB] = []
     private var styled: SceneStyle?
+    private var cameo: ToastCameo
 
     // What the music is doing.
     private var time = 0.0
@@ -55,6 +58,7 @@ nonisolated final class PixelDJScene: VisualizerScene {
 
     init(seed: UInt64) {
         random = SceneRandom(seed: seed)
+        cameo = ToastCameo(seed: seed)
         look = Look(&random)
         beamAngles = Rig.fixtures.map { Rig.restAngle($0) }
         dancers = Dancer.crowd(&random)
@@ -100,6 +104,7 @@ nonisolated final class PixelDJScene: VisualizerScene {
         updateLights(input, dt: dt)
         updateCrowd(dt: dt)
         updateConfetti(dt: dt)
+        cameo.update(dt: dt, silent: silent, steady: calm < 0.3 && hype < 0.3)
     }
 
     /// A breakdown is a stretch where the bass's troughs (between its hits) sit well below where they were; the
@@ -133,6 +138,7 @@ nonisolated final class PixelDJScene: VisualizerScene {
         lullFloor = 1
         hype = 1
         flash = 1
+        cameo.dropped()
         for i in confetti.indices {
             let delay = random.range(0, 0.5)
             confetti[i].launch(&random, delay: delay)
@@ -254,7 +260,9 @@ nonisolated final class PixelDJScene: VisualizerScene {
         paintDJ(&c)
         paintBooth(&c, style: style)
         paintArms(&c)
+        cameo.paint(&c, .walk, groove: groove, style: style)
         paintCrowd(&c, style: style)
+        cameo.paint(&c, .surf, groove: groove, style: style)
         paintConfetti(&c, style: style)
     }
 
@@ -942,6 +950,145 @@ nonisolated private struct Confetto {
         x += sin(time * 3 + drift) * 4 * dt
         flip += flipRate * dt
         if y > 46 { alive = false }
+    }
+}
+
+// MARK: - The cameo
+
+/// Now and then a tiny toast, the Dancing Toast's, strolls along the front of the stage (after a minute or so of steady
+/// music) or crowd-surfs over the heads (a good chance after a drop), and leaves. It has its own random source and
+/// only draws over the club, so with no toast about the club is exactly as it would be without it. In silence it
+/// slips away at once, so a paused still frame never shows it.
+nonisolated private struct ToastCameo {
+    enum Act { case walk, surf }
+
+    private var random: SceneRandom
+    private var act: Act?
+    /// Its left edge, heading, time on stage, and how visible it is (it fades out in silence).
+    private var x = 0.0
+    private var heading = 1.0
+    private var clock = 0.0
+    private var alpha = 1.0
+    /// Seconds of steady music before the next stroll, and a crowd-surf waiting for the hands to go up.
+    private var strollIn: Double
+    private var surfIn = -1.0
+    private let crust: RGB
+    private let face: RGB
+    private let jam: Bool
+    private let shoe: Int
+
+    /// The slice, 8 pixels square: 1 outline, 2 crust, 3 toast.
+    private static let slice: [[Int]] = [
+        [0, 1, 1, 1, 1, 1, 1, 0],
+        [1, 2, 2, 2, 2, 2, 2, 1],
+        [1, 2, 3, 3, 3, 3, 2, 1],
+        [1, 2, 3, 3, 3, 3, 2, 1],
+        [1, 2, 3, 3, 3, 3, 2, 1],
+        [1, 2, 3, 3, 3, 3, 2, 1],
+        [1, 2, 2, 2, 2, 2, 2, 1],
+        [0, 1, 1, 1, 1, 1, 1, 0],
+    ]
+
+    init(seed: UInt64) {
+        random = SceneRandom(seed: seed ^ 0x7A57_B7EA_D0C0_FFEE)
+        // Sometimes soon, so a scene shown for a while in Rotate may see one too.
+        strollIn = random.range(6, 50)
+        let tones: [(UInt32, UInt32)] = [(0xC98A3D, 0xF2D58E), (0xB5651D, 0xE8B04B), (0x7A4214, 0xC47F2E)]
+        let tone = tones[random.int(tones.count)]
+        crust = RGB(hex: tone.0)
+        face = RGB(hex: tone.1)
+        jam = random.chance(0.4)
+        shoe = random.int(4)
+    }
+
+    /// The bass came back: a good chance of a crowd-surf once the hands are up.
+    mutating func dropped() {
+        if act == nil, random.chance(0.65) { surfIn = 0.5 }
+    }
+
+    mutating func update(dt: Double, silent: Bool, steady: Bool) {
+        guard !silent else {
+            surfIn = -1
+            if act != nil {
+                alpha -= dt * 8
+                if alpha <= 0 { leave() }
+            }
+            return
+        }
+        if surfIn >= 0 {
+            surfIn -= dt
+            if surfIn < 0, act == nil { enter(.surf) }
+        }
+        if act == nil, steady {
+            strollIn -= dt
+            if strollIn <= 0 { enter(.walk) }
+        }
+        guard let act else { return }
+        clock += dt
+        alpha = min(1, alpha + dt * 4)
+        x += heading * (act == .walk ? 6 : 11) * dt
+        if x < -12 || x > 58 { leave() }
+    }
+
+    private mutating func enter(_ act: Act) {
+        self.act = act
+        heading = random.chance(0.5) ? 1 : -1
+        x = heading > 0 ? -10 : 54
+        clock = 0
+        alpha = 1
+    }
+
+    private mutating func leave() {
+        act = nil
+        strollIn = random.range(40, 90)
+    }
+
+    /// Draws the toast if it's doing `which`: strolling between the booth and the crowd (drawn before the crowd, so
+    /// heads pass in front of its feet), or carried along over the heads with its arms up (drawn after them).
+    func paint(_ c: inout PixelCanvas, _ which: Act, groove: Double, style: SceneStyle) {
+        guard act == which, alpha > 0.01 else { return }
+        let limb = RGB(hex: 0x4A2A12), eye = RGB(hex: 0x2A160A)
+        let shoe = style.isLight ? style.ink : style.spark(shoe).mixed(with: RGB(hex: 0xE23B3B), 0.35)
+        let left = Int(x.rounded(.down))
+        let step = Int((clock * 4).rounded(.down)) % 2
+        let top: Int
+        if which == .walk {
+            // A bounce on the beat, legs stepping and arms swinging.
+            top = 31 + (groove < 0.25 ? 1 : 0)
+            for (i, hip) in [2, 5].enumerated() {
+                let forward = i == step ? Int(heading) : -Int(heading)
+                c.set(left + hip, top + 8, limb, alpha)
+                c.set(left + hip + forward, top + 9, limb, alpha)
+                c.box(left + hip + forward - (forward < 0 ? 1 : 0), top + 10, 2, 1, shoe, alpha)
+            }
+            for (side, armX) in [(0, left - 1), (1, left + 8)] {
+                c.set(armX, top + 4, limb, alpha)
+                c.set(armX, top + (side == step ? 4 : 6), .white, alpha)
+            }
+        } else {
+            // Bobbing along on the hands, feet kicking, both arms up.
+            top = 31 + (groove < 0.5 ? 0 : 1)
+            for (i, hip) in [2, 5].enumerated() {
+                let kick = i == step ? 1 : 0
+                c.set(left + hip, top + 8, limb, alpha)
+                c.box(left + hip - (i == 0 ? 1 : 0), top + 9 - kick, 2, 1, shoe, alpha)
+            }
+            for (side, armX) in [(0, left - 1), (1, left + 8)] {
+                c.set(armX, top + 2, limb, alpha)
+                c.set(armX, top + 1, limb, alpha)
+                c.set(armX + (side == 0 ? -1 : 1) * (side == step ? 1 : 0), top, .white, alpha)
+            }
+        }
+        // The slice, its face and the topping.
+        let colors = [RGB(hex: 0x24150E), crust, face]
+        for (row, cells) in Self.slice.enumerated() {
+            for (col, ink) in cells.enumerated() where ink > 0 { c.set(left + col, top + row, colors[ink - 1], alpha) }
+        }
+        c.set(left + 2, top + 3, eye, alpha)
+        c.set(left + 5, top + 3, eye, alpha)
+        // A smile, or a whoop on the hands.
+        c.box(left + 3, top + 4, 2, which == .surf ? 2 : 1, which == .surf ? RGB(hex: 0x5A1E12) : eye, alpha)
+        c.box(left + 2, top - 1, 4, 1, jam ? RGB(hex: 0xC8102E) : RGB(hex: 0xF7D660), alpha)
     }
 }
 

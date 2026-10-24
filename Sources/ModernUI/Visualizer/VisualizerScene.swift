@@ -26,7 +26,8 @@ nonisolated struct VisualizerInput {
     var treble: Float
     /// Overall loudness, 0...1, smoothed.
     var level: Float
-    /// A kick (a sharp rise in the bass) landed this frame.
+    /// A kick (a sharp rise in the bass) landed this frame. A breakdown's bassline sets it off too, between the beats:
+    /// a scene that makes a big thing of kicks should go gently while `breakdown` is up.
     var beat: Bool
     /// 1 on a kick, decaying to 0 over about half a second: for flashes.
     var pulse: Float
@@ -38,6 +39,14 @@ nonisolated struct VisualizerInput {
     var beats: Int
     /// Seconds of music the scene has heard.
     var time: Double
+    /// How deep into a breakdown, 0...1, eased: the bass's low points between hits have sat well below their usual
+    /// level for over a second (a gap in the kicks alone won't do: a breakdown's bassline keeps hitting). 0 in silence.
+    var breakdown: Float = 0
+    /// The bass came back after a breakdown this frame: the first kick on the downbeat after one (at most once in
+    /// eight seconds).
+    var drop = false
+    /// What is playing, for a scene that writes it out (`Title · Creator`; empty when nothing is known).
+    var caption = ""
 
     static let barCount = ModernVisualizerFrame.barCount
     static let scopeCount = ModernVisualizerFrame.scopeCount
@@ -90,6 +99,17 @@ nonisolated struct SceneStyle: Equatable {
 
     /// The `i`th spark colour, wrapping.
     func spark(_ i: Int) -> RGB { sparks[((i % sparks.count) + sparks.count) % sparks.count] }
+
+    /// Whether every colour is within `tolerance` (per channel, 0...1) of `other`'s. Pictures a scene caches for its
+    /// palette can be kept until the palette has visibly moved: the Cycle colours turn it eight times a second.
+    func isClose(to other: SceneStyle, tolerance: Double = 0.02) -> Bool {
+        guard isLight == other.isLight, sparks.count == other.sparks.count else { return false }
+        func near(_ a: RGB, _ b: RGB) -> Bool {
+            abs(a.r - b.r) <= tolerance && abs(a.g - b.g) <= tolerance && abs(a.b - b.b) <= tolerance
+        }
+        return near(ink, other.ink) && near(glow, other.glow) && near(accent, other.accent) && near(deep, other.deep)
+            && near(mid, other.mid) && zip(sparks, other.sparks).allSatisfy { near($0, $1) }
+    }
 }
 
 /// One of the visualiser's animations. Paused or stopped, the artwork shows a still frame drawn after 40 updates of
@@ -120,6 +140,22 @@ extension ModernPlayerState.Visualizer {
         case .tunnel: TunnelScene(seed: seed)
         case .fireworks: FireworksScene(seed: seed)
         case .lava: LavaScene(seed: seed)
+        case .vuMeters: VUMeterScene(seed: seed)
+        case .heartbeat: HeartbeatScene(seed: seed)
+        case .turntable: TurntableScene(seed: seed)
+        case .speaker: SpeakerScene(seed: seed)
+        case .loops: LoopsScene(seed: seed)
+        case .pendulums: PendulumScene(seed: seed)
+        case .cells: CellsScene(seed: seed)
+        case .synthwave: SynthwaveScene(seed: seed)
+        case .skyline: SkylineScene(seed: seed)
+        case .aurora: AuroraScene(seed: seed)
+        case .rain: RainScene(seed: seed)
+        case .campfire: CampfireScene(seed: seed)
+        case .breakfastBand: BreakfastBandScene(seed: seed)
+        case .drummingCat: DrummingCatScene(seed: seed)
+        case .rally: RallyScene(seed: seed)
+        case .demoscene: DemosceneScene(seed: seed)
         case .rotate, .off: nil
         }
     }

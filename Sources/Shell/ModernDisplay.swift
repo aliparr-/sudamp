@@ -25,6 +25,7 @@ nonisolated enum ModernDisplay {
         var muted = false
         var visualizerInterval: Double = ModernPlayerState.defaultVisualizerInterval
         var artworkColors = "genre"
+        var visualizerEffect = "none"
     }
 
     static let idleTitle = "Pick a genre to start listening"
@@ -78,6 +79,7 @@ nonisolated enum ModernDisplay {
         m.visualizerInterval = prefs.visualizerInterval.isFinite ? min(max(prefs.visualizerInterval, 5), 600)
             : ModernPlayerState.defaultVisualizerInterval
         m.artworkColors = ArtworkColors(rawValue: prefs.artworkColors) ?? .default
+        m.visualizerEffect = ModernPlayerState.VisualizerEffect(rawValue: prefs.visualizerEffect) ?? .default
         return m
     }
 
