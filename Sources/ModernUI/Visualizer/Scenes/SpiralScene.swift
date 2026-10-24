@@ -5,7 +5,8 @@
 // of its cells, streaks past through the glass. The glass is drawn as fine strands round the tube that crowd towards
 // its bright edges, with light streaking along them and rings round it, blurring as they rush by. The ride goes faster
 // when the music is loud, surges on every kick and hurtles after the drop (the picture rushing in on itself); it slows
-// through a breakdown and stops in silence. Each kick lights a band round the tube ahead in the artwork's spark
+// through a breakdown and stops in silence. The camera rumbles more the faster it goes, jolts on each kick and leans
+// back as the ride surges: the picture moved and turned, drawn just far enough in that its edges never show. Each kick lights a band round the tube ahead in the artwork's spark
 // colours, the drop a white one, and the hall's lights flicker with the treble. On light artwork the hall is pale and
 // the glass smoked. A seed varies where along the tube the ride starts and the hall's lights.
 //
@@ -89,6 +90,14 @@ nonisolated final class SpiralScene: VisualizerScene {
     private var sinceDrop = 10.0
     private var treble = 0.0
     private var frameTime = 1.0 / 60
+    /// The camera's shake: the rumble's clock (quicker at speed), the last jolt (seconds since, how hard, which way it
+    /// tips), and the lean from the ride's surges.
+    private var rumble = 0.0
+    private var sinceJolt = 10.0
+    private var jolt = 0.0
+    private var joltSide = 1.0
+    private var lean = 0.0
+    private var lastSpeed = 0.0
     private var glows: [Glow] = []
     private var glowCount = 0
     private let hueStep: Double
@@ -147,6 +156,25 @@ nonisolated final class SpiralScene: VisualizerScene {
         if wanted == 0, speed < 0.03 { speed = 0 }
         along += speed * dt
 
+        // The camera shakes: a rumble that grows and quickens with the speed, a jolt on each kick that springs back
+        // (a big one on the drop), and a lean back as the ride surges and forward as it slows.
+        let fast = min(1, speed / 5)
+        rumble += dt * (0.7 + 0.8 * fast)
+        sinceJolt += dt
+        if activity > 0.4, input.drop || input.beat {
+            sinceJolt = 0
+            jolt = input.drop ? 1.8 : (0.45 + 0.55 * bass) * (1 - 0.6 * calm)
+            joltSide = input.beats.isMultiple(of: 2) ? 1 : -1
+        }
+        let surge = dt > 0 ? (speed - lastSpeed) / dt : 0
+        lastSpeed = speed
+        lean += (min(max(surge / 12, -1), 1) - lean) * (1 - exp(-dt / 0.12))
+        // At rest, nothing moves.
+        if activity == 0, speed == 0 {
+            jolt = 0
+            lean = 0
+        }
+
         for i in glows.indices {
             glows[i].age += dt
             if activity < 0.05 { glows[i].strength *= exp(-dt / 0.04) }
@@ -189,14 +217,45 @@ nonisolated final class SpiralScene: VisualizerScene {
                                   bitmapInfo: CGBitmapInfo(rawValue: CGImageAlphaInfo.premultipliedLast.rawValue),
                                   provider: provider, decode: nil, shouldInterpolate: smoothed, intent: .defaultIntent)
         else { return }
-        // After the drop, the picture rushes in on itself.
-        let rush = sinceDrop < 4 ? CGFloat(exp(-sinceDrop / 1.1)) * 0.14 : 0
+        // After the drop, the picture rushes in on itself; and the camera shakes, the picture drawn just far enough in
+        // that its edges never show.
+        let rush = sinceDrop < 4 ? CGFloat(exp(-sinceDrop / 1.1) * activity) * 0.14 : 0
+        let shake = shake(unit: min(w, h) / 92)
+        let zoom = 1 + rush + 2 * (shake.reach + shake.tilt * 0.71 * max(w, h)) / min(w, h)
+        let moved = zoom > 1.0005 || shake.x != 0 || shake.y != 0
         ctx.saveGState()
-        ctx.interpolationQuality = smoothed || rush > 0.002 ? .medium : .none
-        ctx.translateBy(x: w / 2, y: h / 2)
-        ctx.scaleBy(x: 1 + rush, y: -(1 + rush))
+        ctx.interpolationQuality = smoothed || moved ? .medium : .none
+        ctx.translateBy(x: w / 2 + shake.x, y: h / 2 + shake.y)
+        ctx.rotate(by: shake.roll)
+        ctx.scaleBy(x: zoom, y: -zoom)
         ctx.draw(image, in: CGRect(x: -w / 2, y: -h / 2, width: w, height: h))
         ctx.restoreGState()
+    }
+
+    /// The camera's shake now, in points (`unit` to the 92-point artwork) and radians, and the most it can reach (the
+    /// picture is drawn far enough in to cover it).
+    private func shake(unit: CGFloat) -> (x: CGFloat, y: CGFloat, roll: CGFloat, reach: CGFloat, tilt: CGFloat) {
+        let fast = min(1, speed / 5)
+        // The rumble: smooth noise, about ten wobbles a second, over a point either way at full speed.
+        let size = fast * fast * (1 - 0.5 * calm)
+        func noise(_ offset: Double) -> Double {
+            let x = (rumble * 40 + offset).truncatingRemainder(dividingBy: Double(Self.flowCount))
+            let i = Int(x), t = Float(x - Double(i))
+            let a = flow[i % Self.flowCount], b = flow[(i + 1) % Self.flowCount]
+            return Double(a + (b - a) * t) * 2 - 1
+        }
+        var x = 1.2 * size * noise(0), y = 1.2 * size * noise(83), roll = 0.008 * size * noise(171)
+        // The jolt: a bump that rings down over a few tenths of a second.
+        let ring = jolt * exp(-sinceJolt / 0.13)
+        let bounce = ring * sin(2 * .pi * 7 * sinceJolt)
+        y += 2 * bounce
+        x += 0.6 * joltSide * bounce
+        roll += 0.011 * joltSide * bounce
+        // The lean: the picture dips as the ride surges, rises as it slows.
+        y += 1.4 * lean
+        let reach = 1.2 * size + 2.1 * ring + 1.4 * abs(lean)
+        let tilt = 0.008 * size + 0.011 * ring
+        return (CGFloat(x) * unit, CGFloat(y) * unit, CGFloat(roll), CGFloat(reach) * unit, CGFloat(tilt))
     }
 
     /// The kicks' bands of light along the tube, as a table from a turn behind the camera.
