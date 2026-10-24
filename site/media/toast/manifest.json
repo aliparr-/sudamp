@@ -1,0 +1,68 @@
+[
+  {
+    "cell" : 46,
+    "columns" : 32,
+    "dance" : "dance-1.png",
+    "fps" : 30,
+    "frames" : 929,
+    "idle" : "idle-1.png",
+    "idleFrames" : 180,
+    "idleStillFrom" : 113,
+    "look" : "golden, butter",
+    "n" : 1,
+    "posterFrame" : 577,
+    "seed" : 4
+  },
+  {
+    "cell" : 46,
+    "columns" : 32,
+    "dance" : "dance-2.png",
+    "fps" : 30,
+    "frames" : 929,
+    "idle" : "idle-2.png",
+    "idleFrames" : 180,
+    "idleStillFrom" : 119,
+    "look" : "light, butter",
+    "n" : 2,
+    "seed" : 16
+  },
+  {
+    "cell" : 46,
+    "columns" : 32,
+    "dance" : "dance-3.png",
+    "fps" : 30,
+    "frames" : 929,
+    "idle" : "idle-3.png",
+    "idleFrames" : 180,
+    "idleStillFrom" : 117,
+    "look" : "well done, jam",
+    "n" : 3,
+    "seed" : 5
+  },
+  {
+    "cell" : 46,
+    "columns" : 32,
+    "dance" : "dance-4.png",
+    "fps" : 30,
+    "frames" : 929,
+    "idle" : "idle-4.png",
+    "idleFrames" : 180,
+    "idleStillFrom" : 115,
+    "look" : "wholemeal, butter",
+    "n" : 4,
+    "seed" : 17
+  },
+  {
+    "cell" : 46,
+    "columns" : 32,
+    "dance" : "dance-5.png",
+    "fps" : 30,
+    "frames" : 929,
+    "idle" : "idle-5.png",
+    "idleFrames" : 180,
+    "idleStillFrom" : 113,
+    "look" : "golden, jam, sunglasses",
+    "n" : 5,
+    "seed" : 11
+  }
+]

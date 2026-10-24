@@ -1,0 +1,180 @@
+{
+  "skin": "sudamp-dark",
+  "window": "playlist",
+  "scale": 1,
+  "focused": true,
+  "phase": "playing",
+  "genre": "deep-house",
+  "genreName": "Deep House",
+  "current": 0,
+  "statusText": "[DEEP HOUSE] SOLAR CREW - SUNSET SESSIONS",
+  "position": 754,
+  "duration": 3720,
+  "volume": 80,
+  "balance": 0,
+  "kbps": 160,
+  "sampleRate": 48000,
+  "channels": 2,
+  "equalizer": {
+    "preset": "Dance",
+    "enabled": true
+  },
+  "visualizerMode": "spectrum",
+  "visualizer": {
+    "bars": [
+      0.2,
+      0.5,
+      0.75,
+      0.95,
+      1.0,
+      0.9,
+      0.7,
+      0.55,
+      0.62,
+      0.75,
+      0.5,
+      0.4,
+      0.33,
+      0.45,
+      0.56,
+      0.25,
+      0.2,
+      0.12,
+      0.06
+    ],
+    "peaks": [
+      0.3,
+      0.6,
+      0.85,
+      1.0,
+      1.0,
+      0.95,
+      0.8,
+      0.65,
+      0.7,
+      0.8,
+      0.6,
+      0.5,
+      0.44,
+      0.5,
+      0.62,
+      0.35,
+      0.3,
+      0.2,
+      0.12
+    ]
+  },
+  "streams": [
+    {
+      "source": "youtube",
+      "ref": "sUdAmP00001",
+      "title": "Sunset Sessions",
+      "creator": "Solar Crew",
+      "durationSec": 3720
+    },
+    {
+      "source": "radio",
+      "id": "radio:deep-radio",
+      "ref": "https://stream.deepradio.fm/live",
+      "title": "Deep Radio",
+      "creator": "Deep Radio"
+    },
+    {
+      "source": "soundcloud",
+      "ref": "nightdrive/extended-mix",
+      "title": "Nightdrive (Extended Mix)",
+      "creator": "Nightdrive",
+      "durationSec": 461
+    },
+    {
+      "source": "mixcloud",
+      "ref": "WarehouseSessions/session-004",
+      "title": "Warehouse Session 004",
+      "creator": "Warehouse Sessions",
+      "durationSec": 3492
+    },
+    {
+      "source": "youtube-live",
+      "ref": "@deephouse247",
+      "title": "Deep House 24/7",
+      "creator": "Deep House Radio"
+    },
+    {
+      "source": "youtube",
+      "ref": "sUdAmP00002",
+      "title": "Boiler Room: Lisbon",
+      "creator": "Ana Lua",
+      "durationSec": 5400
+    },
+    {
+      "source": "soundcloud",
+      "ref": "afterhours/tape-07",
+      "title": "Afterhours Tape 07",
+      "creator": "Afterhours",
+      "durationSec": 2711
+    },
+    {
+      "source": "radio",
+      "id": "radio:house-fm",
+      "ref": "https://live.housefm.net/aac",
+      "title": "House FM",
+      "creator": "House FM"
+    },
+    {
+      "source": "mixcloud",
+      "ref": "BerlinBasement/basement-12",
+      "title": "Berlin Basement 12",
+      "creator": "Berlin Basement",
+      "durationSec": 4210
+    },
+    {
+      "source": "youtube",
+      "ref": "sUdAmP00003",
+      "title": "Rooftop Sunrise Set",
+      "creator": "Mira Kade",
+      "durationSec": 3305
+    },
+    {
+      "source": "soundcloud",
+      "ref": "midnightgarage/side-a",
+      "title": "Midnight Garage",
+      "creator": "MG Collective",
+      "durationSec": 389
+    },
+    {
+      "source": "youtube",
+      "ref": "sUdAmP00004",
+      "title": "Coastal Drive",
+      "creator": "Low Tide",
+      "durationSec": 2980
+    },
+    {
+      "source": "mixcloud",
+      "ref": "SundaySelections/morning-01",
+      "title": "Sunday Morning Selections",
+      "creator": "Sunday Selections",
+      "durationSec": 3600
+    },
+    {
+      "source": "radio",
+      "id": "radio:minimal-waves",
+      "ref": "https://radio.minimalwaves.org/stream",
+      "title": "Minimal Waves",
+      "creator": "Minimal Waves"
+    },
+    {
+      "source": "youtube",
+      "ref": "sUdAmP00005",
+      "title": "Warm Up Mix",
+      "creator": "Kofi Lane",
+      "durationSec": 4012
+    },
+    {
+      "source": "soundcloud",
+      "ref": "lagoon/sessions-3",
+      "title": "Lagoon Sessions 3",
+      "creator": "Lagoon",
+      "durationSec": 3133
+    }
+  ]
+}

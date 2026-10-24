@@ -1,0 +1,445 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>sudamp · The Sudden Amp · music, suddenly</title>
+<meta name="description" content="sudamp is a free little music player for your Mac. Pick a genre, a hand-picked mix starts playing in about two seconds, and you get back to work. Twenty-eight visualisers, modern and classic skins, and a dancing slice of toast.">
+<meta name="theme-color" content="#160a26">
+<meta property="og:title" content="sudamp · music, suddenly">
+<meta property="og:description" content="Pick a genre. Music plays. Get back to work. A free little music player for your Mac, with a dancing slice of toast.">
+<meta property="og:type" content="website">
+<meta property="og:image" content="media/og.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="preload" href="fonts/bricolage.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="fonts/instrument-serif-italic.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="fonts/silkscreen.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="css/style.css">
+<script type="module" src="js/main.js"></script>
+</head>
+<body>
+<a class="skip" href="#how">Skip to content</a>
+
+<!-- ───────────────────────── Nav ───────────────────────── -->
+<header class="nav" data-nav>
+  <a class="nav__brand" href="#top" aria-label="sudamp, back to the top">
+    <img src="favicon.svg" alt="" width="36" height="36">
+    <span class="nav__word">sudamp</span>
+    <span class="nav__tag">The Sudden Amp</span>
+  </a>
+  <nav class="nav__links" aria-label="Sections">
+    <a href="#how">How it works</a>
+    <a href="#visualisers">Visualisers</a>
+    <a href="#skins">Skins</a>
+    <a href="#toast">Meet Toast</a>
+  </nav>
+  <div class="nav__actions">
+    <button class="sound" type="button" data-sound-toggle aria-pressed="false" aria-label="Play Toast's theme tune">
+      <span class="sound__bars" aria-hidden="true"><i></i><i></i><i></i><i></i></span>
+      <span class="sound__label" data-sound-label>Sound off</span>
+    </button>
+    <a class="btn btn--small btn--ink" href="#download" data-download-link>Download</a>
+  </div>
+</header>
+
+<main id="top">
+
+<!-- ───────────────────────── Hero ───────────────────────── -->
+<section class="hero" aria-labelledby="hero-title" data-hero>
+  <div class="hero__sky" aria-hidden="true">
+    <div class="hero__blob hero__blob--a"></div>
+    <div class="hero__blob hero__blob--b"></div>
+    <div class="hero__blob hero__blob--c"></div>
+    <div class="hero__blob hero__blob--d"></div>
+    <div class="hero__stars"></div>
+  </div>
+  <div class="hero__floor" aria-hidden="true"><div class="hero__grid"></div></div>
+
+  <div class="hero__inner">
+    <div class="hero__copy">
+      <div class="badge-spin" aria-hidden="true">
+        <svg viewBox="0 0 200 200">
+          <defs><path id="ring" d="M100 100m-74 0a74 74 0 1 1 148 0a74 74 0 1 1-148 0"/></defs>
+          <text><textPath href="#ring">28 VISUALISERS ✦ 2 SKINS ✦ 1 TOAST ✦ 0 FUSS ✦ </textPath></text>
+        </svg>
+        <span class="badge-spin__core">free!</span>
+      </div>
+      <p class="eyebrow eyebrow--glow"><span class="dot"></span>A free little music player for your Mac</p>
+      <h1 class="hero__title" id="hero-title">
+        <span class="hero__line hero__line--1" data-split>Music,</span>
+        <span class="hero__line hero__line--2"><em data-split>suddenly.</em></span>
+      </h1>
+      <p class="hero__lede">Pick a genre. A hand-picked mix starts playing in about two seconds. Get back to work. <strong>That's it. That's the app.</strong></p>
+      <div class="hero__ctas">
+        <a class="btn btn--butter" href="#download" data-download-link>
+          <svg class="btn__apple" viewBox="0 0 17 20" aria-hidden="true"><path fill="currentColor" d="M14.1 10.6c0-2.6 2.1-3.8 2.2-3.9-1.2-1.8-3.1-2-3.7-2.1-1.6-.2-3.1.9-3.9.9-.8 0-2-.9-3.4-.9-1.7 0-3.3 1-4.2 2.6-1.8 3.1-.5 7.7 1.3 10.2.9 1.2 1.9 2.6 3.2 2.6 1.3-.1 1.8-.8 3.3-.8 1.6 0 2 .8 3.4.8 1.4 0 2.3-1.3 3.1-2.5 1-1.4 1.4-2.8 1.4-2.9-.1 0-2.7-1-2.7-4zM11.6 3.1c.7-.9 1.2-2.1 1.1-3.3-1 0-2.3.7-3 1.6-.7.8-1.3 2-1.1 3.2 1.1.1 2.3-.6 3-1.5z"/></svg>
+          Download for Mac
+        </a>
+        <a class="btn btn--ghost" href="#player" data-try>Try it right here <span aria-hidden="true">↘</span></a>
+      </div>
+    </div>
+
+    <div class="hero__stage">
+      <div class="spot" aria-hidden="true"></div>
+      <!-- The modern player, rebuilt in HTML: pick a genre and it plays. -->
+      <div class="player player--hero" id="player" data-player data-tint="teal" data-appearance="dark">
+        <div class="hint" aria-hidden="true" data-hint>
+          <span>try it!</span>
+          <svg viewBox="0 0 90 60"><path d="M4 8c22-6 52 0 62 22 3 7 3 13 1 20" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/><path d="M58 42l9 10 9-11" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </div>
+        <div class="toast-wrap" data-hero-toast>
+          <canvas class="pixel toast-canvas" width="46" height="46" data-toast-canvas aria-label="Toast, sudamp's mascot, dancing" role="img"></canvas>
+          <p class="bubble" data-bubble><span>Psst. Pick a genre!</span></p>
+        </div>
+        <div class="player__card glass">
+          <div class="player__top">
+            <div class="art" data-art>
+              <div class="art__base"></div>
+              <div class="art__blob art__blob--1"></div><div class="art__blob art__blob--2"></div><div class="art__blob art__blob--3"></div>
+              <video class="art__video" muted playsinline loop preload="none" data-art-video aria-hidden="true"></video>
+              <canvas class="pixel art__idle" width="46" height="46" data-art-idle aria-hidden="true"></canvas>
+              <div class="art__gloss"></div>
+            </div>
+            <div class="player__meta">
+              <div class="player__row">
+                <button class="capsule" type="button" data-genre-button aria-haspopup="menu" aria-expanded="false">
+                  <span data-genre-label>Pick a Genre</span>
+                  <svg viewBox="0 0 12 12" aria-hidden="true"><path d="M3 4.5 6 7.5 9 4.5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                </button>
+                <button class="icon-btn icon-btn--more" type="button" aria-label="More">
+                  <svg viewBox="0 0 20 20" aria-hidden="true"><circle cx="4.5" cy="10" r="1.6"/><circle cx="10" cy="10" r="1.6"/><circle cx="15.5" cy="10" r="1.6"/></svg>
+                </button>
+              </div>
+              <div class="marquee-title"><span class="player__title" data-title>Nothing playing yet</span></div>
+              <p class="player__creator" data-creator>Music in about two seconds</p>
+              <p class="player__badges"><span class="badge" data-source hidden>SoundCloud</span><span class="player__format" data-format></span></p>
+            </div>
+          </div>
+          <div class="progress" aria-hidden="true">
+            <div class="progress__track"><div class="progress__fill" data-progress></div></div>
+            <div class="progress__times"><span data-elapsed>0:00</span><span data-duration>--:--</span></div>
+          </div>
+          <div class="transport">
+            <button class="icon-btn icon-btn--accent" type="button" aria-label="Favourite" data-fav aria-pressed="false">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20.3s-7.6-4.6-9.2-9.3C1.6 7.3 4 4.2 7.3 4.2c2 0 3.6 1.1 4.7 2.7 1.1-1.6 2.7-2.7 4.7-2.7 3.3 0 5.7 3.1 4.5 6.8-1.6 4.7-9.2 9.3-9.2 9.3z"/></svg>
+            </button>
+            <button class="icon-btn" type="button" aria-label="Previous" data-prev>
+              <svg viewBox="0 0 28 20" aria-hidden="true"><path d="M13 3.2v13.6L3 10zM25 3.2v13.6L15 10z" stroke-linejoin="round"/></svg>
+            </button>
+            <button class="play" type="button" aria-label="Play" data-play>
+              <svg class="play__play" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5.2v13.6c0 .8.9 1.3 1.6.8l10.2-6.8c.6-.4.6-1.2 0-1.6L9.6 4.4C8.9 3.9 8 4.4 8 5.2z"/></svg>
+              <svg class="play__pause" viewBox="0 0 24 24" aria-hidden="true"><rect x="6.5" y="5" width="4" height="14" rx="1.3"/><rect x="13.5" y="5" width="4" height="14" rx="1.3"/></svg>
+            </button>
+            <button class="icon-btn" type="button" aria-label="Next" data-next>
+              <svg viewBox="0 0 28 20" aria-hidden="true"><path d="M3 3.2v13.6L13 10zM15 3.2v13.6L25 10z" stroke-linejoin="round"/></svg>
+            </button>
+            <button class="icon-btn" type="button" aria-label="Shuffle genres" data-shuffle>
+              <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7h3.5c2 0 3.3 1 4.4 2.8l2.2 4.4c1.1 1.8 2.4 2.8 4.4 2.8H21M17.5 13.5 21 17l-3.5 3.5M3 17h3.5c1.4 0 2.4-.5 3.3-1.4M21 7h-3.5c-1.4 0-2.4.5-3.3 1.4M17.5 3.5 21 7l-3.5 3.5"/></svg>
+            </button>
+          </div>
+          <div class="player__bottom">
+            <svg class="vol-ico" viewBox="0 0 20 20" aria-hidden="true"><path d="M3 7.5h2.7L9.5 4v12l-3.8-3.5H3z"/></svg>
+            <input class="slider" type="range" min="0" max="100" value="72" aria-label="Volume" data-volume>
+            <svg class="vol-ico" viewBox="0 0 24 20" aria-hidden="true"><path d="M3 7.5h2.7L9.5 4v12l-3.8-3.5H3z"/><path d="M13 6.5c1.2 1 1.8 2.2 1.8 3.5s-.6 2.5-1.8 3.5M16 4c2 1.7 3 3.7 3 6s-1 4.3-3 6" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+            <span class="player__panels">
+              <svg viewBox="0 0 20 20" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M5 3v14M10 3v14M15 3v14"/><circle cx="5" cy="12" r="1.8" fill="currentColor"/><circle cx="10" cy="7" r="1.8" fill="currentColor"/><circle cx="15" cy="11" r="1.8" fill="currentColor"/></svg>
+              <svg viewBox="0 0 20 20" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M7 5h10M7 10h10M7 15h10"/><circle cx="3.5" cy="5" r="1" fill="currentColor"/><circle cx="3.5" cy="10" r="1" fill="currentColor"/><circle cx="3.5" cy="15" r="1" fill="currentColor"/></svg>
+              <svg viewBox="0 0 20 20" aria-hidden="true"><circle cx="10" cy="10" r="7" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M10 3a7 7 0 0 1 0 14z"/></svg>
+            </span>
+          </div>
+        </div>
+
+        <div class="menu glass" role="menu" data-genre-menu hidden>
+          <button role="menuitem" type="button" data-genre="deep-house"><span>Deep House</span><kbd>⌘1</kbd></button>
+          <button role="menuitem" type="button" data-genre="house"><span>House</span><kbd>⌘2</kbd></button>
+          <button role="menuitem" type="button" data-genre="techno"><span>Techno</span><kbd>⌘3</kbd></button>
+          <button role="menuitem" type="button" data-genre="drum-and-bass"><span>Drum &amp; Bass</span><kbd>⌘4</kbd></button>
+          <button role="menuitem" type="button" data-genre="lo-fi"><span>Lo-fi</span><kbd>⌘5</kbd></button>
+          <button role="menuitem" type="button" data-genre="ambient"><span>Ambient</span><kbd>⌘6</kbd></button>
+          <hr>
+          <button role="menuitem" type="button" data-genre="favourites"><span>★ Favourites</span></button>
+          <button role="menuitem" type="button" data-genre="surprise"><span>Surprise Me</span><kbd>⌘0</kbd></button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+</section>
+
+<!-- ───────────────────────── Tapes ───────────────────────── -->
+<div class="tapes" aria-hidden="true">
+  <div class="tape tape--lcd"><div class="tape__track" data-marquee>
+    <span>*** CLICK HERE TO PICK A GENRE ***</span><span>[DEEP HOUSE] SOLAR CREW - SUNSET SESSIONS</span><span>*** 128 KBPS ** 48 KHZ ***</span><span>[LO-FI] RAINY WINDOW RADIO</span><span>*** PREPARING STREAM ENGINE 63% ***</span><span>[TECHNO] KOLLEKTIV NULL - CONCRETE CATHEDRAL</span>
+  </div></div>
+  <div class="tape tape--pink"><div class="tape__track tape__track--reverse" data-marquee>
+    <span>Deep House</span><b>✦</b><span>House</span><b>✦</b><span>Techno</span><b>✦</b><span>Drum &amp; Bass</span><b>✦</b><span>Lo-fi</span><b>✦</b><span>Ambient</span><b>✦</b>
+  </div></div>
+</div>
+
+<!-- ───────────────────────── How it works ───────────────────────── -->
+<section class="how section" id="how" aria-labelledby="how-title">
+  <header class="section__head">
+    <p class="kicker"><span>01</span> How it works</p>
+    <h2 class="h2" id="how-title"><span data-split>A three-step program.</span> <em class="serif">We counted.</em></h2>
+  </header>
+
+  <ol class="steps">
+    <li class="step step--pink" data-reveal>
+      <div class="step__num" aria-hidden="true">1</div>
+      <div class="step__art step__art--menu" aria-hidden="true">
+        <div class="mini-menu glass-light">
+          <span>Deep House</span><span>House</span><span>Techno</span><span>Drum &amp; Bass</span><span class="is-picked">Lo-fi</span><span>Ambient</span>
+        </div>
+        <svg class="cursor" viewBox="0 0 24 24"><path d="M5 2.5v17.2l4.3-4.1 2.8 6.4 3-1.3-2.8-6.3h6z" fill="#fff" stroke="#111" stroke-width="1.4" stroke-linejoin="round"/></svg>
+      </div>
+      <h3>Pick a genre.</h3>
+      <p>Deep House, Techno, Drum &amp; Bass, Lo-fi&hellip; one click on the big glowing button. No playlists to build, no algorithm to train, no account to make.</p>
+    </li>
+    <li class="step step--teal" data-reveal>
+      <div class="step__num" aria-hidden="true">2</div>
+      <div class="step__art step__art--play" aria-hidden="true">
+        <div class="stopwatch"><svg viewBox="0 0 120 120"><circle cx="60" cy="60" r="50" class="stopwatch__track"/><circle cx="60" cy="60" r="50" class="stopwatch__fill"/></svg><b>~2s</b></div>
+        <span class="src src--yt">YouTube</span><span class="src src--sc">SoundCloud</span><span class="src src--mc">Mixcloud</span><span class="src src--fm">Radio</span>
+      </div>
+      <h3>Music plays.</h3>
+      <p>A random mix from a hand-picked list starts in about two seconds, from YouTube, SoundCloud, Mixcloud or internet radio. Just the audio. Not feeling it? Hit Next.</p>
+    </li>
+    <li class="step step--butter" data-reveal>
+      <div class="step__num" aria-hidden="true">3</div>
+      <div class="step__art step__art--work" aria-hidden="true">
+        <div class="menubar"><span class="menubar__apple"></span><b>Numbers</b><span>File</span><span>Edit</span><span class="menubar__spacer"></span><svg class="menubar__toast" viewBox="0 0 16 16" data-glyph></svg><span>Fri 9:41</span></div>
+        <div class="sheet">
+          <div class="sheet__title">Q3 budget FINAL final (2).numbers</div>
+          <div class="sheet__grid" data-sheet></div>
+        </div>
+      </div>
+      <h3>Back to work.</h3>
+      <p>sudamp waits quietly in your menu bar while you do the actual job. Open it tomorrow and it carries on where you left off.</p>
+    </li>
+  </ol>
+</section>
+
+<!-- ───────────────────────── Visualisers ───────────────────────── -->
+<section class="vis section section--night zz" id="visualisers" aria-labelledby="vis-title">
+  <header class="section__head">
+    <p class="kicker kicker--light"><span>02</span> Visualisers</p>
+    <h2 class="h2" id="vis-title"><span data-split>Twenty-eight tiny shows.</span> <em class="serif">Every one of them listens.</em></h2>
+    <p class="section__lede">The artwork dances to whatever's playing. Pick a favourite, or set it to Rotate and sudamp moves through them all, choosing scenes that suit the genre: a campfire for lo-fi, a tunnel for techno, a game of rally for drum &amp; bass.</p>
+  </header>
+
+  <div class="tabs" role="tablist" aria-label="Visualiser sections" data-vis-tabs>
+    <button role="tab" type="button" aria-selected="true" data-tab="characters">Characters &amp; Games <i>6</i></button>
+    <button role="tab" type="button" aria-selected="false" data-tab="places">Places <i>8</i></button>
+    <button role="tab" type="button" aria-selected="false" data-tab="shapes">Shapes <i>7</i></button>
+    <button role="tab" type="button" aria-selected="false" data-tab="meters">Meters &amp; Hi-Fi <i>7</i></button>
+  </div>
+  <div class="vis__grid" data-vis-grid role="tabpanel" aria-label="Scenes"></div>
+
+  <div class="fx" data-reveal>
+    <div class="fx__screen">
+      <div class="crt">
+        <video muted playsinline loop preload="none" data-fx-video poster="media/scenes/synthwave.jpg"></video>
+      </div>
+    </div>
+    <div class="fx__copy">
+      <p class="kicker kicker--light"><span>FX</span> Add a finish</p>
+      <h3 class="h3">Rewind to <em class="serif">1987.</em></h3>
+      <p>Lay an effect over any scene. <strong>VHS</strong> brings the rental-shop tape: colour bleed, scanlines, a tracking band and the deck's PLAY sign. <strong>Kaleidoscope</strong> folds the scene into twelve mirrored wedges and slowly turns it.</p>
+      <div class="segmented" role="radiogroup" aria-label="Effect" data-fx>
+        <button type="button" role="radio" aria-checked="true" data-fx-name="none">None</button>
+        <button type="button" role="radio" aria-checked="false" data-fx-name="vhs">VHS</button>
+        <button type="button" role="radio" aria-checked="false" data-fx-name="kaleidoscope">Kaleidoscope</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ───────────────────────── Skins ───────────────────────── -->
+<section class="skins section zz" id="skins" aria-labelledby="skins-title" data-skins data-mode="modern">
+  <header class="section__head">
+    <p class="kicker"><span>03</span> Skins</p>
+    <h2 class="h2" id="skins-title"><span data-split>Two looks.</span> <em class="serif">One tiny amp.</em></h2>
+  </header>
+
+  <div class="switcher" role="radiogroup" aria-label="Skin class">
+    <button type="button" role="radio" aria-checked="true" data-skin-mode="modern">Modern</button>
+    <button type="button" role="radio" aria-checked="false" data-skin-mode="classic">Classic</button>
+    <span class="switcher__thumb" aria-hidden="true"></span>
+    <span class="switcher__keys" aria-hidden="true"><kbd>⇧</kbd><kbd>⌘</kbd><kbd>M</kbd></span>
+  </div>
+
+  <div class="skins__stage">
+    <!-- Modern -->
+    <div class="skins__pane skins__pane--modern" data-pane="modern">
+      <div class="wallpaper" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
+      <div class="stack" data-modern-stack data-tint="pink" data-appearance="dark">
+        <div class="player player--show">
+          <div class="player__card glass">
+            <div class="player__top">
+              <div class="art">
+                <div class="art__base"></div>
+                <div class="art__blob art__blob--1"></div><div class="art__blob art__blob--2"></div><div class="art__blob art__blob--3"></div>
+                <video class="art__video" muted playsinline loop preload="none" data-lazy-video data-src="media/scenes/breakfast-band.mp4" poster="media/scenes/breakfast-band.jpg" aria-hidden="true"></video>
+                <div class="art__gloss"></div>
+              </div>
+              <div class="player__meta">
+                <div class="player__row">
+                  <span class="capsule">Lo-fi <svg viewBox="0 0 12 12" aria-hidden="true"><path d="M3 4.5 6 7.5 9 4.5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+                  <span class="icon-btn icon-btn--more"><svg viewBox="0 0 20 20" aria-hidden="true"><circle cx="4.5" cy="10" r="1.6"/><circle cx="10" cy="10" r="1.6"/><circle cx="15.5" cy="10" r="1.6"/></svg></span>
+                </div>
+                <div class="marquee-title"><span class="player__title">Breakfast Beats, Side B</span></div>
+                <p class="player__creator">Kofi Lane</p>
+                <p class="player__badges"><span class="badge badge--mc">Mixcloud</span><span class="player__format">AAC · 44.1 kHz</span></p>
+              </div>
+            </div>
+            <div class="progress"><div class="progress__track"><div class="progress__fill" style="width:38%"></div></div><div class="progress__times"><span>14:52</span><span>39:10</span></div></div>
+            <div class="transport transport--static" aria-hidden="true">
+              <span class="icon-btn icon-btn--accent"><svg viewBox="0 0 24 24"><path d="M12 20.3s-7.6-4.6-9.2-9.3C1.6 7.3 4 4.2 7.3 4.2c2 0 3.6 1.1 4.7 2.7 1.1-1.6 2.7-2.7 4.7-2.7 3.3 0 5.7 3.1 4.5 6.8-1.6 4.7-9.2 9.3-9.2 9.3z"/></svg></span>
+              <span class="icon-btn"><svg viewBox="0 0 28 20"><path d="M13 3.2v13.6L3 10zM25 3.2v13.6L15 10z"/></svg></span>
+              <span class="play is-playing"><svg class="play__play" viewBox="0 0 24 24"><path d="M8 5.2v13.6c0 .8.9 1.3 1.6.8l10.2-6.8c.6-.4.6-1.2 0-1.6L9.6 4.4C8.9 3.9 8 4.4 8 5.2z"/></svg><svg class="play__pause" viewBox="0 0 24 24"><rect x="6.5" y="5" width="4" height="14" rx="1.3"/><rect x="13.5" y="5" width="4" height="14" rx="1.3"/></svg></span>
+              <span class="icon-btn"><svg viewBox="0 0 28 20"><path d="M3 3.2v13.6L13 10zM15 3.2v13.6L25 10z"/></svg></span>
+              <span class="icon-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7h3.5c2 0 3.3 1 4.4 2.8l2.2 4.4c1.1 1.8 2.4 2.8 4.4 2.8H21M17.5 13.5 21 17l-3.5 3.5M3 17h3.5c1.4 0 2.4-.5 3.3-1.4M21 7h-3.5c-1.4 0-2.4.5-3.3 1.4M17.5 3.5 21 7l-3.5 3.5"/></svg></span>
+            </div>
+          </div>
+        </div>
+
+        <div class="eq glass" aria-hidden="true">
+          <div class="eq__head"><b>Equalizer</b><span class="pill">Club <svg viewBox="0 0 12 12"><path d="M3 4.5 6 7.5 9 4.5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span><svg class="eq__reset" viewBox="0 0 20 20"><path d="M5.5 7.5A5.5 5.5 0 1 1 4.6 12" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/><path d="M3.5 4.2v4h4" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg><span class="toggle is-on"><i></i></span></div>
+          <div class="eq__body">
+            <div class="eq__scale"><span>+12</span><span>0</span><span>-12</span></div>
+            <div class="eq__plot">
+              <svg class="eq__curve" viewBox="0 0 300 100" preserveAspectRatio="none" data-eq-curve></svg>
+              <div class="eq__bands" data-eq-bands></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="stations glass" aria-hidden="true">
+          <div class="stations__head"><b>Lo-fi</b><span>16 stations</span></div>
+          <ul>
+            <li class="is-current"><span class="tag tag--now"><i></i><i></i><i></i></span><span class="stations__t">Breakfast Beats, Side B<small>Kofi Lane</small></span><time>39:10</time></li>
+            <li><span class="tag tag--fm">FM</span><span class="stations__t">Rainy Window Radio<small>24/7 beats to toast to</small></span><time>LIVE</time></li>
+            <li><span class="tag tag--yt">YT</span><span class="stations__t">Tape Hiss &amp; Teacups<small>Low Tide</small></span><time>1:02:14</time></li>
+            <li><span class="tag tag--sc">SC</span><span class="stations__t">Sunday Crossword<small>Mira Kade</small></span><time>47:30</time></li>
+            <li><span class="tag tag--mc">MC</span><span class="stations__t">Marmalade Skies<small>The Crumbs</small></span><time>58:12</time></li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="skins__copy">
+        <h3 class="h3">Modern</h3>
+        <p>The default. Native Liquid Glass in light or dark, in twelve tints, with an equalizer and a station list that slide out like drawers.</p>
+        <div class="tints" role="radiogroup" aria-label="Tint" data-tints></div>
+        <div class="segmented segmented--small" role="radiogroup" aria-label="Appearance" data-appearance-toggle>
+          <button type="button" role="radio" aria-checked="false" data-appearance="light">Light</button>
+          <button type="button" role="radio" aria-checked="true" data-appearance="dark">Dark</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Classic -->
+    <div class="skins__pane skins__pane--classic" data-pane="classic" hidden>
+      <div class="desktop" aria-hidden="true"></div>
+      <div class="classic" data-classic>
+        <div class="classic__win classic__win--main"><img class="pixel" alt="" data-classic-img="main"><canvas class="pixel classic__vis" data-classic-vis></canvas></div>
+        <div class="classic__win classic__win--eq"><img class="pixel" alt="" data-classic-img="equalizer"></div>
+        <div class="classic__win classic__win--pl"><img class="pixel" alt="" data-classic-img="playlist"></div>
+      </div>
+      <div class="skins__copy">
+        <h3 class="h3">Classic</h3>
+        <p>Pixel-perfect and proud of it. It plays classic Winamp skins (<code>.wsz</code>), comes with a hundred from the Winamp Skin Museum, and wears any skin you drop on it.</p>
+        <div class="chips" role="radiogroup" aria-label="Classic skin" data-classic-skins></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ───────────────────────── Toast ───────────────────────── -->
+<section class="meet section zz" id="toast" aria-labelledby="toast-title">
+  <div class="meet__sun" aria-hidden="true"></div>
+  <header class="section__head">
+    <p class="kicker"><span>04</span> The mascot</p>
+    <h2 class="h2" id="toast-title"><span data-split>Meet Toast.</span> <em class="serif">Mascot. Dancer. Technically bread.</em></h2>
+  </header>
+
+  <div class="meet__body">
+    <div class="meet__stage" data-reveal>
+      <div class="meet__disc" aria-hidden="true"></div>
+      <canvas class="pixel meet__toast" width="46" height="46" data-meet-toast role="img" aria-label="Toast dancing"></canvas>
+      <button class="btn btn--ink btn--retoast" type="button" data-retoast>
+        <svg viewBox="0 0 20 20" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16.5 7A7 7 0 0 0 3.6 6.2M3.5 2.5v4h4M3.5 13a7 7 0 0 0 12.9.8M16.5 17.5v-4h-4"/></svg>
+        Re-toast
+      </button>
+      <p class="meet__look" data-look aria-live="polite">Golden, with butter</p>
+    </div>
+
+    <article class="card" data-reveal>
+      <header class="card__head">
+        <span class="card__name">TOAST</span><span class="card__lv">LV 99</span>
+      </header>
+      <p class="card__type"><span>BREAD</span><span>DANCE</span></p>
+      <dl class="card__stats">
+        <div><dt>Moves</dt><dd>Hands on hips, clapping, waving, disco pointing, stepping, the robot</dd></div>
+        <div><dt>Special</dt><dd>Flips its butter when the bass drops</dd></div>
+        <div><dt>Doneness</dt><dd>Light, golden, well done or wholemeal</dd></div>
+        <div><dt>Wears</dt><dd>Sneakers. Sometimes sunglasses.</dd></div>
+        <div><dt>Day job</dt><dd>Your app icon and your menu bar</dd></div>
+        <div><dt>Side gigs</dt><dd>Sings in Breakfast Band. Crowd-surfs in Pixel DJ.</dd></div>
+      </dl>
+      <footer class="card__foot">When the music stops, it stands still and smiles. <span aria-hidden="true">:)</span></footer>
+    </article>
+  </div>
+</section>
+
+<!-- ───────────────────────── Download ───────────────────────── -->
+<section class="download section zz" id="download" aria-labelledby="dl-title" data-download>
+  <div class="download__rays" aria-hidden="true"></div>
+  <div class="download__inner">
+    <h2 class="download__title" id="dl-title"><span data-split>Pop one in.</span></h2>
+    <p class="download__lede">sudamp is free and open source. It's for Macs with Apple silicon running macOS 15 or later.</p>
+
+    <div class="toaster" data-toaster aria-hidden="true">
+      <canvas class="pixel toaster__toast" width="46" height="46" data-toaster-toast></canvas>
+      <canvas class="pixel toaster__body" width="46" height="30" data-toaster-body></canvas>
+    </div>
+
+    <a class="btn btn--mega" href="https://github.com/aliparr-/sudamp/releases/latest" data-download-button>
+      <svg class="btn__apple" viewBox="0 0 17 20" aria-hidden="true"><path fill="currentColor" d="M14.1 10.6c0-2.6 2.1-3.8 2.2-3.9-1.2-1.8-3.1-2-3.7-2.1-1.6-.2-3.1.9-3.9.9-.8 0-2-.9-3.4-.9-1.7 0-3.3 1-4.2 2.6-1.8 3.1-.5 7.7 1.3 10.2.9 1.2 1.9 2.6 3.2 2.6 1.3-.1 1.8-.8 3.3-.8 1.6 0 2 .8 3.4.8 1.4 0 2.3-1.3 3.1-2.5 1-1.4 1.4-2.8 1.4-2.9-.1 0-2.7-1-2.7-4zM11.6 3.1c.7-.9 1.2-2.1 1.1-3.3-1 0-2.3.7-3 1.6-.7.8-1.3 2-1.1 3.2 1.1.1 2.3-.6 3-1.5z"/></svg>
+      <span>Download sudamp</span>
+      <small>for macOS</small>
+    </a>
+    <ul class="download__facts">
+      <li>Free</li><li>Open source, GPL-3.0</li><li>macOS 15+</li><li>Apple silicon</li>
+    </ul>
+    <p class="download__alt">Or build it yourself: <a href="https://github.com/aliparr-/sudamp">github.com/aliparr-/sudamp</a></p>
+  </div>
+</section>
+
+</main>
+
+<!-- ───────────────────────── Footer ───────────────────────── -->
+<footer class="foot">
+  <div class="foot__lcd" aria-hidden="true"><div class="tape__track" data-marquee><span>*** IT REALLY BUTTERS THE TOAST ***</span><span>[SUDAMP] THANKS FOR SCROLLING</span><span>*** IT REALLY BUTTERS THE TOAST ***</span><span>[SUDAMP] NOW GET BACK TO WORK</span></div></div>
+  <div class="foot__cols">
+    <div>
+      <p class="foot__brand"><img src="favicon.svg" alt="" width="28" height="28"> sudamp <span>The Sudden Amp</span></p>
+      <p>A free, open-source music player for macOS. Made in <a href="https://t3.codes">T3 Code</a>.</p>
+    </div>
+    <div>
+      <p>sudamp is an unofficial client: every stream belongs to its creator or broadcaster. It isn't affiliated with YouTube, SoundCloud, Mixcloud or Winamp. Mix titles on this page are made up; the music on this page is synthesised in your browser. AndAmp skins by <a href="https://mattix.nl">Mattix</a>, <a href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a>.</p>
+    </div>
+    <div class="foot__links">
+      <a href="https://github.com/aliparr-/sudamp">Source on GitHub</a>
+      <a href="https://github.com/aliparr-/sudamp/blob/main/CREDITS.md">Credits</a>
+      <a href="https://github.com/aliparr-/sudamp/blob/main/LICENSE">Licence (GPL-3.0)</a>
+    </div>
+  </div>
+  <p class="foot__word" aria-hidden="true">sudamp</p>
+</footer>
+
+<div class="grain" aria-hidden="true"></div>
+</body>
+</html>
