@@ -14,7 +14,7 @@ import SkinKit
 /// popover or the View menu.
 ///
 /// The visualiser is the same `VisualiserAnalyser` as the classic skins', pulled by ModernUI's display link at 30 Hz
-/// only while the artwork animates and the window can be seen.
+/// (60 while a scene asks for it) only while the artwork animates and the window can be seen.
 final class ModernPlayerUI: PlayerUIBase {
     let player: ModernPlayer
     private var analyser: VisualiserAnalyser?

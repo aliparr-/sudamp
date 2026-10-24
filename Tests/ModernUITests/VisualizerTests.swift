@@ -77,7 +77,7 @@ nonisolated func play(_ mode: ModernPlayerState.Visualizer, _ frames: [ModernVis
     typealias Visualizer = ModernPlayerState.Visualizer
 
     @Test func scenesRotateAndOff() {
-        #expect(Visualizer.scenes.count == 27 && !Visualizer.scenes.contains(.rotate) && !Visualizer.scenes.contains(.off))
+        #expect(Visualizer.scenes.count == 28 && !Visualizer.scenes.contains(.rotate) && !Visualizer.scenes.contains(.off))
         #expect(Visualizer.default == .spectrum && Visualizer.allCases.last == .off)
         #expect(Set(Visualizer.allCases.map(\.title)).count == Visualizer.allCases.count, "every choice has its own name")
         // The rotation plays every scene once, in its own mixed-up order; clicking the artwork walks it and comes round
@@ -114,6 +114,7 @@ nonisolated func play(_ mode: ModernPlayerState.Visualizer, _ frames: [ModernVis
         #expect(Visualizer.suited(toGenre: "deep-house").first == .skyline, "deep house before house")
         #expect(Visualizer.suited(toGenre: "house").first == .pixelDJ)
         #expect(Visualizer.suited(toGenre: "techno").first == .tunnel)
+        #expect(Visualizer.suited(toGenre: "trance").first == .spiral)
         #expect(Visualizer.suited(toGenre: "Ambient Drone").first == .aurora, "matched on words, in any case")
         #expect(Visualizer.suited(toGenre: nil).isEmpty && Visualizer.suited(toGenre: "").isEmpty)
         #expect(Visualizer.suited(toGenre: "polka").isEmpty && Visualizer.suited(toGenre: "favourites").isEmpty)
@@ -403,6 +404,29 @@ nonisolated func play(_ mode: ModernPlayerState.Visualizer, _ frames: [ModernVis
         PixelFont.draw("Ünïcode ß 夜", into: &canvas, x: -3, y: 4, color: .white)
     }
 
+    /// Spiral flies on while the music plays and holds still once it has settled in silence. It asks for 60 frames a
+    /// second, the other scenes 30; through a fade the renderer asks for the faster of the two.
+    @Test func spiralFliesAndComesToRest() {
+        let renderer = SceneRenderer(seed: 5)
+        renderer.show(.spiral, animated: false)
+        #expect(renderer.framesPerSecond == 60)
+        var features = AudioFeatures()
+        let size = CGSize(width: 92, height: 92)
+        let music = testMusic(seconds: 2.1)
+        for frame in music.dropLast() { renderer.update(features.next(frame, dt: 1.0 / 60), dt: 1.0 / 60) }
+        let flying = bytes(renderer.image(size: size, scale: 1))
+        renderer.update(features.next(music.last, dt: 1.0 / 60), dt: 1.0 / 60)
+        #expect(bytes(renderer.image(size: size, scale: 1)) != flying, "a frame later it has moved on")
+        for _ in 0..<40 { renderer.update(features.next(nil, dt: 1.0 / 60), dt: 1.0 / 60) }
+        let still = bytes(renderer.image(size: size, scale: 1))
+        for _ in 0..<10 { renderer.update(features.next(nil, dt: 1.0 / 60), dt: 1.0 / 60) }
+        #expect(bytes(renderer.image(size: size, scale: 1)) == still, "at rest after 40 silent updates")
+        renderer.show(.starfield, animated: true)
+        #expect(renderer.framesPerSecond == 60, "while it fades out")
+        for _ in 0..<60 { renderer.update(features.next(nil, dt: 1.0 / 60), dt: 1.0 / 60) }
+        #expect(!renderer.isFading && renderer.framesPerSecond == 30)
+    }
+
     @Test func theRendererCrossFades() {
         let renderer = SceneRenderer()
         renderer.show(.spectrum, animated: false)
@@ -572,6 +596,24 @@ nonisolated func play(_ mode: ModernPlayerState.Visualizer, _ frames: [ModernVis
         }
         walk(art.layer!)
         #expect(pathAnimations.isEmpty, "\(pathAnimations)")
+        player.close()
+    }
+
+    /// The display link runs at the rate the scene showing asks for: 60 for Spiral, 30 for the others and with the
+    /// visualiser off.
+    @Test func theLinkFollowsTheScenesRate() {
+        let (player, _) = makePlayer()
+        var state = playing()
+        state.visualizer = .spiral
+        player.state = state
+        #expect(player.visualizerScene == .spiral && player.visualizerFrameRate == 60)
+        #expect(player.visualizerDiagnostics.hasSuffix("60 fps"))
+        state.visualizer = .tunnel
+        player.state = state
+        #expect(player.visualizerFrameRate == 30)
+        state.visualizer = .off
+        player.state = state
+        #expect(player.visualizerFrameRate == 30)
         player.close()
     }
 

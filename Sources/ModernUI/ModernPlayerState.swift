@@ -39,7 +39,7 @@ nonisolated public struct ModernPlayerState: Equatable, Sendable {
     public enum Visualizer: String, Sendable, CaseIterable {
         // In the menus' order, a section at a time (`section`).
         case spectrum, oscilloscope, leds, vuMeters = "vu-meters", heartbeat, turntable, speaker
-        case halo, waterfall, tunnel, loops, pendulums, cells
+        case halo, waterfall, tunnel, spiral, loops, pendulums, cells
         case starfield, synthwave, skyline, fireworks, aurora, rain, campfire, lava
         case pixelDJ = "pixel-dj", toast, breakfastBand = "breakfast-band", drummingCat = "drumming-cat", rally, demoscene
         case rotate, off
@@ -53,7 +53,7 @@ nonisolated public struct ModernPlayerState: Equatable, Sendable {
         /// differ (the menus' order would play seven meters in a row).
         public static let rotation: [Visualizer] = [
             .spectrum, .starfield, .pixelDJ, .loops, .synthwave, .vuMeters, .halo, .toast, .rain, .tunnel, .speaker,
-            .skyline, .rally, .aurora, .leds, .fireworks, .drummingCat, .pendulums, .waterfall, .campfire,
+            .skyline, .rally, .spiral, .aurora, .leds, .fireworks, .drummingCat, .pendulums, .waterfall, .campfire,
             .breakfastBand, .turntable, .heartbeat, .cells, .lava, .demoscene, .oscilloscope,
         ]
 
@@ -71,6 +71,7 @@ nonisolated public struct ModernPlayerState: Equatable, Sendable {
             case .halo: "Halo"
             case .waterfall: "Waterfall"
             case .tunnel: "Tunnel"
+            case .spiral: "Spiral"
             case .loops: "Loops"
             case .pendulums: "Pendulums"
             case .cells: "Cells"
@@ -107,6 +108,7 @@ nonisolated public struct ModernPlayerState: Equatable, Sendable {
             case .halo: "sun.max.fill"
             case .waterfall: "water.waves"
             case .tunnel: "circle.circle"
+            case .spiral: "tornado"
             case .loops: "infinity"
             case .pendulums: "metronome.fill"
             case .cells: "circle.hexagongrid.fill"
@@ -141,7 +143,7 @@ nonisolated public struct ModernPlayerState: Equatable, Sendable {
         public var section: Section? {
             switch self {
             case .spectrum, .oscilloscope, .leds, .vuMeters, .heartbeat, .turntable, .speaker: .meters
-            case .halo, .waterfall, .tunnel, .loops, .pendulums, .cells: .shapes
+            case .halo, .waterfall, .tunnel, .spiral, .loops, .pendulums, .cells: .shapes
             case .starfield, .synthwave, .skyline, .fireworks, .aurora, .rain, .campfire, .lava: .places
             case .pixelDJ, .toast, .breakfastBand, .drummingCat, .rally, .demoscene: .characters
             case .rotate, .off: nil
@@ -180,10 +182,10 @@ nonisolated public struct ModernPlayerState: Equatable, Sendable {
             ("deep-house", [.skyline, .turntable, .lava, .halo, .synthwave, .pixelDJ]),
             ("house", [.pixelDJ, .toast, .breakfastBand, .speaker, .vuMeters, .fireworks]),
             ("disco", [.pixelDJ, .toast, .breakfastBand, .fireworks]),
-            ("techno", [.tunnel, .cells, .waterfall, .heartbeat, .leds, .oscilloscope]),
+            ("techno", [.tunnel, .cells, .spiral, .waterfall, .heartbeat, .leds, .oscilloscope]),
             ("minimal", [.cells, .oscilloscope, .loops, .heartbeat]),
-            ("trance", [.tunnel, .starfield, .halo, .aurora]),
-            ("drum-and-bass", [.rally, .speaker, .tunnel, .fireworks, .starfield]),
+            ("trance", [.spiral, .tunnel, .starfield, .halo, .aurora]),
+            ("drum-and-bass", [.rally, .spiral, .speaker, .tunnel, .fireworks, .starfield]),
             ("synthwave", [.synthwave, .skyline, .demoscene, .rally]),
             ("electro", [.demoscene, .synthwave, .rally, .cells]),
             ("jazz", [.turntable, .vuMeters, .drummingCat, .skyline]),
@@ -334,7 +336,7 @@ nonisolated public struct ModernPlayerState: Equatable, Sendable {
     private static func pad(_ n: Int) -> String { n < 10 ? "0\(n)" : "\(n)" }
 }
 
-/// One visualiser frame from the app's analyser: pulled 30 times a second while the artwork animates.
+/// One visualiser frame from the app's analyser: pulled 30 times a second while the artwork animates (60 for Spiral).
 nonisolated public struct ModernVisualizerFrame: Equatable, Sendable {
     public static let barCount = 19
     public static let scopeCount = 76

@@ -5,9 +5,9 @@
 // underneath.
 // The visualiser is drawn into it: one of the scenes (`Visualizer/`), each frame a bitmap from `SceneRenderer`, with
 // the palette's glow around it, and the effect (VHS, Kaleidoscope) over it. Frames come 30 times a second while
-// playing. With Rotate, the scenes take turns, cross-fading: a breakdown brings a calm scene and the drop a lively
-// one, and a new genre opens on a scene that suits it. With the Cycle colours, the artwork's hue turns as the music
-// plays. Stopped or paused, the scene settles to a still frame and nothing animates.
+// playing (60 for a scene that asks). With Rotate, the scenes take turns, cross-fading: a breakdown brings a calm scene
+// and the drop a lively one, and a new genre opens on a scene that suits it. With the Cycle colours, the artwork's hue
+// turns as the music plays. Stopped or paused, the scene settles to a still frame and nothing animates.
 
 import AppKit
 import QuartzCore
@@ -76,6 +76,9 @@ final class ArtworkView: NSView {
 
     /// The scene showing (while rotating, the current one).
     var currentScene: Mode? { mode == .off ? nil : renderer.mode }
+    /// Frames a second the visualiser asks for: the scene's rate (30 for most), or 30 with the visualiser off (the
+    /// Cycle colours still turn).
+    var framesPerSecond: Int { mode == .off ? 30 : renderer.framesPerSecond }
     /// Frames drawn since the view was made (tests).
     private(set) var framesDrawn = 0
 
@@ -316,8 +319,8 @@ final class ArtworkView: NSView {
         }
     }
 
-    /// One visualiser frame, called 30 times a second while animating. nil is silence after playing: the scene
-    /// settles to a still frame and no frames follow.
+    /// One visualiser frame, called 30 times a second while animating (60 for a scene that asks). nil is silence after
+    /// playing: the scene settles to a still frame and no frames follow.
     func update(with frame: ModernVisualizerFrame?) {
         guard let frame else { return settle() }
         let now = CACurrentMediaTime()

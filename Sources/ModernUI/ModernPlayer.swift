@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 // The modern skin's window, as the app sees it: give it a `ModernPlayerState`, an appearance and a tint, and
 // listen to `onEvent`. It owns the panels (Equalizer, Stations), the window's place (`modern-layout.json`), the
-// visualiser's display link (30 Hz, only while the artwork animates and the window can be seen), the appearance
-// popover, and the hooks automation and snapshots use.
+// visualiser's display link (30 Hz, or 60 for a scene that asks; only while the artwork animates and the window can be
+// seen), the appearance popover, and the hooks automation and snapshots use.
 
 import AppKit
 import QuartzCore
@@ -49,7 +49,7 @@ public final class ModernPlayer: NSObject {
         didSet { if tint != oldValue { applyPalette() } }
     }
 
-    /// Visualiser frames, pulled at 30 Hz while the artwork animates.
+    /// Visualiser frames, pulled at 30 Hz while the artwork animates (60 for a scene that asks).
     public var visualizerProvider: ModernVisualizerProvider?
     /// Every user action.
     public var onEvent: ((ModernEvent) -> Void)?
@@ -119,10 +119,15 @@ public final class ModernPlayer: NSObject {
 
     /// For logs: why the visualiser is or isn't running.
     public var visualizerDiagnostics: String {
-        "animating \(state.isAnimating), mode \(state.visualizer.rawValue), scene \(visualizerScene?.rawValue ?? "none"), "
-            + "visible \(window.isVisible), app active \(NSApp.isActive), screen locked \(WindowVisibility.screenIsLocked), "
-            + "occlusion visible \(window.occlusionState.contains(.visible)), "
-            + "uncovered \(uncoveredCheck.map { String($0.uncovered) } ?? "unchecked"), link paused \(displayLink?.isPaused ?? true)"
+        let parts = [
+            "animating \(state.isAnimating)", "mode \(state.visualizer.rawValue)",
+            "scene \(visualizerScene?.rawValue ?? "none")", "visible \(window.isVisible)",
+            "app active \(NSApp.isActive)", "screen locked \(WindowVisibility.screenIsLocked)",
+            "occlusion visible \(window.occlusionState.contains(.visible))",
+            "uncovered \(uncoveredCheck.map { String($0.uncovered) } ?? "unchecked")",
+            "link paused \(displayLink?.isPaused ?? true)", "\(visualizerFrameRate) fps",
+        ]
+        return parts.joined(separator: ", ")
     }
 
     /// Fades out and hides (switching skins).
@@ -312,13 +317,24 @@ public final class ModernPlayer: NSObject {
             }
         }))
         let link = root.displayLink(target: self, selector: #selector(displayLinkFired(_:)))
-        // Scenes draw a frame each tick (`SUDAMP_VISUALIZER_FPS` overrides, for measurements).
-        let fps = Float(ProcessInfo.processInfo.environment["SUDAMP_VISUALIZER_FPS"].flatMap(Int.init) ?? Self.visualizerFPS)
-        link.preferredFrameRateRange = CAFrameRateRange(minimum: min(fps, 30), maximum: fps, preferred: fps)
         link.add(to: .main, forMode: .common)
         link.isPaused = true
         displayLink = link
+        applyFrameRate()
     }
+
+    /// Scenes draw a frame each tick, at the rate the scene showing asks for (`SUDAMP_VISUALIZER_FPS` overrides, for
+    /// measurements).
+    private func applyFrameRate() {
+        guard let displayLink else { return }
+        let wanted = Self.fpsOverride ?? root.nowPlaying.artwork.framesPerSecond
+        guard wanted != visualizerFrameRate else { return }
+        visualizerFrameRate = wanted
+        let fps = Float(wanted)
+        displayLink.preferredFrameRateRange = CAFrameRateRange(minimum: min(fps, 30), maximum: fps, preferred: fps)
+    }
+
+    private static let fpsOverride = ProcessInfo.processInfo.environment["SUDAMP_VISUALIZER_FPS"].flatMap(Int.init)
 
     /// Playing, with a visualiser (or colours that turn), in a window that is up (whether it can be seen is checked
     /// apart).
@@ -352,6 +368,7 @@ public final class ModernPlayer: NSObject {
 
     private func updateDisplayLink() {
         guard let displayLink else { return }
+        applyFrameRate()
         let wanted = visualizerWanted
         if displayLink.isPaused == wanted {
             displayLink.isPaused = !wanted
@@ -371,9 +388,8 @@ public final class ModernPlayer: NSObject {
         }
     }
 
-    /// Frames a second the visualiser draws: the classic skins' rate. A scene's frame costs 0.1–0.3 ms of main-thread
-    /// drawing, so 60 would double the visualiser's share of the 3% CPU budget for little a 92-point square can show.
-    static let visualizerFPS = 30
+    /// Frames a second the display link was last asked for: the scene's rate (`VisualizerScene.framesPerSecond`).
+    public private(set) var visualizerFrameRate = 0
 
     public var isVisualizerRunning: Bool { displayLink.map { !$0.isPaused } ?? false }
     /// The scene the artwork shows (while rotating, the current one); nil when off.
@@ -387,6 +403,8 @@ public final class ModernPlayer: NSObject {
         let frame = visualizerProvider?()
         if let loudest = frame?.bars.max(), loudest > visualizerPeak { visualizerPeak = loudest }
         root.nowPlaying.artwork.update(with: frame)
+        // The scene can change on its own (Rotate) or by a pick: the link follows its rate.
+        applyFrameRate()
     }
 
     // MARK: Click routing

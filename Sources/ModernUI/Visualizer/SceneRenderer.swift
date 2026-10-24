@@ -76,6 +76,9 @@ nonisolated final class SceneRenderer {
         }
     }
 
+    /// Frames a second the scenes showing ask for (through a fade, the faster of the two).
+    var framesPerSecond: Int { max(scene?.framesPerSecond ?? 30, outgoing?.framesPerSecond ?? 0) }
+
     /// The glow the scene showing wants (blended through a fade), 0...1.
     var glow: Double {
         let current = scene?.glow ?? 0

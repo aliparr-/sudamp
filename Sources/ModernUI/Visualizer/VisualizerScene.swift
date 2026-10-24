@@ -123,6 +123,14 @@ nonisolated protocol VisualizerScene: AnyObject {
     func draw(in ctx: CGContext, size: CGSize, style: SceneStyle)
     /// How much of the artwork's glow suits it: 1 for bright shapes on the artwork, 0 for scenes that fill it.
     var glow: Double { get }
+    /// Frames a second it asks for while it shows: 30, the classic skins' rate, for most; more for a scene whose
+    /// motion would judder at 30 (a fast flight through depth). A frame costs 0.1–0.3 ms of main-thread drawing for
+    /// most scenes, so 60 doubles the visualiser's share of the CPU budget for little a 92-point square can show.
+    var framesPerSecond: Int { get }
+}
+
+nonisolated extension VisualizerScene {
+    var framesPerSecond: Int { 30 }
 }
 
 extension ModernPlayerState.Visualizer {
@@ -138,6 +146,7 @@ extension ModernPlayerState.Visualizer {
         case .pixelDJ: PixelDJScene(seed: seed)
         case .toast: ToastScene(seed: seed)
         case .tunnel: TunnelScene(seed: seed)
+        case .spiral: SpiralScene(seed: seed)
         case .fireworks: FireworksScene(seed: seed)
         case .lava: LavaScene(seed: seed)
         case .vuMeters: VUMeterScene(seed: seed)
