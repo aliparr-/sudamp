@@ -476,6 +476,20 @@ nonisolated func play(_ mode: ModernPlayerState.Visualizer, _ frames: [ModernVis
         #expect(sprite.rows.contains { row in sprite.columns.contains { sprite[$0, row] == 4 } }, "a paler middle")
     }
 
+    /// The menu bar's toast: a 16-point template image, hand-placed pixels at 1x and a drawing at 2x, mirror-symmetric.
+    @MainActor @Test func theMenuBarToastIsATemplateAtBothScales() {
+        let image = ToastGlyph.menuBar
+        #expect(image.isTemplate && image.size == NSSize(width: 16, height: 16))
+        #expect(image.representations.map(\.pixelsWide).sorted() == [16, 32])
+        #expect(ToastGlyph.pixelMap.count == 16 && ToastGlyph.pixelMap.allSatisfy { $0.count == 16 })
+        #expect(ToastGlyph.pixelMap.allSatisfy { String($0.reversed()) == $0 })
+        // The drawing keeps inside its square: a stroke cut off by the edge would leave a pixel there solid.
+        let drawn = image.representations.first { $0.pixelsWide == 32 } as? NSBitmapImageRep
+        let edge = (0..<32).flatMap { i in [(0, i), (31, i), (i, 0), (i, 31)] }
+        let edgeInk = edge.map { drawn?.colorAt(x: $0.0, y: $0.1)?.alphaComponent ?? 1 }.max() ?? 1
+        #expect(edgeInk < 0.95, "nothing is clipped")
+    }
+
     @Test func pixelCanvasBlendsAndClips() {
         var canvas = PixelCanvas(width: 4, height: 3)
         canvas.set(-1, 0, .white)

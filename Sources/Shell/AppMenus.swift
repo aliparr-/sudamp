@@ -2,6 +2,7 @@
 import AppKit
 import Catalog
 import Core
+import ModernUI
 import Playback
 
 /// The menu bar, the status item and the Dock menu (PLAN M2 "Shell basics", M5 "Library and keys"). Genre rows come
@@ -200,8 +201,7 @@ final class AppMenus: NSObject, NSMenuDelegate, NSMenuItemValidation {
     /// A small status-item menu: what plays, the genre menu, Play/Pause, Next, Show, Quit.
     func installStatusItem() {
         let item = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
-        item.button?.image = NSImage(systemSymbolName: "music.note", accessibilityDescription: "sudamp")
-        item.button?.image?.isTemplate = true
+        item.button?.image = ToastGlyph.menuBar
         item.button?.toolTip = "sudamp"
         item.menu = statusMenu
         statusItem = item
